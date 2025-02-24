@@ -2,7 +2,7 @@
 # NAME: pyp_reports.py
 # VERSION: 3.0.0 (21AUGUST2024)
 # AUTHOR: John B. Cole (john.b.cole@gmail.com)
-# LICENSE: LGPL
+# LICENSE: LGPL v2.1 (see LICENSE file)
 ###############################################################################
 # FUNCTIONS:
 #   meanMetricBy()
@@ -19,7 +19,6 @@
 ##
 
 import logging
-import string
 from . import pyp_db
 from . import pyp_utils
 
@@ -29,7 +28,7 @@ from reportlab.pdfgen import canvas
 
 METRIC_TO_COLUMN = {'fa': 'coi'}
 BYVAR_TO_COLUMN = {'by': 'birthyear',
-                   'gen': 'generation',}
+                   'gen': 'generation'}
 
 
 ##
@@ -63,9 +62,9 @@ def meanMetricBy(pedobj, metric='fa', byvar='by', createpdf=False, conn=False):
             byvar = 'by'
 
         if pyp_db.doesTableExist(pedobj, conn=conn):
-            sql = 'select %s, avg(%s) from %s group by %s order by %s' % (BYVAR_TO_COLUMN[byvar],
+            sql = 'SELECT %s, AVG(%s) FROM %s GROUP BY %s ORDER BY %s' % (BYVAR_TO_COLUMN[byvar],
                 METRIC_TO_COLUMN[metric], pedobj.kw['database_table'], BYVAR_TO_COLUMN[byvar],
-                BYVAR_TO_COLUMN[byvar] )
+                BYVAR_TO_COLUMN[byvar])
             # print('pyp_reports/meanMetricBy() SQL: ', sql)
             cursor = conn.Execute(sql)
             while not cursor.EOF:
@@ -282,7 +281,7 @@ def pdf3GenPed(animalID, pedobj, titlepage=0, reporttitle='', reportauthor='', r
     logging.info('Writing 3GenPed to %s', _pdfOutfile )
 
     _pdfSettings = _pdfInitialize(pedobj)
-    #print _pdfSettings
+    # print _pdfSettings
     canv = canvas.Canvas(_pdfOutfile, invariant=1)
     canv.setPageCompression(1)
 
@@ -426,22 +425,21 @@ def pdf3GenPed(animalID, pedobj, titlepage=0, reporttitle='', reportauthor='', r
                     canv.drawString(_x, _y+_16, 'Herd:')
                     canv.drawString(_x+_sill_width, _y+_16, _herd)
             # Draw the vertical lines that join the sills.
-            ## Parents
+            # Parents
             canv.line(os['s']['x'], os['d']['y'], os['s']['x'], os['s']['y'])
-            ## Maternal grandparents
+            # Maternal grandparents
             canv.line(os['ds']['x'], os['dd']['y'], os['ds']['x'], os['ds']['y'])
-            ## Paternal grandparents
+            # Paternal grandparents
             canv.line(os['ss']['x'], os['sd']['y'], os['ss']['x'], os['ss']['y'])
-            ## Mat-mat grandparents
+            # Mat-mat grandparents
             canv.line(os['dds']['x'], os['ddd']['y'], os['dds']['x'], os['dds']['y'])
-            ## Mat-pat grandparents
+            # Mat-pat grandparents
             canv.line(os['dss']['x'], os['dsd']['y'], os['dss']['x'], os['dss']['y'])
-            ## Pat-mat grandparents
+            # Pat-mat grandparents
             canv.line(os['sds']['x'], os['sdd']['y'], os['sds']['x'], os['sds']['y'])
-            ## Pat-pat grandparents
+            # Pat-pat grandparents
             canv.line(os['sss']['x'], os['ssd']['y'], os['sss']['x'], os['sss']['y'])
-            # Make sure we draw the page to the canvas when we've
-            # finished with it.
+            # Make sure we draw the page to the canvas when we've finished with it.
             canv.drawText(tx)
             canv.showPage()
         canv.save()
@@ -514,33 +512,33 @@ def _pdfDrawPageFrame(canv, _pdfSettings):
     """
     # Write the report title in the top, left-hand corner of the page.
     canv.line(_pdfSettings['_pdfCalcs']['_left_margin'],
-        _pdfSettings['_pdfCalcs']['_top_margin'],
-        _pdfSettings['_pdfCalcs']['_right_margin'],
-        _pdfSettings['_pdfCalcs']['_top_margin'])
+              _pdfSettings['_pdfCalcs']['_top_margin'],
+              _pdfSettings['_pdfCalcs']['_right_margin'],
+              _pdfSettings['_pdfCalcs']['_top_margin'])
     canv.setFont('Times-Italic', 12)
     canv.drawString(_pdfSettings['_pdfCalcs']['_left_margin'],
-        _pdfSettings['_pdfCalcs']['_top_margin'] + 2,
-        _pdfSettings['_pdfTitle'])
+                    _pdfSettings['_pdfCalcs']['_top_margin'] + 2,
+                    _pdfSettings['_pdfTitle'])
 
     # Write the date/time in the top, right-hand corner of the page.
     canv.line(_pdfSettings['_pdfCalcs']['_left_margin'],
-        _pdfSettings['_pdfCalcs']['_top_margin'],
-        _pdfSettings['_pdfCalcs']['_right_margin'],
-        _pdfSettings['_pdfCalcs']['_top_margin'])
+              _pdfSettings['_pdfCalcs']['_top_margin'],
+              _pdfSettings['_pdfCalcs']['_right_margin'],
+              _pdfSettings['_pdfCalcs']['_top_margin'])
     canv.setFont('Times-Italic', 12)
     canv.drawString(_pdfSettings['_pdfCalcs']['_right_margin'] - 1.85 * _pdfSettings['_pdfCalcs']['_unit'],
                     _pdfSettings['_pdfCalcs']['_top_margin'] + 2,
-        pyp_utils.pyp_nice_time())
+                    pyp_utils.pyp_nice_time())
 
     # Write the page number bottom center.
     canv.line(_pdfSettings['_pdfCalcs']['_left_margin'],
-        _pdfSettings['_pdfCalcs']['_top_margin'],
-        _pdfSettings['_pdfCalcs']['_right_margin'],
-        _pdfSettings['_pdfCalcs']['_top_margin'])
+              _pdfSettings['_pdfCalcs']['_top_margin'],
+              _pdfSettings['_pdfCalcs']['_right_margin'],
+              _pdfSettings['_pdfCalcs']['_top_margin'])
     canv.line(_pdfSettings['_pdfCalcs']['_left_margin'],
-        _pdfSettings['_pdfCalcs']['_bottom_margin'],
-        _pdfSettings['_pdfCalcs']['_right_margin'],
-        _pdfSettings['_pdfCalcs']['_bottom_margin'])
+              _pdfSettings['_pdfCalcs']['_bottom_margin'],
+              _pdfSettings['_pdfCalcs']['_right_margin'],
+              _pdfSettings['_pdfCalcs']['_bottom_margin'])
     canv.drawCentredString(0.5 * _pdfSettings['_pdfCalcs']['_page'][0],
                            0.5*_pdfSettings['_pdfCalcs']['_unit'],
                            "Page %d" % canv.getPageNumber())
@@ -553,7 +551,7 @@ def _pdfDrawPageFrame(canv, _pdfSettings):
 # @param reporttitle Title of report; if '', _pdfTitle is used.
 # @param reportauthor Author/preparer of report.
 # @retval None
-def _pdfCreateTitlePage(canv, _pdfSettings, reporttitle = '', reportauthor = ''):
+def _pdfCreateTitlePage(canv, _pdfSettings, reporttitle='', reportauthor=''):
     """
     _pdfCreateTitlePage() adds a title page to a ReportLab canvas object.
     """

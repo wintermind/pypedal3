@@ -2,7 +2,7 @@
 # NAME: pyp_reports_templates.py
 # VERSION: 3.0.0 (21AUGUST2024)
 # AUTHOR: John B. Cole (john.b.cole@gmail.com)
-# LICENSE: LGPL
+# LICENSE: LGPL v2.1 (see LICENSE file)
 ###############################################################################
 # FUNCTIONS:
 ###############################################################################
@@ -24,7 +24,7 @@ styles = getSampleStyleSheet()
 
 ##
 # We define the fixed features of the first page of the document with this function.
-def myFirstPage(_pdfSettings, canvas, doc, _pdfTitle="My Title"):
+def myFirstPage(_pdfSettings, canvas, _pdfTitle="My Title"):
     """
     We define the fixed features of the first page of the document with this function.
     """

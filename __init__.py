@@ -4,7 +4,7 @@
 # NAME: __init__.py
 # VERSION: 3.0.0 (16MARCH2024)
 # AUTHOR: John B. Cole (john.b.cole@gmail.com)
-# LICENSE: LGPL
+# LICENSE: LGPL v2.1 (see LICENSE file)
 ###############################################################################
 """
 __init__.py

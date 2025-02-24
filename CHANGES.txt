@@ -12,6 +12,12 @@ PyPedal 2 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+XXX 02/24/2025  Removed an unused parameter from pyp_reports_templates/myFirstPage().
+XXX 02/24/2025  Removed pyp_newclasses/PyPedalError and  pyp_newclasses/PyPedalPedigreeInputFileNameError because they
+    aren't used anywhere.
+''' 02/24/2025  Removed the definition of "isnewanimal" from pyp_utils/renumber(). It was used in only 2
+    places so it makes more sense to just check the animal class directly.
+??? 08/26/2024  Does "_mycoi.sort(pyp_utils.sort_dict_by_values)" in pyp_metrics/min_max_f() actually work?
 ??? 08/22/2024  My lord, the indentation in pyp_nrm/inbreeding_modified_meuwissen_luo() was a complete and utter
     disaster. Mixed spaces and tabs everywhere. Needs careful testing to make sure I didn't break anything while
     fixing that mess.
@@ -133,7 +139,7 @@ XXX 03/05/2018  pyp_utils/assign_sexes() is now deprecated in favor of
     break things in pyp_network.py. Fixes won't result in any user-facing API
     changes. I don't think.
 ''' 03/05/2018  Added a new option, 'missing_value' to pyp_newclasses::NewPedigree().
-    Functions that return numneric values will be revised to use this as the
+    Functions that return numeric values will be revised to use this as the
     missing value indicator.
 ??? 09/09/2016  pyp_graphics/draw_pedigree() is not working with DOT on
     El Capitan -- jpg is not a valid extension?

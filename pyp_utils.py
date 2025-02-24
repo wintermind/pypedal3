@@ -3,8 +3,8 @@
 ###############################################################################
 # NAME: pyp_utils.py
 # VERSION: 2.0.0 (21AUGUST2024)
-# AUTHOR: John B. Cole, PhD (john.b.cole@gmail.com)
-# LICENSE: LGPL
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
 ###############################################################################
 # FUNCTIONS:
 #   set_ancestor_flag()
@@ -369,13 +369,13 @@ def set_upg(pedobj, upg_rule='asd'):
 
 
 ##
-# reorder() renumbers a pedigree such that parents precede their offspring in the
-# pedigree.  In order to minimize overhead as much as is reasonably possible,
+# reorder() rearranges a pedigree such that parents precede their offspring in the
+# pedigree. In order to minimize overhead as much as is reasonably possible,
 # a list of animal IDs that have already been seen is kept.  Whenever a parent
 # that is not in the seen list is encountered, the offspring of that parent is
-# moved to the end of the pedigree.  This should ensure that the pedigree is
-# properly sorted such that all parents precede their offspring.  myped is
-# reordered in place.  reorder() is VERY slow, but I am pretty sure that it works
+# moved to the end of the pedigree. This should ensure that the pedigree is
+# properly sorted such that all parents precede their offspring. myped is
+# reordered in place. reorder() is VERY slow, but I am pretty sure that it works
 # correctly.
 # @note Deprecated
 # @param myped A PyPedal pedigree object.
@@ -387,12 +387,12 @@ def set_upg(pedobj, upg_rule='asd'):
 # @retval A reordered PyPedal pedigree.
 def reorder(myped, filetag='_reordered_', io='no', missingparent=0, debug=0, max_rounds=100):
     """
-    Renumber a pedigree such that parents precede their offspring in the
-    pedigree.  In order to minimize overhead as much as is reasonably possible,
-    a list of animal IDs that have already been seen is kept.  Whenever a parent
+    Rearrange a pedigree such that parents precede their offspring in the
+    pedigree. In order to minimize overhead as much as is reasonably possible,
+    a list of animal IDs that have already been seen is kept. Whenever a parent
     that is not in the seen list is encountered, the offspring of that parent is
-    moved to the end of the pedigree.  This should ensure that the pedigree is
-    properly sorted such that all parents precede their offspring.  myped is
+    moved to the end of the pedigree. This should ensure that the pedigree is
+    properly sorted such that all parents precede their offspring. myped is
     reordered in place.
 
     reorder() is VERY slow, but I am pretty sure that it works correctly.
@@ -551,13 +551,13 @@ def reorder(myped, filetag='_reordered_', io='no', missingparent=0, debug=0, max
 
 
 ##
-# fast_reorder() renumbers a pedigree such that parents precede their offspring in
-# the pedigree.  In order to minimize overhead as much as is reasonably possible,
-# a list of animal IDs that have already been seen is kept.  Whenever a parent
+# fast_reorder() rearranges a pedigree such that parents precede their offspring in
+# the pedigree. In order to minimize overhead as much as is reasonably possible,
+# a list of animal IDs that have already been seen is kept. Whenever a parent
 # that is not in the seen list is encountered, the offspring of that parent is
-# moved to the end of the pedigree.  This should ensure that the pedigree is
-# properly sorted such that all parents precede their offspring.  myped is
-# reordered in place.  fast_reorder() uses dictionaries to renumber the pedigree
+# moved to the end of the pedigree. This should ensure that the pedigree is
+# properly sorted such that all parents precede their offspring. myped is
+# reordered in place. fast_reorder() uses dictionaries to renumber the pedigree
 # based on paddedIDs.
 # @param myped A PyPedal pedigree object.
 # @param filetag A descriptor prepended to output file names.
@@ -566,27 +566,28 @@ def reorder(myped, filetag='_reordered_', io='no', missingparent=0, debug=0, max
 # @retval A reordered PyPedal pedigree.
 def fast_reorder(myped, filetag='_new_reordered_', io='no', debug=0):
     """
-    Renumber a pedigree such that parents precede their offspring in the
-    pedigree.  In order to minimize overhead as much as is reasonably possible,
-    a list of animal IDs that have already been seen is kept.  Whenever a parent
+    Rearrange a pedigree such that parents precede their offspring in the
+    pedigree. In order to minimize overhead as much as is reasonably possible,
+    a list of animal IDs that have already been seen is kept. Whenever a parent
     that is not in the seen list is encountered, the offspring of that parent is
-    moved to the end of the pedigree.  This should ensure that the pedigree is
-    properly sorted such that all parents precede their offspring.  myped is
+    moved to the end of the pedigree. This should ensure that the pedigree is
+    properly sorted such that all parents precede their offspring. myped is
     reordered in place.
 
     reorder() is VERY slow, but I am pretty sure that it works correctly.  fast_reorder()
     appears to be VERY fast, but I am not sure if it works correctly all of the time or
-    not.  Use this procedure at your own risk!
+    not. Use this procedure at your own risk!
     """
 
     l = len(myped)
+    i = 0
     idlist = []
     animalmap = {}
     # <kludge>
     myped.reverse()
     # </kludge>
     if debug == 1:
-        print('\tPedigree contains %s animals.' % (l))
+        print('\tPedigree contains %s animals.' % l)
         print('\tMaking a dictionary of animal objects')
         print('\tMaking a list of padded animal IDs')
     for i in range(l):
@@ -622,9 +623,9 @@ def fast_reorder(myped, filetag='_new_reordered_', io='no', debug=0):
 
 ##
 # renumber() takes a pedigree as input and renumbers it such that the oldest
-# animal in the pedigree has an ID of '1' and the n-th animal has an ID of 'n'.  If the
+# animal in the pedigree has an ID of '1' and the n-th animal has an ID of 'n'. If the
 # pedigree is not ordered from oldest to youngest such that all offspring precede their
-# offspring, the pedigree will be reordered.  The renumbered pedigree is written to disc in
+# offspring, the pedigree will be reordered. The renumbered pedigree is written to disc in
 # 'asd' format and a map file that associates sequential IDs with original IDs is also
 # written.
 # @param myped A PyPedal pedigree object.
@@ -642,19 +643,13 @@ def renumber(myped, filetag='_renumbered_', io='no', outformat='0', debug=0, ret
              animaltype='new', cleanmap=True):
     """
     renumber() takes a pedigree as input and renumbers it such that the oldest
-    animal in the pedigree has an ID of '1' and the n-th animal has an ID of 'n'.  If the
+    animal in the pedigree has an ID of '1' and the n-th animal has an ID of 'n'. If the
     pedigree is not ordered from oldest to youngest such that all offspring precede their
-    offspring, the pedigree will be reordered.  The renumbered pedigree is written to
+    offspring, the pedigree will be reordered. The renumbered pedigree is written to
     disc in 'asd' format and a map file that associates sequential IDs with original IDs is also written.
     """
     if debug == 1:
         print('[DEBUG]: Pedigree of size %s passed to pyp_utils/renumber()' % len(myped))
-
-    # Do we have NewAnimals? They have names and others do not.
-    if animaltype == 'new':
-        isnewanimal = 1
-    else:
-        isnewanimal = 0
 
     # In the dictionary id_map, the old IDs are the keys and the
     # new IDs are the values.
@@ -664,8 +659,8 @@ def renumber(myped, filetag='_renumbered_', io='no', outformat='0', debug=0, ret
         if debug == 1:
             if l == 0:
                 print('[DEBUG]: Renumbering the pedigree...')
-            if numpy.fmod(l,10000) == 0:
-                print('\t%s ' % (l))
+            if numpy.fmod(l, 10000) == 0:
+                print('\t%s ' % l)
             print('[DEBUG]: An:%s (%s)\tSire: %s\tDam: %s' % (myped[l].animalID, myped[l].paddedID, myped[l].sireID,
                                                               myped[l].damID))
         id_map[myped[l].animalID] = idnum
@@ -678,7 +673,9 @@ def renumber(myped, filetag='_renumbered_', io='no', outformat='0', debug=0, ret
         # to change the name to match the renumbered ID so that
         # pedigree drawings using pyp_graphics/draw_pedigree()
         # will be correctly labelled.
-        if isnewanimal:
+        #
+        # Do we have NewAnimals? They have names and others do not.
+        if animaltype == 'new':
             if myped[l].name == myped[l].originalID:
                 myped[l].name = myped[l].renumberedID
         # We cannot forget to renumber parents, too!
@@ -708,7 +705,7 @@ def renumber(myped, filetag='_renumbered_', io='no', outformat='0', debug=0, ret
 
     # This next bit renumbers the sons, daus, and unks dictionaries for
     # each animal.
-    if isnewanimal:
+    if animaltype == 'new':
         _sons, _daus, _unks = {}, {}, {}
         for m in myped:
             # Renumber sons
@@ -926,9 +923,11 @@ def cmp3(a, b):
 
 ##
 # sort_dict_by_values() returns a dictionary where the keys in the dictionary
-# are sorted ascending value, first on value and then on key within value.  The
+# are sorted in ascending value, first on value and then on key within value.  The
 # implementation was taken from John Hunter's contribution to a newsgroup thread:
-# http://groups-beta.google.com/group/comp.lang.python/browse_thread/thread/bbc259f8454e4d3f/cc686f4cd795feb4?q=python+%22sorted+dictionary%22&rnum=1&hl=en#cc686f4cd795feb4
+# http://groups-beta.google.com/group/comp.lang.python/browse_thread/thread/
+# bbc259f8454e4d3f/cc686f4cd795feb4?q=python+%22sorted+dictionary%22&rnum=1&
+# hl=en#cc686f4cd795feb4.
 # @param first Python list of dictionary keys.
 # @param second Python list of dictionary values.
 # @retval A list of tuples sorted in ascending order.

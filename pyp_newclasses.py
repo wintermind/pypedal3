@@ -503,7 +503,7 @@ class NewPedigree:
                 filename = '%s_%s.ped' % (self.kw['pedname'],
                                           other.kw['pedname'])
                 print('[INFO]: filename = %s' % filename)
-            self.save(filename=filename, write_list=ped_to_write['a'],
+            self.save(filename=str(filename), write_list=ped_to_write['a'],
                       pedformat=self.kw['pedformat'], originalID=True)
             other.save(filename=filename, write_list=ped_to_write['b'],
                        pedformat=self.kw['pedformat'], originalID=True, append=True)
@@ -1202,8 +1202,7 @@ class NewPedigree:
     # @param write_list Optional list of animal records to save. The default is to save all animals.
     # @param originalID save original IDs or renumbered IDs.
     # @retval A save status indicator (0: failed, 1: success)
-    def save(self, filename='', pedformat='asd', sepchar=' ', append=False,
-             write_list=False, originalID=False):
+    def save(self, filename='', pedformat='asd', sepchar=' ', append=False, write_list=False, originalID=False):
         """
         save() writes a PyPedal pedigree to a user-specified file.  The saved pedigree
         includes all fields recognized by PyPedal, not just the original fields read
@@ -1298,8 +1297,7 @@ class NewPedigree:
                             #    ( self.kw['pedname'] )
                             if pf in ['a', 'A']:
                                 value = _a.originalID
-                            # This cascade may break if the pedigree is not
-                            # renumbered...
+                            # This cascade may break if the pedigree is not renumbered...
                             elif pf in ['s', 'S']:
                                 if _a.sireID != self.kw['missing_parent']:
                                     value = self.pedigree[_a.sireID - 1].originalID
@@ -3259,10 +3257,10 @@ class LightAnimal:
         print('\tBirth Year:\t%s' % (int(self.by)))
         print('\tSex:\t\t%s' % self.sex)
         print('\tOriginal ID:\t%s' % self.originalID)
-        try:
-            print('\tRenumbered ID:\t%s' % self.renumberedID)
-        except AttributeError:
-            pass
+        #try:
+        #    print('\tRenumbered ID:\t%s' % self.renumberedID)
+        #except AttributeError:
+        #    pass
 
     ##
     # stringme() returns a summary of the data stored in the LightAnimal() object
@@ -3385,15 +3383,13 @@ class LightAnimal:
             # result = string.atoi(md5hash.hexdigest(),16)
         except:
             # If we have some sort of problem with the MD5 hash then try this.
-            # WARNING -- This algorithm was broken on Mac OS/X and Windows,
-            # but not on 9some) Linuxes. The problem may have been related to
-            # platform-specific values of sys.maxint, so I've hard-coded that
-            # as sys.maxint from a 64-bit system. It gets cast to a long on 32-
-            # bit platforms, but I haven't found that to be a problem -- yet.
+            # WARNING -- This algorithm was broken on Mac OS/X and Windows, but not on *some* Linuxes. The problem
+            # may have been related to platform-specific values of sys.maxint, so I've hard-coded that as sys.maxint
+            # from a 64-bit system. It gets cast to a long on 32-bit platforms, but I haven't found that to be a
+            # problem -- yet.
             #
-            # This algorithm is taken from "Character String Keys" in "Data
-            # Structures and Algorithms with Object-Oriented Design Patterns
-            # in Python" by Bruno R. Preiss:
+            # This algorithm is taken from "Character String Keys" in "Data Structures and Algorithms with
+            # Object-Oriented Design Patterns in Python" by Bruno R. Preiss:
             # http://www.brpreiss.com/books/opus7/html/page220.html#progstrnga
             shift = 6
             mask = ~0 << (31 - shift)
@@ -3811,41 +3807,3 @@ def load_pedigree(options={}, optionsfile='pypedal.ini', pedsource='file', pedgr
         except:
             print('[ERROR]: pyp_newclasses.load_pedigree() was unable to instantiate and load the pedigree.')
         return 0
-
-
-##
-# PyPedalError is the base class for exceptions in PyPedal. The exceptions
-# are based on the examples from "An Introduction to Python" by Guido van
-# Rossum and Fred L. Drake,Jr.
-# (http://www.network-theory.co.uk/docs/pytut/tut_64.html).
-# @param None
-# @retval None
-class PyPedalError(Exception):
-    """PyPedalError is the base class for exceptions in PyPedal."""
-    pass
-
-
-##
-# PyPedalPedigreeInputFileNameError is raised when a simulated pedigree
-# is not requested and a pedigree file name is not provided.
-# @param None
-# @retval None
-class PyPedalPedigreeInputFileNameError(PyPedalError):
-    """PyPedalPedigreeInputFileNameError is raised when a simulated pedigree
-    is not requested and a pedigree file name is not provided.
-    """
-
-    ##
-    # __init__() returns a new instance of a PyPedalPedigreeInputFileNameError object
-    # @param self Reference to current object
-    # @retval A new PyPedalPedigreeInputFileNameError object
-    def __init__(self):
-        self.message = ('You did not request that a pedigree be simulated, and you did not provide the name of a'
-                        ' pedigree file to be read.')
-
-    ##
-    # __str__() returns an instance of a PyPedalPedigreeInputFileNameError object represented as a string
-    # @param self Reference to current object
-    # @retval A string representation of a  PyPedalPedigreeInputFileNameError object
-    def __str__(self):
-        return repr(self.message)

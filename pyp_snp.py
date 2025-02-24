@@ -2,9 +2,9 @@
 
 ###############################################################################
 # NAME: pyp_snp.py
-# VERSION: 3.0.0 (21MAUGUST2024)
-# AUTHOR: John B. Cole, PhD (john.b.cole@gmail.com)
-# LICENSE: LGPL
+# VERSION: 3.0.0 (21AUGUST2024)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
 ###############################################################################
 # FUNCTIONS:
 #   read_agil_chromosome_data()

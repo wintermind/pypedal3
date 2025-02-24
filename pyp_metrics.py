@@ -3,8 +3,8 @@
 ###############################################################################
 # NAME: pyp_metrics.py
 # VERSION: 2.0.0 (29SEPTEMBER2010)
-# AUTHOR: John B. Cole, PhD (john.cole@ars.usda.gov)
-# LICENSE: LGPL
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
 ###############################################################################
 # FUNCTIONS:
 #   min_max_f()
@@ -32,6 +32,7 @@
 ###############################################################################
 
 import copy
+import logging
 import numpy
 from . import pyp_nrm
 from . import pyp_utils
@@ -42,6 +43,7 @@ from . import pyp_utils
 # relationship as well as effective founder number, effective population size,
 # and effective ancestor number.
 ##
+
 
 ##
 # min_max_f() takes a pedigree and returns a list of the individuals with the n
@@ -58,18 +60,16 @@ def min_max_f(pedobj, a='', n=10, forma='dense'):
     individuals with the n largest and n smallest coefficients of
     inbreeding; individuals with CoI of zero are not included.
     """
-    try: logging.info('Entered min_max_f()')
-    except: pass
-    if forma not in ['dense','sparse']:
+    try:
+        logging.info('Entered pyp_metrics/min_max_f()')
+    except:
+        pass
+    if forma not in ['dense', 'sparse']:
         format = 'dense'
     if not pedobj.kw['form_nrm'] and not a:
-        #if forma == 'sparse':
-        #    a = pyp_nrm.fast_a_matrix_sparse(pedobj.pedigree,pedobj.kw)
-        #else:
-        #    a = pyp_nrm.fast_a_matrix(pedobj.pedigree,pedobj.kw)
-        a = pyp_nrm.fast_a_matrix(pedobj.pedigree,pedobj.kw,method=forma)
+        a = pyp_nrm.fast_a_matrix(pedobj.pedigree, pedobj.kw, method=forma)
         print(a)
-        individual_coi = fast_a_coefficients(pedobj,a=a)
+        individual_coi = fast_a_coefficients(pedobj, a=a)
         print(individual_coi)
     else:
         individual_coi = fast_a_coefficients(pedobj)
