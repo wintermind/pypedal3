@@ -12,6 +12,7 @@ PyPedal 2 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
++++ 02/26/2025  Added a README.md file, not sure how that got missed.
 XXX 02/24/2025  Removed an unused parameter from pyp_reports_templates/myFirstPage().
 XXX 02/24/2025  Removed pyp_newclasses/PyPedalError and  pyp_newclasses/PyPedalPedigreeInputFileNameError because they
     aren't used anywhere.
