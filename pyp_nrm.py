@@ -5,7 +5,8 @@
 # VERSION: 3.0.0 (22AUGUST2024)
 # AUTHOR: John B. Cole (john.b.cole@gmail.com)
 # LICENSE: LGPL v2.1 (see LICENSE file)
-################################################################################ FUNCTIONS:
+###############################################################################
+# FUNCTIONS:
 #   a_matrix()
 #   fast_a_matrix()
 #   fast_a_matrix_r()

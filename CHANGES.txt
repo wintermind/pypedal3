@@ -1,21 +1,29 @@
-PyPedal 2 CHANGELOG
+PyPedal 3 CHANGELOG
 ===================
 "---" indicates a known bug;
 "+++" indicates a feature addition;
 "***" indicates an API change or a major bugfix;
 "'''" indicates a minor bugfix or feature enhancement.
-"???" indicates a possible problem (i.e. bug) that has
-      not been verified.
+"???" indicates a possible problem (i.e. bug) that has not been verified.
 "XXX" indicates a feature that has been deprecated or removed.
 "!!!" indicates a feature that is planned or stubbed, but is not yet working.
 "###" indicates a note or idea I don't want to forget.
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+??? 08/29/2025  pyp_metrics/mating_coi_group() refers to a key-value pair (k and v) that doesn't exist...
+??? 08/29/2008  What's going on with form_a in pyp_metrics/fast_a_coefficients()? It looks as though the same
+    methods is used to contruct A regardless of the argument provided.
+''' 08/29/2025  Did some cleanup in pyp_snp.
+''' 08/29/2025  Pre-declared reldict and rel_dict in pyp_snp/compute_genomic_inbreeding_from_grm
+''' 08/29/2025  Fixed a variable name error (g_matrix instead of G) in pyp_snp/compute_genomic_inbreeding_from_grm.
+''' 02/28/2025  Fixed a typo when setting the default 'log_ped_lines' keyword.
+--- 02/28/2025  Oops. PyPedalPedigreeInputFileNameError was used in one place...
+XXX 02/28/2025  Removed the 'updates_sexes' keyword since 'set_sexes' now serves that purpose.
 +++ 02/26/2025  Added a README.md file, not sure how that got missed.
 XXX 02/24/2025  Removed an unused parameter from pyp_reports_templates/myFirstPage().
-XXX 02/24/2025  Removed pyp_newclasses/PyPedalError and  pyp_newclasses/PyPedalPedigreeInputFileNameError because they
-    aren't used anywhere.
+XXX 02/24/2025  Removed pyp_newclasses/PyPedalError and pyp_newclasses/PyPedalPedigreeInputFileNameError because
+    they weren't used anywhere.
 ''' 02/24/2025  Removed the definition of "isnewanimal" from pyp_utils/renumber(). It was used in only 2
     places so it makes more sense to just check the animal class directly.
 ??? 08/26/2024  Does "_mycoi.sort(pyp_utils.sort_dict_by_values)" in pyp_metrics/min_max_f() actually work?

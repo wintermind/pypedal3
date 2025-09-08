@@ -102,7 +102,8 @@ class NewPedigree:
                 kw['simulate_seed'] = 5048665
         else:
             if 'pedfile' not in list(kw.keys()):
-                raise PyPedalPedigreeInputFileNameError
+                print('[ERROR]: You did not provide a pedigree file name!')
+                sys.exit(0)
         if 'pedigree_save' not in list(kw.keys()):
             kw['pedigree_save'] = 0
         if 'pedformat' not in list(kw.keys()):
@@ -149,8 +150,6 @@ class NewPedigree:
             kw['counter'] = 1000
         if 'slow_reorder' not in list(kw.keys()):
             kw['slow_reorder'] = 1
-        if 'update_sexes' not in list(kw.keys()):
-            kw['update_sexes'] = 0
         # Default missing values for NewAnimal objects.
         if 'missing_bdate' not in list(kw.keys()):
             kw['missing_bdate'] = '01011900'
@@ -199,7 +198,7 @@ class NewPedigree:
             kw['nrm_format'] = 'text'
         if 'f_computed' not in list(kw.keys()):
             kw['f_computed'] = 0
-        if 'long_ped_lines' not in list(kw.keys()):
+        if 'log_ped_lines' not in list(kw.keys()):
             kw['log_ped_lines'] = 0
         if 'log_long_filename' not in list(kw.keys()):
             kw['log_long_filenames'] = 0
