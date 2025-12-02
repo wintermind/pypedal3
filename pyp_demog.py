@@ -20,7 +20,7 @@
 ##
 
 
-from . import pyp_utils
+from PyPedal import pyp_utils
 
 # Define some globals in case the user forgets to call set_base_year() and
 # set_age_units().

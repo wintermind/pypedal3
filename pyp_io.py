@@ -39,7 +39,7 @@
 
 import logging, numpy, pickle, string, time
 import pyp_nrm
-from . import pyp_utils
+from PyPedal import pyp_utils
 
 global PYPEDAL_OUTPUT_TYPE
 
@@ -61,7 +61,7 @@ def a_inverse_to_file(pedobj, ainv=''):
     """
     try:
         logging.info('Entered pyp_io/a_inverse_to_file()')
-    except:
+    except TypeError or NameError:
         pass
     _r = 0
     try:
@@ -79,7 +79,7 @@ def a_inverse_to_file(pedobj, ainv=''):
 
     try:
         logging.info('Exited pyp_io/a_inverse_to_file()')
-    except:
+    except TypeError or NameError:
         pass
     return _r
 
@@ -95,18 +95,18 @@ def a_inverse_from_file(inputfile):
     """
     try:
         logging.info('Entered pyp_io/a_inverse_from_file()')
-    except:
+    except TypeError or NameError:
         pass
     try:
         from pickle import Pickler
         ain = open(inputfile, 'r')
         au = pickle.Unpickler(ain)
         a_inv = au.load()
-    except:
+    except ValueError:
         a_inv = numpy.zeros([1, 1], float)
     try:
         logging.info('Exited pyp_io/a_inverse_from_file()')
-    except:
+    except TypeError or NameError:
         pass
     return a_inv
 
@@ -123,7 +123,7 @@ def dissertation_pedigree_to_file(pedobj):
     # This procedure assumes that the pedigree passed to it is in 'asdxfg' format.
     try:
         logging.info('Entered pyp_io/dissertation_pedigree_to_file()')
-    except:
+    except TypeError or NameError:
         pass
     _r = 0
     try:
@@ -144,7 +144,7 @@ def dissertation_pedigree_to_file(pedobj):
         pass
     try:
         logging.info('Exited pyp_io/dissertation_pedigree_to_file()')
-    except:
+    except TypeError or NameError:
         pass
     return _r
 
@@ -162,7 +162,7 @@ def dissertation_pedigree_to_pedig_format(pedobj):
     """
     try:
         logging.info('Entered pyp_io/dissertation_pedigree_to_pedig_format()')
-    except:
+    except TypeError or NameError:
         pass
     _r = 0
     try:
@@ -182,7 +182,7 @@ def dissertation_pedigree_to_pedig_format(pedobj):
         pass
     try:
         logging.info('Exited pyp_io/dissertation_pedigree_to_pedig_format()')
-    except:
+    except TypeError or NameError:
         pass
     return _r
 
@@ -201,7 +201,7 @@ def dissertation_pedigree_to_pedig_interest_format(pedobj):
     """
     try:
         logging.info('Entered pyp_io/dissertation_pedigree_to_pedig_interest_format()')
-    except:
+    except TypeError or NameError:
         pass
     _r = 0
     try:
@@ -216,7 +216,7 @@ def dissertation_pedigree_to_pedig_interest_format(pedobj):
         pass
     try:
         logging.info('Exited pyp_io/dissertation_pedigree_to_pedig_interest_format()')
-    except:
+    except TypeError or NameError:
         pass
     return _r
 
@@ -239,7 +239,7 @@ def dissertation_pedigree_to_pedig_format_mask(pedobj):
     """
     try:
         logging.info('Entered pyp_io/dissertation_pedigree_to_pedig_format_mask()')
-    except:
+    except TypeError or NameError:
         pass
     try:
         length = len(pedobj.pedigree)
@@ -292,7 +292,7 @@ def dissertation_pedigree_to_pedig_format_mask(pedobj):
         pass
     try:
         logging.info('Exited pyp_io/dissertation_pedigree_to_pedig_format_mask()')
-    except:
+    except TypeError or NameError:
         pass
     return _r
 
@@ -379,13 +379,13 @@ def pickle_pedigree(pedobj, filename=''):
     """
     try:
         logging.info('Entered pyp_io/pickle_pedigree()')
-    except:
+    except TypeError or NameError:
         pass
     _r = 0
     try:
         _r = 1
         if not filename:
-          _pfn = '%s.pkl' % pedobj.kw['filetag']
+            _pfn = '%s.pkl' % pedobj.kw['filetag']
         else:
             _pfn = '%s.pkl' % filename
         print(_pfn)
@@ -397,7 +397,7 @@ def pickle_pedigree(pedobj, filename=''):
         logging.error('Unable to pickle pedigree %s to file %s', pedobj.kw['pedname'], _pfn)
     try:
         logging.info('Exited pyp_io/pickle_pedigree()')
-    except:
+    except TypeError or NameError:
         pass
     return _r
 
@@ -413,14 +413,15 @@ def unpickle_pedigree(filename=''):
     """
     try:
         logging.info('Entered pyp_io/unpickle_pedigree()')
-    except:
+    except TypeError or NameError:
         pass
     _r = 0
     try:
         if not filename:
             logging.error('No filename provided for pedigree unpickling!')
         else:
-            _ck_pfn = string.split(filename, '.')
+            # _ck_pfn = string.split(filename, '.')
+            _ck_pfn = filename.split('.')
             if len(_ck_pfn) == 2:
                 _pfn = filename
             else:
@@ -433,7 +434,7 @@ def unpickle_pedigree(filename=''):
         logging.error('Unable to unpickle pedigree from file!')
     try:
         logging.info('Exited pyp_io/unpickle_pedigree()')
-    except:
+    except TypeError or NameError:
         pass
     return _r
 
@@ -469,7 +470,7 @@ def summary_inbreeding(f_metadata):
         _summary = '\n%s\n%s' % (_summary, LINE1)
         return _summary
     except:
-        return '0'
+        return None
 
 
 ##
@@ -494,7 +495,7 @@ def save_ijk(pedobj, nrm_filename):
     if pedobj.kw['messages'] == 'verbose':
         print('[INFO]: A-matrix successfully saved to file %s at %s.' % ( nrm_filename, pyp_utils.pyp_nice_time()))
     logging.info('A-matrix successfully saved to file %s', nrm_filename)
-    return 1
+    return True
 
 
 ##
@@ -1133,7 +1134,7 @@ def save_to_genes(pedobj, outfilename):
                     # If we have values that exceed the width of the field truncate them and warn the user.
                     if len(str(value)) > size:
                         value = str(value[0:size+1])
-                        if messages == 'verbose':
+                        if pedobj.kw['messages'] == 'verbose':
                             print('[WARNING]: Truncated field %s while exporting to GENES 1.20 file %s!' %
                                   (name, outfilename))
                         logging.warn('Truncated field %s while exporting to GENES 1.20 file %s!', name,
@@ -1144,8 +1145,8 @@ def save_to_genes(pedobj, outfilename):
                 f.write(value)
         # End-of-file marker
         f.write('\x1A')
-        ### End code of Raymond Hettinger's taken from http://code.activestate.com/recipes/362715/
-        ### and modified slightly for PyPedal.
+        # End code of Raymond Hettinger's taken from http://code.activestate.com/recipes/362715/
+        # and modified slightly for PyPedal.
         f.close()
         if pedobj.kw['messages'] == 'verbose':
             print('[INFO]: Successfully exported pedigree to the GENES file %s!' % outfilename)
@@ -1167,6 +1168,7 @@ def save_to_genes(pedobj, outfilename):
 # @param pedformat Pedigree format code for the output file
 # @param kw Dictionary of keyword parameters
 def save_newanimals_to_file(animal_list, filename, pedigree, pedformat, kw):
+    value = None
     if len(animal_list) == 0:
         pass
     else:

@@ -1,8 +1,6 @@
-#!/usr/bin/python
-
 ###############################################################################
 # NAME: pyp_nrm.py
-# VERSION: 3.0.0 (22AUGUST2024)
+# VERSION: 3.0.0 (2DECEMBER2025)
 # AUTHOR: John B. Cole (john.b.cole@gmail.com)
 # LICENSE: LGPL v2.1 (see LICENSE file)
 ###############################################################################
@@ -45,8 +43,8 @@ try:
 except ImportError:
     logging.info('pyp_nrm couldn\'t import the scipy.sparse module! Using NumPy dense matrices instead.')
     print('[INFO]: pyp_nrm couldn\'t import the scipy.sparse module! Using NumPy dense matrices instead.')
-from . import pyp_network
-from . import pyp_utils
+from PyPedal import pyp_network
+from PyPedal import pyp_utils
 
 
 ##
@@ -106,7 +104,7 @@ def a_matrix(pedobj, save=False):
                     print('[ERROR]: There is a problem with the sire (ID %s) and/or dam (ID %s) of animal %s' %
                           (pedobj.pedigree[col].sireID, pedobj.pedigree[col].damID, pedobj.pedigree[col].animalID))
                     break
-    except:
+    except ValueError:
         a = numpy.zeros([1, 1], 'd')
 
     if save:
@@ -168,11 +166,11 @@ def fast_a_matrix(pedigree, pedopts, save=0, method='dense', debug=0, fill=1):
     _str_sires = {}
     _str_dams = {}
     l = len(pedigree)
-    #method = 'dense'
-    if method not in ['dense','sparse']:
+    # method = 'dense'
+    if method not in ['dense', 'sparse']:
         method = 'dense'
-    #try:
-    # Use PySparse to provide sparse matrix storage for large
+    # try:
+    # Use SciPySparse to provide sparse matrix storage for large
     # relationship matrices.
     if method == 'sparse':
         try:
@@ -180,71 +178,78 @@ def fast_a_matrix(pedigree, pedopts, save=0, method='dense', debug=0, fill=1):
             a = coo_array((l, l), dtype=numpy.float32).toarray()
         except ImportError:
             logging.error('Could not import scipy.sparse; using Numpy instead!')
-            a = numpy.zeros([l, l], dtype=numpy.float32)  # initialize a matrix of zeros
-	    try:
-                a = numpy.zeros([l,l],dtype=numpy.float32)  # initialize a matrix of zeros of appropriate size
-	    except MemoryError:
-	        a = numpy.memmap('fast_a_matrix_mmap.bin', dtype='float32', mode='w+', shape=(l,l))
-	    except:
-	        print('[ERROR]: Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix()!' % ( l ))
-	        logging.error('Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix()!', l)
-	        return False
+            # a = numpy.zeros([l, l], dtype=numpy.float32)  # initialize a matrix of zeros
+            # Try to allocate the array on the heap.
+            try:
+                a = numpy.zeros([l, l], dtype=numpy.float32)  # initialize a matrix of zeros of appropriate size
+            # If we can't allocate it on the heap, can we memory-map it?
+            except MemoryError:
+                try:
+                    a = numpy.memmap('fast_a_matrix_mmap.bin', dtype='float32', mode='w+', shape=(l,l))
+                except:
+                    print('[ERROR]: Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix()!' % ( l ))
+                    logging.error('Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix()!', l)
+                    return False
     # Otherwise, use Numpy and its dense matrices
     else:
-	# First, try and allocate the vectors in RAM. If that does not work, try and allocate them using
+        # First, try and allocate the vectors in RAM. If that does not work, try and allocate them using
         # memory-mapped files. If that does not work, well, give up.
-	try:
-            a = numpy.zeros([l,l],'d')  # initialize a matrix of zeros of appropriate size
-	except MemoryError:
-	    a = numpy.memmap('fast_a_matrix_mmap.bin', dtype='float32', mode='w+', shape=(l,l))
-	except:
-	    print('[ERROR]: Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix()!' % ( l ))
-	    logging.error('Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix()!', l)
-	    return False
-        # print a
+        try:
+            a = numpy.zeros([l, l], 'd')  # initialize a matrix of zeros of appropriate size
+        except MemoryError:
+            try:
+                a = numpy.memmap('fast_a_matrix_mmap.bin', dtype='float32', mode='w+', shape=(l, l))
+            except:
+                print('[ERROR]: Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix()!' % l)
+                logging.error('Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix()!', l)
+                return False
+        # print(a)
     if pedopts['debug_messages'] and pedopts['messages'] != 'quiet':
-        print('\t\t[pyp_nrm/fast_a_matrix()] Started forming animal, sire, and dam lists at %s' %  pyp_utils.pyp_nice_time())
-    #print '\tIdx\tID\tName'
+        print('\t\t[pyp_nrm/fast_a_matrix()] Started forming animal, sire, and dam lists at %s' %
+              pyp_utils.pyp_nice_time())
+    # print('\tIdx\tID\tName')
     for i in range(l):
-	a[i,i] = 1.0
-	if foundercoi == 1:
-            if str(pedigree[i].sireID) == str(pedopts['missing_parent']) and str(pedigree[i].damID) == str(pedopts['missing_parent']):
-                a[i,i] = 1.0 + pedigree[i].fa
+        a[i, i] = 1.0
+        if foundercoi == 1:
+            if (str(pedigree[i].sireID) == str(pedopts['missing_parent']) and
+                    str(pedigree[i].damID) == str(pedopts['missing_parent'])):
+                a[i, i] = 1.0 + pedigree[i].fa
         try:
             _a = _animals[i]
         except KeyError:
             _animals[i] = int(pedigree[i].animalID)
-            #print 'A:\t', i, '\t', pedigree[i].animalID, '\t', pedigree[i].name
+            # print('A:\t', i, '\t', pedigree[i].animalID, '\t', pedigree[i].name)
         try:
             _s = _sires[i]
         except KeyError:
             _sires[i] = int(pedigree[i].sireID)
-	    _str_sires[i] = str(_sires[i])
-            #print 'S:\t', i, '\t', pedigree[i].sireID, '\t', pedigree[i].sireName
+            _str_sires[i] = str(_sires[i])
+            # print('S:\t', i, '\t', pedigree[i].sireID, '\t', pedigree[i].sireName)
         try:
             _d = _dams[i]
         except KeyError:
             _dams[i] = int(pedigree[i].damID)
             _str_dams[i] = str(_dams[i])
-            #print 'D:\t', i, '\t', pedigree[i].damID, '\t', pedigree[i].damName
+            # print('D:\t', i, '\t', pedigree[i].damID, '\t', pedigree[i].damName)
     if pedopts['debug_messages'] and pedopts['messages'] != 'quiet':
-        print('\t\t[pyp_nrm/fast_a_matrix()] Finished forming animal, sire, and dam lists at %s' %  pyp_utils.pyp_nice_time())
-        print('\t\t[pyp_nrm/fast_a_matrix()] Started computing A at %s' %  pyp_utils.pyp_nice_time())
-    #print '_animals: ', _animals
-    #print '_sires: ', _sires
-    #print '_dams: ', _dams
-    #print 'missing_parent: ', pedopts['missing_parent']
-    #print l
+        print('\t\t[pyp_nrm/fast_a_matrix()] Finished forming animal, sire, and dam lists at %s' %
+              pyp_utils.pyp_nice_time())
+        print('\t\t[pyp_nrm/fast_a_matrix()] Started computing A at %s' % pyp_utils.pyp_nice_time())
+    # print('_animals: ', _animals)
+    # print('_sires: ', _sires)
+    # print('_dams: ', _dams)
+    # print('missing_parent: ', pedopts['missing_parent'])
+    # print(l)
     this_msg = str(pedopts['missing_parent'])
     for row in range(l):
-        for col in range(row,l):
+        for col in range(row, l):
             if _str_sires[col] != this_msg and _str_dams[col] != this_msg:
                 # both parents known
                 if row == col:
-                    a[row,col] = a[row,col] + ( 0.5 * a[_sires[col]-1,_dams[col]-1] )
+                    a[row, col] = a[row, col] + (0.5 * a[_sires[col]-1, _dams[col]-1])
                 else:
-                    a[row,col] = 0.5 * ( a[row,_sires[col]-1] + a[row,_dams[col]-1] )
-                    a[col,row] = a[row,col]
+                    a[row, col] = 0.5 * (a[row, _sires[col]-1] + a[row, _dams[col]-1])
+                    a[col, row] = a[row, col]
             else:
                 if _str_sires[col] == this_msg and _str_dams[col] == this_msg:
                     # sire and dam unknown
@@ -252,31 +257,31 @@ def fast_a_matrix(pedigree, pedopts, save=0, method='dense', debug=0, fill=1):
                 elif _str_sires[col] == this_msg and _str_dams[col] != this_msg:
                     # sire unknown, dam known
                     if row != col:
-                        a[row,col] = 0.5 * a[row,_dams[col]-1]
-                        a[col,row] = a[row,col]
-		else:
+                        a[row, col] = 0.5 * a[row, _dams[col]-1]
+                        a[col, row] = a[row, col]
+                else:
                     # sire known, dam unknown
                     if row != col:
-                        a[row,col] = 0.5 * a[row,_sires[col]-1]
-                        a[col,row] = a[row,col]
+                        a[row, col] = 0.5 * a[row, _sires[col]-1]
+                        a[col, row] = a[row, col]
     if pedopts['debug_messages'] and pedopts['messages'] != 'quiet':
-        print('\t\t[pyp_nrm/fast_a_matrix()] Finished computing A at %s' %  pyp_utils.pyp_nice_time())
-    #except:
-    #    a = numpy.zeros([l,l],'d')  # initialize a matrix of zeros of appropriate order
+        print('\t\t[pyp_nrm/fast_a_matrix()] Finished computing A at %s' % pyp_utils.pyp_nice_time())
+    # except:
+    #     a = numpy.zeros([l,l],'d')  # initialize a matrix of zeros of appropriate order
 
     if save == 1:
-        a_outputfile = '%s%s%s' % (pedopts['filetag'],'_new_a_matrix_','.dat')
-        aout = open(a_outputfile,'w')
+        a_outputfile = '%s%s%s' % (pedopts['filetag'], '_new_a_matrix_', '.dat')
+        aout = open(a_outputfile, 'w')
         label = 'Produced by pyp_nrm/fast_a_matrix()\n'
         aout.write(label)
         for row in range(l):
             line = ''
             for col in range(l):
                 if col == 0:
-                    line = '%7.5f' % (a[row,col])
+                    line = '%7.5f' % a[row, col]
                 else:
-                    line = '%s%s%s' % (line,',',a[row,col])
-            line = '%s%s' % (line,'\n')
+                    line = '%s%s%s' % (line, ',', a[row, col])
+            line = '%s%s' % (line, '\n')
             aout.write(line)
         aout.close()
 
@@ -286,6 +291,7 @@ def fast_a_matrix(pedigree, pedopts, save=0, method='dense', debug=0, fill=1):
     if debug:
         print(a)
     return a
+
 
 ##
 # Form a relationship matrix from a pedigree.  fast_a_matrix_r() differs from fast_a_matrix() in that the
@@ -301,47 +307,39 @@ def fast_a_matrix_r(pedigree, pedopts, save=0, method='dense'):
     fast_a_matrix() in that the coefficients of relationship are corrected for the
     inbreeding of the parents.
     """
-    #try: logging.info('Entered fast_a_matrix_r()')
-    #except: pass
+    # try:
+    #     logging.info('Entered fast_a_matrix_r()')
+    # except NameError or TypeError:
+    #     pass
     import math   # We need it for sqrt()
     animals = []
     sires = []
     dams = []
-    #print pedigree
+    # print(pedigree)
     l = len(pedigree)
-    #method = 'dense'
-    if method not in ['dense','sparse']:
+    # method = 'dense'
+    if method not in ['dense', 'sparse']:
         method = 'dense'
     try:
-        # Use PySparse to provide sparse matrix storage for large
+        # Use SciPySparse to provide sparse matrix storage for large
         # relationship matrices.
         if method == 'sparse':
             try:
-                a = spmatrix.ll_mat_sym(l*l)
-                for i in range(l):
-                    a[i,i] = 1.
-            except:
-                #a = numpy.zeros([l,l],'d')
-	        try:
-                    a = numpy.zeros([l,l],'d')  # initialize a matrix of zeros of appropriate size
-	        except MemoryError:
-	            a = numpy.memmap('fast_a_matrix_r_mmap.bin', dtype='float32', mode='w+', shape=(l,l))
-	        except:
-	            print('[ERROR]: Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix_r()!' % ( l ))
-	            logging.error('Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix_r()!', l)
-                    return False
-
-        # Otherwise, use NumPy and its dense matrices
+                from scipy.sparse import coo_array
+                a = coo_array((l, l), dtype=numpy.float32).toarray()
+            except ImportError:
+                logging.error('Couldn\'t import scipy.sparse; using Numpy instead!')
+        # Otherwise, use dense NumPy matrices, which is OK if the pedigree isn't too big.
         else:
-            #a = numpy.zeros([l,l],'d')
-	    try:
-                a = numpy.zeros([l,l],'d')  # initialize a matrix of zeros of appropriate size
-	    except MemoryError:
-	        a = numpy.memmap('fast_a_matrix_r_mmap.bin', dtype='float32', mode='w+', shape=(l,l))
-	    except:
-	        print('[ERROR]: Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix_r()!' % ( l ))
-	        logging.error('Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix_r()!', l)
-                return False
+            try:
+                a = numpy.zeros([l, l], 'd')  # create a matrix of zeros of appropriate size.
+            except MemoryError:
+                try:
+                    a = numpy.memmap('fast_a_matrix_r_mmap.bin', dtype='float32', mode='w+', shape=(l, l))
+                except:
+                    print('[ERROR]: Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix_r()!' % l)
+                    logging.error('Unable to allocate a matrix of rank %s in pyp_nrm.fast_a_matrix_r()!', l)
+                    return False
 
         for i in range(l):
             animals.append(int(pedigree[i].animalID))
@@ -351,97 +349,102 @@ def fast_a_matrix_r(pedigree, pedopts, save=0, method='dense'):
         # correct CoR for parental inbreeding.
         for row in range(l):
             for col in range(row,l):
-                #print '[DEBUG]: row = %s\tcol = %s' % (row,col)
-                if str(sires[col]) == str(pedopts['missing_parent']) and str(dams[col]) == str(pedopts['missing_parent']):
+                # print '[DEBUG]: row = %s\tcol = %s' % (row,col)
+                if str(sires[col]) == str(pedopts['missing_parent']) and \
+                        str(dams[col]) == str(pedopts['missing_parent']):
                     if row == col:
                         # both parents unknown and assumed unrelated
-                        a[row,col] = 1.
+                        a[row, col] = 1.
                 elif str(sires[col]) == str(pedopts['missing_parent']):
                     # sire unknown, dam known
                     if row == col:
-                        a[row,col] = 1.
+                        a[row, col] = 1.
                     else:
-                        a[row,col] = 0.5 * a[row,dams[col]-1]
-                        a[col,row] = a[row,col]
+                        a[row, col] = 0.5 * a[row, dams[col]-1]
+                        a[col, row] = a[row, col]
                 elif str(dams[col]) == str(pedopts['missing_parent']):
                     # sire known, dam unknown
                     if row == col:
-                        a[row,col] = 1.
+                        a[row, col] = 1.
                     else:
-                        a[row,col] = 0.5 * a[row,sires[col]-1]
-                        a[col,row] = a[row,col]
+                        a[row, col] = 0.5 * a[row, sires[col]-1]
+                        a[col, row] = a[row, col]
                 elif sires[col] != pedopts['missing_parent'] and dams[col] != pedopts['missing_parent']:
                     # both parents known
                     if row == col:
-                        a[row,col] = 1. + ( 0.5 * a[sires[col]-1,dams[col]-1] )
+                        a[row, col] = 1. + (0.5 * a[sires[col]-1, dams[col]-1])
                     else:
-                        intermediate = a[row,sires[col]-1] + a[row,dams[col]-1]
-                        a[row,col] = 0.5 * intermediate
-                        a[col,row] = a[row,col]
+                        intermediate = a[row, sires[col]-1] + a[row, dams[col]-1]
+                        a[row, col] = 0.5 * intermediate
+                        a[col, row] = a[row, col]
                 else:
                     if pedopts['debug_messages'] and pedopts['messages'] != 'quiet':
-                        print('[ERROR]: There is a problem with the sire (ID %s) and/or dam (ID %s) of animal %s' % (pedigree[col].sireID, pedigree[col].damID, pedigree[col].animalID))
+                        print('[ERROR]: There is a problem with the sire (ID %s) and/or dam (ID %s) of animal %s' %
+                              (pedigree[col].sireID, pedigree[col].damID, pedigree[col].animalID))
                     break
         for row in range(l):
             for col in range(row,l):
-                if str(sires[col]) == str(pedopts['missing_parent']) and str(dams[col]) == str(pedopts['missing_parent']):
+                if str(sires[col]) == str(pedopts['missing_parent']) and \
+                        str(dams[col]) == str(pedopts['missing_parent']):
                     pass
                 elif str(sires[col]) == str(pedopts['missing_parent']):
                     # sire unknown, dam known
-                    if row != col and a[row,col] > 0.:
-                        numerator = 0.5 * a[row,dams[col]-1]
-                        denominator = sqrt ( a[dams[col]-1,dams[col]-1] )
+                    if row != col and a[row, col] > 0.:
+                        numerator = 0.5 * a[row, dams[col]-1]
+                        denominator = math.sqrt (a[dams[col]-1, dams[col]-1])
                         try:
                             coefficient = numerator / denominator
                         except:
                             coefficient = 0.
                         a[row,col] = coefficient
-                        a[col,row] = a[row,col]
+                        a[col,row] = a[row, col]
                 elif str(dams[col]) == str(pedopts['missing_parent']):
                     # sire known, dam unknown
-                    if row != col and a[row,col] > 0.:
-                        numerator = 0.5 * a[row,sires[col]-1]
-                        denominator = sqrt ( a[sires[col]-1,sires[col]-1] )
+                    if row != col and a[row, col] > 0.:
+                        numerator = 0.5 * a[row, sires[col]-1]
+                        denominator = math.sqrt(a[sires[col]-1, sires[col]-1])
                         try:
                             coefficient = numerator / denominator
                         except:
                             coefficient = 0.
-                        a[row,col] = coefficient
-                        a[col,row] = a[row,col]
+                        a[row, col] = coefficient
+                        a[col, row] = a[row, col]
                 elif sires[col] != pedopts['missing_parent'] and dams[col] != pedopts['missing_parent']:
                     # both parents known
-                    if row != col and a[row,col] > 0.:
-                        numerator = 0.5 * ( a[row,sires[col]-1] + a[row,dams[col]-1] )
-                        denominator = math.sqrt ( ( a[sires[col]-1,sires[col]-1] ) * ( a[dams[col]-1,dams[col]-1] ) )
+                    if row != col and a[row, col] > 0.:
+                        numerator = 0.5 * (a[row, sires[col]-1] + a[row, dams[col]-1])
+                        denominator = math.sqrt((a[sires[col]-1, sires[col]-1]) * (a[dams[col]-1, dams[col]-1]))
                         try:
                             coefficient = numerator / denominator
                         except:
                             coefficient = 0.
-                        a[row,col] = coefficient
-                        a[col,row] = a[row,col]
+                        a[row, col] = coefficient
+                        a[col, row] = a[row, col]
                 else:
                     pass
     except:
-        a = numpy.zeros([1,1],'d')
+        a = numpy.zeros([1, 1], 'd')
     # print a
     if save == 1:
-        a_outputfile = '%s%s%s' % (pedobj.kw['filetag'],'_a_matrix_r_','.dat')
-        aout = open(a_outputfile,'w')
+        a_outputfile = '%s%s%s' % (pedopts.kw['filetag'], '_a_matrix_r_', '.dat')
+        aout = open(a_outputfile, 'w')
         label = 'Produced by pyp_nrm/fast_a_matrix_r()\n'
         aout.write(label)
         for row in range(l):
             line = ''
             for col in range(l):
                 if col == 0:
-                    line = '%7.5f' % (a[row,col])
+                    line = '%7.5f' % (a[row, col])
                 else:
-                    line = '%s%s%s' % (line,',',a[row,col])
-            line = '%s%s' % (line,'\n')
+                    line = '%s%s%s' % (line, ',', a[row, col])
+            line = '%s%s' % (line, '\n')
             aout.write(line)
         aout.close()
 
-    #try: logging.info('Exited fast_a_matrix_r()')
-    #except: pass
+    # try:
+    #     logging.info('Exited fast_a_matrix_r()')
+    # except NameError or TypeError:
+    #     pass
     return a
 
 
@@ -472,11 +475,11 @@ def inbreeding(pedobj, method='tabular', gens=0, rels=0, output=1, force=0, amet
     metadata = {}
     if method not in ['vanraden', 'tabular', 'meu_luo', 'mod_meu_luo', 'aguilar']:
         logging.warning('You passed an unrecognized method, %s, to pyp_nrm/inbreeding(); the method was '
-                             'changed to the default of \'tabular\'.', method)
+                        'changed to the default of \'tabular\'.', method)
         method = 'tabular'
     if int(gens) < 0:
-        logging.warning('You passed an invalid value of gens, %s, to pyp_nrm/inbreeding(); gens was changed '
-                             'to the default of 0.', gens)
+        logging.warning('You passed an invalid value of gens, %s, to pyp_nrm/inbreeding(); gens was changed to '
+                        'the default of 0.', gens)
         gens = 0
 
     if rels:
@@ -525,8 +528,8 @@ def inbreeding(pedobj, method='tabular', gens=0, rels=0, output=1, force=0, amet
                         reldict['r_sum'] = reldict['r_sum'] + pedobj.nrm.nrm[i][j]
             # print('[DEBUG]: reldict: ', reldict)
     else:
-        if method == 'vanraden':# or pedobj.metadata.num_records > 1000:
-            #if pedobj.metadata.num_records > 1000:
+        if method == 'vanraden': # or pedobj.metadata.num_records > 1000:
+            # if pedobj.metadata.num_records > 1000:
             # logging.warning('pyp_nrm.inbreeding() dispatched the pedigree %s to pyp_nrm/inbreeding_vanraden()
             #                  because it contains more than 1000 records.', pedobj.kw['pedname'])
             if rels:
@@ -653,17 +656,17 @@ def inbreeding(pedobj, method='tabular', gens=0, rels=0, output=1, force=0, amet
         line = '-'*80
         aout.write('All animals:\n')
         aout.write('%s\n' % line)
-        aout.write('\tCount:\t%s\n'%len(list(fx.keys())))
-        aout.write('\tMean:\t%s\n'%f_avg)
-        aout.write('\tMin:\t%s\n'%f_min)
-        aout.write('\tMax:\t%s\n'%f_max)
+        aout.write('\tCount:\t%s\n' % len(list(fx.keys())))
+        aout.write('\tMean:\t%s\n' % f_avg)
+        aout.write('\tMin:\t%s\n' % f_min)
+        aout.write('\tMax:\t%s\n' % f_max)
         line = '-'*80
         aout.write('Animals with non-zero CoI:\n')
         aout.write('%s\n' % line)
-        aout.write('\tCount:\t%s\n'%f_nonzero_count)
-        aout.write('\tMean:\t%s\n'%f_nonzero_avg)
-        aout.write('\tMin:\t%s\n'%f_nonzero_min)
-        aout.write('\tMax:\t%s\n'%f_nonzero_max)
+        aout.write('\tCount:\t%s\n' % f_nonzero_count)
+        aout.write('\tMean:\t%s\n' % f_nonzero_avg)
+        aout.write('\tMin:\t%s\n' % f_nonzero_min)
+        aout.write('\tMax:\t%s\n' % f_nonzero_max)
         aout.close()
 
     logging.info('Exited pyp_nrm/inbreeding()')
@@ -806,12 +809,10 @@ def inbreeding_vanraden(pedobj, cleanmaps=1, gens=0, rels=0):
                                 # i's pedigree without changing the data in pedobj.pedigree.
                     _map = {}
                     for j in _ped:
-                        # This is VERY important -- rather than append a reference
-                        # to _ped[j-1] to _r we need to append a COPY of _ped[j-1]
-                        # to _r.  If you change this code and get rid of the call to
-                        # copy.copy() then things will not work correctly.  You will
-                        # realize what you have done when your renumberings seem to
-                        # be spammed.
+                        # This is VERY important -- rather than append a reference to _ped[j-1] to _r we need to append
+                        # a COPY of _ped[j-1] to _r.  If you change this code and get rid of the call to copy.copy()
+                        # then things will not work correctly.  You'll realize what you have done when your
+                        # renumberings seem to be spammed. (This is a consequence of Python's pass-by-reference design.)
                         _r.append(copy.copy(pedobj.pedigree[int(j)-1]))
                 # We also need to honor the slow_reorder option.
                 if pedobj.kw['slow_reorder']:
@@ -825,22 +826,19 @@ def inbreeding_vanraden(pedobj, cleanmaps=1, gens=0, rels=0):
                 _backmap = {}
                 for _mk, _mv in _map.items():
                     _backmap[_mv] = _mk
-                # There is a potential error lurking here!  The filetag passed to
-                # fast_a_matrix as "_tag" is expected to be a pedoptions dictionary.
-                # Hm...I think that passing a copy of the kw dictionary from pedobj
+                # There is a potential error lurking here!  The filetag passed to fast_a_matrix as "_tag" is expected
+                # to be a pedoptions dictionary. Hm...I think that passing a copy of the kw dictionary from pedobj
                 # with the filetag changed as appropriate will do the trick.
                 _opts = copy.copy(pedobj.kw)
                 _opts['filetag'] = _tag
-                # We need to accomodate the 'nrm_method' option, too.  The need for
-                # this is clearly demonstrated by horse.ped in the examples/ subdirectory -
-                # the inbreeding is so intense in that pedigree that four of the animals
-                # have r_xy >= 1. if we do not adjust the elements of A for parental in-
-                # breeding.
+                # We need to accomodate the 'nrm_method' option, too. The need for this is clearly demonstrated by
+                # horse.ped in the examples/ subdirectory - the inbreeding is so intense in that pedigree that four
+                # of the animals have r_xy >= 1. if we do not adjust the elements of A for parental inbreeding.
                 if pedobj.kw['nrm_method'] == 'nrm':
-                    _a = fast_a_matrix(_s, _opts, method=pedobj.kw['matrix_type'])     # Form the NRM w/the tabular method
+                    _a = fast_a_matrix(_s, _opts, method=pedobj.kw['matrix_type'])
                 else:
                     _a = fast_a_matrix_r(_s, _opts, method=pedobj.kw['matrix_type'])
-                #print('len(_ped): ', len(_ped))
+                # print('len(_ped): ', len(_ped))
                 for j in range(len(_ped)):
                     _orig_id = _backmap[_s[j].animalID]
                     # The same animal can appear in many different pedigrees, but
@@ -875,7 +873,7 @@ def inbreeding_vanraden(pedobj, cleanmaps=1, gens=0, rels=0):
                     try:
                         _ptest = _parents[_parent_key]
                     except KeyError:
-                        #_parents[_parent_key] = _orig_id
+                        # _parents[_parent_key] = _orig_id
                         _parents[_parent_key] = _parent_key
                     # We only got into this loop because this combination of parents
                     # did not have an entry in fx, so put one there.
@@ -896,10 +894,14 @@ def inbreeding_vanraden(pedobj, cleanmaps=1, gens=0, rels=0):
                 _cum_f_counter = _cum_f_counter + _f_counter
     #             if _pct_proc > 0.01:
     #            if pedobj.kw['messages'] == 'verbose':
-                    # print('%s of animals processed in round %s of #pyp_nrm/inbreeding_vanraden().' % (_pct_proc,_vanraden_round))
-                    # print('%s of all animals have been processed in #pyp_nrm/inbreeding_vanraden().' % _cum_pct_proc)
-                #try: logging.info('%s of animals processed in round %s of #pyp_nrm/inbreeding_vanraden().', _pct_proc, _vanraden_round)
-                #except: pass
+                    # print('%s of animals processed in round %s of #pyp_nrm/inbreeding_vanraden().' %
+                    #     (_pct_proc,_vanraden_round))
+                    # print('%s of all animals have been processed in #pyp_nrm/inbreeding_vanraden().' %
+                    #     _cum_pct_proc)
+                # try:
+                #     logging.info('%s of animals processed in round %s of #pyp_nrm/inbreeding_vanraden().',_pct_proc,
+                #     _vanraden_round)
+                # except: pass
                 logging.info('%s pct (%s) of all animals have been processed in pyp_nrm/inbreeding_vanraden().',
                              _cum_pct_proc, _cum_f_counter)
             _counter = _counter + 1
@@ -962,7 +964,7 @@ def inbreeding_aguilar(pedobj, amethod=3):
     # ...
     # 2. Put in code to make the pedigree flatfile that INBUPGF90 needs
     pedfile = 'aguilar_pedigree_%s.txt' % pedobj.kw['pedname']
-    callinbupgf90 = ['inbupgf90', '--pedfile', pedfile, '--method', '3', '--yob', '>', logfile, '2>&1&']
+    callinbupgf90 = ['inbupgf90', '--pedfile', pedfile, '--method', str(amethod), '--yob', '>', logfile, '2>&1&']
     time_waited = 0
     p = subprocess.Popen(callinbupgf90, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     while p.poll() is None:
@@ -980,27 +982,27 @@ def inbreeding_aguilar(pedobj, amethod=3):
     (results, errors) = p.communicate()
     if errors == '':
         if pedobj.kw['messages'] == 'verbose':
-            print('\t\t[inbreeding_aguilar]: INBUPGF90 finished without problems at %s!' % \
+            print('\t\t[inbreeding_aguilar]: INBUPGF90 finished without problems at %s!' %
                   datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
             logging.info('[inbreeding_aguilar]: INBUPGF90 finished without problems at %s!',
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+                         datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
     else:
         if pedobj.kw['messages'] == 'verbose':
             print('\t\t[inbreeding_aguilar]: INBUPGF90 finished with errors: %s' % errors)
         logging.error('[inbreeding_aguilar]: INBUPGF90 finished with errors: ', errors)
     if pedobj.kw['messages'] == 'verbose':
-        print('\t[aguilar_inbreeding]: Finished using INBUPGF90 to calculate COI at %s' % \
-            datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+        print('\t[aguilar_inbreeding]: Finished using INBUPGF90 to calculate COI at %s' %
+              datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
     logging.info('[inbreeding_aguilar]: Finished using INBUPGF90 to calculate COI at %s',
-        datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+                 datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
 
     # Load the COI into a dictionary keyed by original animal ID
     coifile = '%s.solinb' % pedfile
     if pedobj.kw['messages'] == 'verbose':
-        print('\t[inbreeding_aguilar]: Putting coefficients of inbreeding from %s.solinb in a dictionary at %s' \
-            % (pedfile, datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
-    logging.info('[inbreeding_aguilar]: Putting coefficients of inbreeding from %s.solinb in a dictionary at %s' % \
-            (pedfile, datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
+        print('\t[inbreeding_aguilar]: Putting coefficients of inbreeding from %s.solinb in a dictionary at %s' %
+              (pedfile, datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
+    logging.info('[inbreeding_aguilar]: Putting coefficients of inbreeding from %s.solinb in a dictionary at %s' %
+                 (pedfile, datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
     inbr = {}
     ifh = open(coifile, 'r')
     for line in ifh:
@@ -1016,9 +1018,9 @@ def inbreeding_aguilar(pedobj, amethod=3):
 
     # Clean-up
     os.remove(pedfile)
-    os.remove('%.solinb') % pedfile
-    os.remove('%s.errors') % pedfile
-    os.remove('%.inbavgs') % pedfile
+    os.remove('%.solinb' % pedfile)
+    os.remove('%s.errors' % pedfile)
+    os.remove('%.inbavgs' % pedfile)
 
     # Send back the coefficients of inbreeding to the caller.
     return inbr
@@ -1162,7 +1164,7 @@ def recurse_pedigree_idonly_side(pedobj, anid, _ped, side='s'):
     dams.  That is, a pedigree would go sire-paternal grandsire-paternal
     great-grandsire, etc.
     """
-    if side not in ['s','d']:
+    if side not in ['s', 'd']:
         side = 's'
     try:
         anid = int(anid)
@@ -1213,23 +1215,23 @@ def inbreeding_tabular(pedobj, gens=0, rels=0):
             'r_sum': 0.,
         }
 
-    # See pyp_nrm.inbreeding_vanraden() for detailed notes on what
-    # the code in this loop does.
+    # See pyp_nrm.inbreeding_vanraden() for detailed notes on what the code in this loop does.
     if int(gens) > 0:
-        #ng = pyp_network.ped_to_graph(pedobj)
+        # 20251202: Why was this commented out???
+        ng = pyp_network.ped_to_graph(pedobj)
 
         _ped = pyp_network.find_ancestors_g(ng, len(pedobj.idmap), {}, gens)
         # _ped = pyp_network.find_ancestors_g(ng, i, [], gens)
-        _ped.append(i)
+        # _ped.append(i)
         _a, _s, _r = [], [], []
         _map = {}
         for j in _ped:
             _r.append(copy.copy(pedobj.pedigree[int(j)-1]))
         if pedobj.kw['slow_reorder']:
-            _r = pyp_utils.reorder(_r, _tag)      # Reorder the pedigree
+            _r = pyp_utils.reorder(_r, pedobj.kw['filetag'])      # Reorder the pedigree
         else:
-            _r = pyp_utils.fast_reorder(_r, _tag)      # Reorder the pedigree
-        _s, _map = pyp_utils.renumber(_r, _tag, returnmap=1, debug=pedobj.kw['debug_messages'],
+            _r = pyp_utils.fast_reorder(_r, pedobj.kw['filetag'])      # Reorder the pedigree
+        _s, _map = pyp_utils.renumber(_r, pedobj.kw['filetag'], returnmap=1, debug=pedobj.kw['debug_messages'],
                                       animaltype=pedobj.kw['animal_type'])
         _backmap = {}
         for _mk, _mv in _map.items():
@@ -1243,7 +1245,7 @@ def inbreeding_tabular(pedobj, gens=0, rels=0):
         fx = {}
         for i in range(len(_ped)):
             fx[pedobj.pedigree[i].animalID] = _a[i][i] - 1.
-        del(_a)
+        del _a
     else:
         try:
             if pedobj.kw['nrm_method'] == 'nrm':
@@ -1265,11 +1267,14 @@ def inbreeding_tabular(pedobj, gens=0, rels=0):
                                     reldict['r_min'] = _a[i][j]
                             reldict['r_count'] = reldict['r_count'] + 1
                             reldict['r_sum'] = reldict['r_sum'] + _a[i][j]
-            del(_a)
+            del _a
         except:
             pass
 
-    logging.info('Exited pyp_nrm/inbreeding_tabular()')
+    try:
+        logging.info('Exited pyp_nrm/inbreeding_tabular()')
+    except NameError or TypeError:
+        pass
 
     if rels:
         return fx, reldict
@@ -1292,7 +1297,10 @@ def inbreeding_meuwissen_luo(pedobj, gens=0, **kw):
     presented on pp. 311-312 of Meuiwissen, T.H.E., and Z. Luo. 1992. Computing inbreeding coefficients in large
     populations. Genet. Sel. Evol. 24:305-313.
     """
-    logging.info('Entered pyp_nrm/inbreeding_meuwissen_luo()')
+    try:
+        logging.info('Entered pyp_nrm/inbreeding_meuwissen_luo()')
+    except NameError or TypeError:
+        pass
 
     # Setup dictionary to accumulate coefficients of inbreeding
     fx = {}
@@ -1336,7 +1344,7 @@ def inbreeding_meuwissen_luo(pedobj, gens=0, **kw):
         if pedobj.kw['debug_messages']:
             print('\t\t[DEBUG]: l[%s] = %s' % (i, lvec[i]))
 
-        # We're using 0-indexing, so the little F0 = -1 trick that M&L use does not help us here.
+        # We're using 0-indexing, so the little F0 = -1 trick that M&L use doesn't help us here.
         # Check for the most common case first -- both parents unknown
         if (pedobj.pedigree[i].sireID != pedobj.kw['missing_parent'] and
                 pedobj.pedigree[i].damID != pedobj.kw['missing_parent']):
@@ -1397,7 +1405,10 @@ def inbreeding_meuwissen_luo(pedobj, gens=0, **kw):
     del avec
     del dvec
 
-    logging.info('Exited pyp_nrm/inbreeding_meuwissen_luo().')
+    try:
+        logging.info('Exited pyp_nrm/inbreeding_meuwissen_luo().')
+    except NameError or TypeError:
+        pass
 
     return fx
 
@@ -1419,7 +1430,10 @@ def inbreeding_modified_meuwissen_luo(pedobj, gens=0, **kw):
     in Appendix B.2 of Mrode (2005). Mrode cites Quaas's method as: Quaas, R. L. 1995. Fx
     algorithms. An unpublished note.
     """
-    logging.info('Entered pyp_nrm/inbreeding_modified_meuwissen_luo()')
+    try:
+        logging.info('Entered pyp_nrm/inbreeding_modified_meuwissen_luo()')
+    except NameError or TypeError:
+        pass
 
     # Setup dictionary to accumulate coefficients of inbreeding
     fx = {}
@@ -1505,10 +1519,10 @@ def inbreeding_modified_meuwissen_luo(pedobj, gens=0, **kw):
             if pedobj.kw['debug_messages']:
                 print('\t\t[DEBUG]: lvecd[%s]: %s' % (pedobj.pedigree[i].damID-1, lvecd[pedobj.pedigree[i].damID-1]))
 
-        # This loop was miserable to code due in large part to the publisher's decision to use two-point italic typefaces
-        # for setting subscripts. Thanks, CABI, that was awesome. It would have been much easier to read the text if 1) it
-        # has been larger, and 2) it had been typeset as an algorithm using proper indentation and notation. Lesson learned:
-        # use extreme magnification.
+        # This loop was miserable to code due in large part to the publisher's decision to use two-point italic
+        # typefaces for setting subscripts. Thanks, CABI, that was awesome. It would have been much easier to read the
+        # text if 1) it had been larger, and 2) it had been typeset as an algorithm using proper indentation and
+        # notation. Lesson learned: use extreme magnification.
         while len(ancs) > 0 and len(ancd) > 0:
             j = max(ancs)
             k = max(ancd)
@@ -1654,7 +1668,10 @@ def inbreeding_modified_meuwissen_luo(pedobj, gens=0, **kw):
     del avec
     del dvec
 
-    logging.info('Exited pyp_nrm/inbreeding_modified_meuwissen_luo()')
+    try:
+        logging.info('Exited pyp_nrm/inbreeding_modified_meuwissen_luo()')
+    except NameError or TypeError:
+        pass
 
     return fx
 
@@ -1671,8 +1688,10 @@ def a_decompose(pedobj):
     Henderson, 1976; Thompson, 1977; Mrode, 1996).  Return D, a diagonal
     matrix, and T, a lower triagular matrix such that A = TDT'.
     """
-    try: logging.info('Entered a_decompose()')
-    except: pass
+    try:
+        logging.info('Entered a_decompose()')
+    except NameError or TypeError:
+        pass
     l = pedobj.metadata.num_records
 
     if not (pedobj.kw['form_nrm'] and pedobj.nrm.nrm.shape[0] == pedobj.metadata.num_records):
@@ -1761,7 +1780,10 @@ def a_decompose(pedobj):
         aout.write(line)
     aout.close()
 
-    logging.info('Exited pyp_nrm/a_decompose()')
+    try:
+        logging.info('Exited pyp_nrm/a_decompose()')
+    except NameError or TypeError:
+        pass
 
     return D, T
 
@@ -1834,9 +1856,8 @@ def form_d_nof(pedobj):
 # Form the inverse of A directly using the method of Henderson (1976) which
 # does not account for inbreeding.
 # @param pedobj A PyPedal pedigree object.
-# @param filetag Prefix added to output file names.
 # @retval The inverse of the NRM, A, not accounting for inbreeding.
-def a_inverse_dnf(pedobj, filetag='_a_inverse_dnf_'):
+def a_inverse_dnf(pedobj):
     """
     Form the inverse of A directly using the method of Henderson (1976) which
     does not account for inbreeding.
@@ -1910,7 +1931,7 @@ def a_inverse_dnf(pedobj, filetag='_a_inverse_dnf_'):
         line = ''
         for col in range(l):
             if col == 0:
-                line = '%7.5f' % d_inv[row,col]
+                line = '%7.5f' % d_inv[row, col]
             else:
                 line = '%s%s%s' % (line, ',', d_inv[row, col])
         line = '%s%s' % (line, '\n')
@@ -2060,10 +2081,10 @@ def partial_inbreeding(pedobj, animals=[], gens=0, rels=1, cleanmaps=1):
 
     try:
         logging.info('Entered partial_inbreeding()')
-    except:
+    except NameError or TypeError:
         pass
 
-    from . import pyp_network
+    from PyPedal import pyp_network
     ng = pyp_network.ped_to_graph(pedobj)
 
     _ped = []       # This is a temporary pedigree
@@ -2119,8 +2140,7 @@ def partial_inbreeding(pedobj, animals=[], gens=0, rels=1, cleanmaps=1):
         else:
             _parent_key = '%s_%s' % (top_r[top_peddict[int(i)]].sireID, top_r[top_peddict[int(i)]].damID)
         try:
-            _k = fx[i]  # If an exception is thrown, an animal is not in the
-                        # dictionary yet.
+            _k = fx[i]  # If an exception is thrown, an animal is not in the dictionary yet.
         except KeyError:
             try:
                 _pk = _parents[_parent_key]
@@ -2193,7 +2213,8 @@ def partial_inbreeding(pedobj, animals=[], gens=0, rels=1, cleanmaps=1):
 
     try:
         logging.info('Exited partial_inbreeding()')
-    except: pass
+    except NameError or TypeError:
+        pass
     # if rels:
     #     return fx
     # else:

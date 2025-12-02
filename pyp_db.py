@@ -22,15 +22,15 @@ import math
 import os
 import string
 import sys
-from . import pyp_io
-from . import pyp_nrm
-from . import pyp_utils
+from PyPedal import pyp_io
+from PyPedal import pyp_nrm
+from PyPedal import pyp_utils
 
-try:
-    import pydal
-except ImportError:
-    print('[ERRROR]: Unable to import pyDAL in pyp_db.py!')
-    logging.error('Unable to import pyDAL in pyp_db.py!')
+# try:
+from pydal import DAL
+# except ImportError:
+#     print('[ERRROR]: Unable to import pyDAL in pyp_db.py!')
+#     logging.error('Unable to import pyDAL in pyp_db.py!')
 
 
 ##

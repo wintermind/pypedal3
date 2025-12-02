@@ -2,7 +2,7 @@
 
 ###############################################################################
 # NAME: pyp_newclasses.py
-# VERSION: 3.0.0 (16MARCH2024)
+# VERSION: 3.0.0 (2DECEMBER2025)
 # AUTHOR: John B. Cole (john.b.cole@gmail.com)
 # LICENSE: LGPL v2.1 (see LICENSE file)
 ###############################################################################
@@ -20,13 +20,12 @@ import sys
 import time
 # Handle the configuration file
 from configobj import ConfigObj
-# Import the other pieces of PyPedal.  This will probably go away as most of these are rolled into
-# NewPedigree as methods.
-from . import pyp_db
-from . import pyp_io
-from . import pyp_metrics
-from . import pyp_nrm
-from . import pyp_utils
+# Import the other pieces of PyPedal.
+from PyPedal import pyp_db
+from PyPedal import pyp_io
+from PyPedal import pyp_metrics
+from PyPedal import pyp_nrm
+from PyPedal import pyp_utils
 
 
 ##

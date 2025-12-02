@@ -20,15 +20,16 @@ import logging
 # import the modules that you will use directly from your new module.  If you
 # do not want to import a module listed below, put a '#' at the start of the
 # line.
-from . import pyp_db
-from . import pyp_demog
-from . import pyp_graphics
-from . import pyp_io
-from . import pyp_metrics
-from . import pyp_network
-from . import pyp_nrm
-from . import pyp_reports
-from . import pyp_utils
+from PyPedal import pyp_db
+from PyPedal import pyp_demog
+from PyPedal import pyp_graphics
+from PyPedal import pyp_io
+from PyPedal import pyp_metrics
+from PyPedal import pyp_network
+from PyPedal import pyp_nrm
+from PyPedal import pyp_reports
+from PyPedal import pyp_snp
+from PyPedal import pyp_utils
 
 ##
 # yourFunctionName() <description of what function does>

@@ -57,7 +57,7 @@
 
 import logging
 import math
-from . import pyp_demog
+from PyPedal import pyp_demog
 
 
 ##
@@ -78,7 +78,7 @@ def rmuller_spy_matrix_pil(A, fname='tmp.png', cutoff=0.1, do_outline=0, height=
     try:
         from PIL import Image
         from PIL import ImageDraw
-    except:
+    except ImportError:
         return False
     img = Image.new("RGB", (width, height),(255, 255, 255))
     draw = ImageDraw.Draw(img)
@@ -136,7 +136,7 @@ def rmuller_pcolor_matrix_pil(A, fname='tmp.png', do_outline=0, height=300, widt
     try:
         from PIL import Image
         from PIL import ImageDraw
-    except:
+    except ImportError:
         return False
     key_dict = {}
     color_cache = {}
@@ -238,7 +238,7 @@ def draw_pedigree(pedobj, gfilename='pedigree', gtitle='', gformat='jpg', gsize=
     """
     if gtitle == '':
         gtitle = pedobj.kw['pedname']
-    from .pyp_utils import string_to_table_name
+    from pyp_utils import string_to_table_name
     _gtitle = string_to_table_name(gtitle)
     # if pedobj.kw['messages'] == 'verbose':
     #     print( 'gtitle: %s' % ( gtitle ))

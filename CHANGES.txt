@@ -1,17 +1,46 @@
+###############################################################################
+# NAME: CHANGES.txt
+# VERSION: 3.0.0 (2DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
+###############################################################################
+
 PyPedal 3 CHANGELOG
 ===================
 "---" indicates a known bug;
 "+++" indicates a feature addition;
 "***" indicates an API change or a major bugfix;
 "'''" indicates a minor bugfix or feature enhancement.
-"???" indicates a possible problem (i.e. bug) that has not been verified.
+"???" indicates a possible problem (i.e., bug) that has not been verified.
 "XXX" indicates a feature that has been deprecated or removed.
 "!!!" indicates a feature that is planned or stubbed, but is not yet working.
 "###" indicates a note or idea I don't want to forget.
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
-??? 08/29/2025  pyp_metrics/mating_coi_group() refers to a key-value pair (k and v) that doesn't exist...
++++ 12/02/2025  Added pyp_test.py, which runs tests on PyPedal. I'm sure it's not nearly as capable as a fancy unit-
+    testing framework, but I just need something simple for checking that I haven't broken everything with all of my
+    "cleanup" work.
+''' 12/02/2025  pyp_nrm/fast_a_matrix() and pyp_nrm/fast_a_matrix_r() need very careful testing. A number of tab-
+    to-space inconsistencies were fixed, and references to the deprecated PySparse module were replaced with
+    similar SciPy functions. It's very likely there are bugs lurking because a lot of small changes were made.
+''' 12/02/2025  pyp_nrm/inbreeding_aguilar() was using a hard-coded value of amethod instead of respecting the
+    user-provided value.
+''' 12/02/2025  Replaced all references to '_tag' in pyp_nrm/inbreeding_tabular() with references to
+    pedobj.kw['filetag'].
+*** 12/02/2025  Removed the 'filetag' argument from pyp_nem/a_inverse_dnf() and changed the filename code to use
+    the pedobj attribute.
+''' 12/02/2025  More cleanup in io, mostly try...except handling, and a bug from old output message handling.
+''' 12/02/2025  All files now use "from PyPedal import..." instead of "from PyPedal import .".
+''' 12/02/2025  Added some more ImportError catches in pyp_graphics.
+''' 12/02/2025  Lots more cleanup in pyp_nrm. The biggest issue was inconsistent use of tabs and spaces, ugh.
+    Fixed a lot of commented-out debugging code so that it'll work work correctly if activated.
+''' 12/02/2025  Added a header to CHANGES.txt.
+''' 12/02/2025  Lots more cleanup in pyp_metrics. Fixed a lot of commented-out debugging code so that it'll work
+    work correctly if activated.
+''' 12/02/2025  Added some specific classes to the except... statements in pyp_metrics/mating_coi_group().
+--- 08/29/2025  pyp_metrics/mating_coi_group() refers to a key-value pair (k and v) that doesn't exist. Replaced
+    with code that splits the mating string to produce the contents of k and v. Needs test!
 ??? 08/29/2008  What's going on with form_a in pyp_metrics/fast_a_coefficients()? It looks as though the same
     methods is used to contruct A regardless of the argument provided.
 ''' 08/29/2025  Did some cleanup in pyp_snp.
@@ -46,7 +75,7 @@ XXX 02/24/2025  Removed pyp_newclasses/PyPedalError and pyp_newclasses/PyPedalPe
 ''' 08/22/2023  Updated imports in pyp_graphics/rmuller_spy_matrix_pil() to work with Pillow.
 *** 08/21/2024  All the functions in pyp_network now accept a 'debug' argument (boolean).
 *** 08/21/2024  All the functions in pyp_network now return False on falure, rather than 0, -999, or other values.
-*** 08/21/2024  I went through all the functions in network and cleaned things up to improve readability.
+*** 08/21/2024  I went through all the functions in pyp_network and cleaned things up to improve readability.
     The linter is much happier now. I also wrapped old prints properly and added console and logfile messages to
     many functions that were lacking them.
 ''' 08/21/2024  I think I caught an indentation problem in pyp_network/ped_to_graph() that would have resulted in only

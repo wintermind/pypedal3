@@ -19,8 +19,8 @@
 ##
 
 import logging
-from . import pyp_db
-from . import pyp_utils
+from PyPedal import pyp_db
+from PyPedal import pyp_utils
 
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.units import inch, cm
