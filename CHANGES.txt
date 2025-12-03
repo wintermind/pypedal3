@@ -18,6 +18,7 @@ PyPedal 3 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+--- 12/02/2025  pyp_db is a hot mess and needs to be completely reworked. Ugh.
 +++ 12/02/2025  Added pyp_test.py, which runs tests on PyPedal. I'm sure it's not nearly as capable as a fancy unit-
     testing framework, but I just need something simple for checking that I haven't broken everything with all of my
     "cleanup" work.

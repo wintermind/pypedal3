@@ -58,7 +58,7 @@ def a_matrix(pedobj, save=False):
     Form a numerator relationship matrix from a pedigree.  DEPRECATED in favor of pyp_nem/fast_a_matrix().
     """
     logging.info('Entered pyp_nrm/a_matrix().')
-    l = pedobj.medata.num_records
+    l = pedobj.metadata.num_records
     # Grab some array tools
     try:
         a = numpy.zeros([l, l], 'd')  # initialize a matrix of zeros of appropriate dimension
@@ -158,7 +158,8 @@ def fast_a_matrix(pedigree, pedopts, save=0, method='dense', debug=0, fill=1):
     # Check the foundercoi flag and do what it says.
     foundercoi = int(pedopts['foundercoi'])
     # Check to make sure that foundercoi is either 0 or 1.
-    if foundercoi not in [0, 1]: foundercoi = 0
+    if foundercoi not in [0, 1]:
+        foundercoi = 0
 
     _animals = {}
     _sires = {}
@@ -303,7 +304,7 @@ def fast_a_matrix(pedigree, pedopts, save=0, method='dense', debug=0, fill=1):
 # @retval A relationship as Numarray matrix.
 def fast_a_matrix_r(pedigree, pedopts, save=0, method='dense'):
     """
-    Form a relationship matrix from a pedigree.  fast_a_matrix_r() differs from
+    Form a relationship matrix from a pedigree. fast_a_matrix_r() differs from
     fast_a_matrix() in that the coefficients of relationship are corrected for the
     inbreeding of the parents.
     """

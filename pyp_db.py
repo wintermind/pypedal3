@@ -25,12 +25,7 @@ import sys
 from PyPedal import pyp_io
 from PyPedal import pyp_nrm
 from PyPedal import pyp_utils
-
-# try:
 from pydal import DAL
-# except ImportError:
-#     print('[ERRROR]: Unable to import pyDAL in pyp_db.py!')
-#     logging.error('Unable to import pyDAL in pyp_db.py!')
 
 
 ##
@@ -53,14 +48,14 @@ def connectToDatabase(pedobj):
     # Let's create the connection object.
     # SQLite
     if pedobj.kw['database_type'] == 'sqlite':
-        conn = pydal.DAL('sqlite://' + pedobj.kw['database_name'])
+        conn = DAL('sqlite://' + pedobj.kw['database_name'] + '.db')
     # Postgres
     elif pedobj.kw['database_type'] == 'postgres':
-        conn = pydal.DAL("postgres://{pedobj.kw['database_user']}:password={pedobj.kw['database_passwd']}@{pedobj.kw['database_host']}/{pedobj.kw['database_name']}")
+        conn = DAL("postgres://{pedobj.kw['database_user']}:password={pedobj.kw['database_passwd']}@{pedobj.kw['database_host']}/{pedobj.kw['database_name']}")
         #    port=pedobj.kw['database_port']
     # MySQL
     else:
-        conn = pydal.DAL("mysql://{pedobj.kw['database_user']}:password={pedobj.kw['database_passwd']}@{pedobj.kw['database_host']}/{pedobj.kw['database_name']}?set_encoding=utf8mb4")
+        conn = DAL("mysql://{pedobj.kw['database_user']}:password={pedobj.kw['database_passwd']}@{pedobj.kw['database_host']}/{pedobj.kw['database_name']}?set_encoding=utf8mb4")
     if not conn:
         # If we can't connect to the specified database, try and create the database.
         # This will fail if the specified user does not have permission to create databases.
@@ -78,7 +73,7 @@ def connectToDatabase(pedobj):
 # @param conn An existing ADOdb connection or False to create one
 # @param drop Boolean indicating if the data should be dropped from an existing table with the same name
 # @retval True on success, False otherwise.
-def createPedigreeTable(pedobj,conn=False,drop=False):
+def createPedigreeTable(pedobj, conn=False, drop=False):
     """
     createPedigreeTable() creates a new pedigree table in a database. Note that the table has a simple,
     fixed structure that may not include all attributes of a NewAnimal object.
@@ -150,7 +145,7 @@ def createPedigreeTable(pedobj,conn=False,drop=False):
                 originalHerd VARCHAR(128), \
                 gencoeff REAL, \
                 alleles VARCHAR(256), \
-                userField CHAR(128));' % ( pedobj.kw['database_table'] )
+                userField CHAR(128));' % ( pedobj.kw['database_table'])
             cursor = conn.Execute(sql)
             cursor.Close()
         # Crumbs...something went horribly wrong here!
@@ -212,7 +207,7 @@ def deleteTable(pedobj, tablename=False, conn=False):
 # @param pedobj A PyPedal pedigree object.
 # @param conn An existing ADOdb connection or False to create one
 # @retval True on success, False otherwise.
-def populatePedigreeTable(pedobj,conn=False):
+def populatePedigreeTable(pedobj, conn=False):
     """
     populatePedigreeTable() takes a PyPedal pedigree object and loads
     the animal records in that pedigree into a database table.

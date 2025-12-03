@@ -8,6 +8,9 @@
 ###############################################################################
 # FUNCTIONS:
 #   test_pyp_newclasses_load_pedigree()
+#   test_pyp_nrm_a_matrix()
+#   test_pyp_nrm_fast_a_matrix()
+#   test_pyp_nrm_fast_a_matrix_r()
 ###############################################################################
 
 # @package pyp_test
@@ -31,13 +34,59 @@ from PyPedal import pyp_utils
 # @retval A PyPedal pedigree object on success, None on failure.
 def test_pyp_newclasses_load_pedigree(pedigree_options):
     """
-    read_agil_chromosome_data() loads SNP marker information from the chromosome.data file
-    used by AGIL and CDCB. Note that this ONLY reads the first 5 columns (SNP name, chromosome
-    number, within-chromosome marker number, overall marker number, and location in base pairs).
+    test_pyp_newclasses_load_pedigree() attempts to load the specified pedigree file and
+    create a PyPedal pedigree object from it.
     """
     pedobj = None
     pedobj = pyp_newclasses.load_pedigree(pedigree_options)
     return pedobj
+
+
+##
+# test_pyp_nrm_a_matrix() attempts to calculate the relationship matrix from the provided pedigree using
+# pyp_nrn/a_matrix().
+# @param pedigree A PyPedal pedigree object.
+# @retval A PyPedal pedigree object on success, None on failure.
+def test_pyp_nrm_a_matrix(pedigree):
+    """
+    test_pyp_nrm_a_matrix() attempts to calculate the relationship matrix from the provided pedigree using
+    pyp_nrn/a_matrix().
+    """
+    inbr = None
+    inbr = pyp_nrm.a_matrix(pedigree)
+    return inbr
+
+
+##
+# test_pyp_nrm_fast_a_matrix() attempts to calculate the relatonship matrix from the provided pedigree using
+# pyp_nrn/fast_a_matrix().
+# @param pedigree A PyPedal pedigree object.
+# @param options A dictionary of pedigree options
+# @retval A PyPedal pedigree object on success, None on failure.
+def test_pyp_nrm_fast_a_matrix(pedigree, options):
+    """
+    test_pyp_nrm_fast_a_matrix() attempts to calculate the relationship matrix from the provided pedigree using
+    pyp_nrn/fast_a_matrix().
+    """
+    inbr = None
+    inbr = pyp_nrm.fast_a_matrix(pedigree, options)
+    return inbr
+
+
+##
+# test_pyp_nrm_fast_a_matrix_r() attempts to calculate the relationship matrix adjusted for numerator relationships
+# from the provided pedigree using pyp_nrn/fast_a_matrix_r().
+# @param pedigree A PyPedal pedigree object.
+# @param options A dictionary of pedigree options
+# @retval A PyPedal pedigree object on success, None on failure.
+def test_pyp_nrm_fast_a_matrix_r(pedigree, options):
+    """
+    test_pyp_nrm_fast_a_matrix_r() attempts to calculate the relationship matrix adjusted for numerator relationships
+    from the provided pedigree using pyp_nrn/fast_a_matrix_r().
+    """
+    inbr = None
+    inbr = pyp_nrm.fast_a_matrix_r(pedigree, options)
+    return inbr
 
 
 if __name__ == '__main__':
@@ -58,3 +107,39 @@ if __name__ == '__main__':
     assert result.metadata.num_records == 6, ('The pedigree contains %s instead of 6 animals!' %
                                                  result.metadata.num_records)
     print('\t[SUCCESS]: test_files/mrode.ped contains 6 unique animals, as expected.')
+
+    inbr = np.array([
+                  [1.0000, 0.0000, 0.5000, 0.5000, 0.5000, 0.2500],
+                  [0.0000, 1.0000, 0.5000, 0.0000, 0.2500, 0.6250],
+                  [0.5000, 0.5000, 1.0000, 0.2500, 0.6250, 0.5625],
+                  [0.5000, 0.0000, 0.2500, 1.0000, 0.6250, 0.3125],
+                  [0.5000, 0.2500, 0.6250, 0.6250, 1.1250, 0.6875],
+                  [0.2500, 0.6250, 0.5625, 0.3125, 0.6875, 1.1250]
+    ])
+
+    result2 = test_pyp_nrm_a_matrix(result)
+    assert (result2 == inbr).all(), ('Could not compute the relationship matrix for test_files/mrode.ped using '
+                                     'yp_nrm/a_martix()!')
+    print('\t[SUCCESS]: Computed the relationship matrix for test_files_mrode.ped using pyp_nrm/a_matrix().')
+
+    result3 = test_pyp_nrm_fast_a_matrix(result.pedigree, result.kw)
+    assert (result3 == inbr).all(), ('Could not compute the relationship matrix for test_files/mrode.ped '
+                                     'using pyp_nrm/fast_a_martix()!')
+    print('\t[SUCCESS]: Computed the relationship matrix for test_files_mrode.ped using pyp_nrm/fast_a_matrix().')
+
+    inbr_r = np.array([
+        [1.,         0.,         0.5,        0.5,        0.5,        0.23570226],
+        [0.,         1.,         0.5,        0.,         0.25,       0.58925565],
+        [0.5,        0.5,        1.,         0.25,       0.625,      0.53033009],
+        [0.5,        0.,         0.25,       1.,         0.625,      0.29462783],
+        [0.5,        0.25,       0.625,      0.625,      1.125,      0.64818122],
+        [0.23570226, 0.58925565, 0.53033009, 0.29462783, 0.64818122, 1.125]
+    ])
+
+    result4 = test_pyp_nrm_fast_a_matrix_r(result.pedigree, result.kw)
+    assert (result4 == inbr).all(), ('Could not compute the relationship matrix adjusted for numerator relationships'
+                                     'for test_files/mrode.ped using pyp_nrm/fast_a_martix_r()!')
+    print('\t[SUCCESS]: Computed the relationship matrix adjusted for numerator relationships for test_files_mrode.ped '
+          'using pyp_nrm/fast_a_matrix_r().')
+
+

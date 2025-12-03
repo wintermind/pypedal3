@@ -48,7 +48,6 @@ import copy
 import logging
 import numpy
 import os
-import string
 import time
 from PyPedal import pyp_demog
 # from PyPedal import pyp_metrics
