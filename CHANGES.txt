@@ -18,6 +18,13 @@ PyPedal 3 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+!!! 12/03/2025  At the moment, the only database type that works with pyp_db is SQLite. It should be straightforward to
+    add, e.g., MySQL and Postgres support, using pyDAL. I haven't done that because I don't have test environments for
+    that.
+--- 12/03/2025  pyp_db/delete_table() doesn't work yet.
+--- 12/03/2025  pyp_db/table_drop_rows() doesn't work yet.
+*** 12/03/2025  All routines in pyp_db have been re-written to use the pyDAL database abstraction library, which is
+    still active, in place of the obsolete ADODB.
 --- 12/02/2025  pyp_db is a hot mess and needs to be completely reworked. Ugh.
 +++ 12/02/2025  Added pyp_test.py, which runs tests on PyPedal. I'm sure it's not nearly as capable as a fancy unit-
     testing framework, but I just need something simple for checking that I haven't broken everything with all of my
