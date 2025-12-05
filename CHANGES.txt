@@ -18,6 +18,19 @@ PyPedal 3 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+!!! 12/05/2025  pypedal.bib needs to be pared-down and updated, I don't think most users want to sift through my
+    12,000-line BiBTeX references from 15 years ago that doesn't even include DOI.
+''' 12/05/2025  Much reworking of the _quarto.yml file used for generating the new documentation. Much inspiration from,
+    and gratitude to, the "Modern Polars" book by Kevin Heavey (https://github.com/kevinheavey/modern-polars/).
+''' 12/05/2025  Fixed the Citeproc warning. All code blocks must have the prefix "lst-", e.g., "@lst-load-pedigree".
+--- 12/04/2025  When docs/pypedal.qmd is processed it throws "[WARNING] Citeproc: citation load-pedigree not found",
+    I'm not sure why.
++++ 12/04/2025  Added a docs/ tree and started rewriting the PyPedal manual in Quarto.
+''' 12/04/2025  Fixed a broken import in pyp_io.
+''' 12/04/2025  pyp_db/delete_table() should now work.
+''' 12/04/2025  pyp_db/table_drop_rows() should now work.
+''' 12/04/2025  Added test code for pyp_db to pyp_test.
+''' 12/03/2025  Fixed a small typo in pyp_newclasses.
 !!! 12/03/2025  At the moment, the only database type that works with pyp_db is SQLite. It should be straightforward to
     add, e.g., MySQL and Postgres support, using pyDAL. I haven't done that because I don't have test environments for
     that.

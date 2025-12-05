@@ -1,0 +1,106 @@
+###############################################################################
+# NAME: _quarto.yml
+# VERSION: 3.0.0 (5DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
+###############################################################################
+
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "PyPedal --- Python Software for Pedigree Analysis"
+  author: "John B. Cole"
+  description: "..."
+  keyword: PyPedal, Python, pedigrees
+  date: "12/04/2025"
+  downloads: [pdf]
+  sidebar:
+    style: "floating"
+    collapse-level: 1
+    border: true
+    search: true
+  page-footer:
+    left: |
+      All content licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) <br> &copy; John B. Cole.
+    center: "[GitHub](https://github.com/wintermind/pypedal3)"
+    right: Built with [Quarto](https://quarto.org/).
+    background: "#f8f9fa"
+  chapters:
+    - index.qmd
+    - introduction.qmd
+    - getting_started.qmd
+    - references.qmd
+
+bibliography: pypedal.bib
+
+format:
+  html:
+    theme:
+      light: cosmo
+    fontsize: "15px"
+    linestretch: 1.6
+    # mainfont: "Roboto"
+    # monofont: "Fira Mono"
+    smooth-scroll: true
+    toc-depth: 3
+    code-link: true
+    code-tools:
+      toggle: true
+    code-fold: true
+    code-block-bg: true
+    code-overflow: wrap
+    reference-location: margin
+    mermaid:
+      theme: neutral
+    html-math-method: katex
+    jupyter: python3
+    lof: false
+    lot: false
+    toc: false
+    number-sections: true
+    highlight-style: pygments
+    page-navigation: true
+
+  pdf:
+    lof: false
+    lot: false
+    toc: false
+    toc-depth: 2
+    fig-cap-location: bottom
+    tbl-cap-location: top
+    urlcolor: "blue"
+    linkcolor: "black"
+    biblio-style: apalike
+    keep-tex: true
+    code-block-bg: "#f2f2f2"
+    code-block-border-left: "#f2f2f2"
+    code-overflow: wrap
+    mermaid:
+      theme: neutral
+    include-in-header:
+      text: |
+        \usepackage{makeidx}
+        \makeindex
+    include-after-body:
+      text: |
+        \printindex
+
+latex-auto-install: true
+
+knitr:
+  opts_chunk:
+    cache: true
+    cache.lazy: false
+    dpi: 600
+    fig.width: 5.5
+    fig.height: 3
+    out.width: "100%"
+    split: true
+    R.options:
+      knitr.graphics.auto_pdf: true
+      datatable.print.nrows: 10
+      datatable.print.class: false
+      datatable.print.keys: false
+      datatable.print.trunc.cols: TRUE

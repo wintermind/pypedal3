@@ -1,0 +1,62 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "PyPedal — Python Software for Pedigree Analysis",
+    "section": "",
+    "text": "0.1 Acknowledgments\nPyPedal was initially written to support the author’s dissertation research while at Louisiana State University. The initial development was supported in part by a grant from The Seeing Eye, Inc. (Morristown, NJ). The author wishes to thank Paul VanRaden for many helpful suggestions for improving the ability of PyPedal to handle computations in large pedigrees. Additional feedback in the form of bug reports, feature requests, and discussion of computing strategies was provided by Dan Cieslak, Bradley J. Heins (University of Minnesota), Edward H. Hagen (Institute for Theoretical Biology, Humboldt-Universität zu Berlin), Kathy Hanford (University of Nebraska), Thomas Kelly (Department of Animal and Poultry Science, University of Guelph), Thomas von Hassell, Gianluca Saba, and Ken Severin (University of Alaska – Fairbanks). Gregor Gorjanc wrote a blog entry describing how to install PyPedal on Debian Linux. Fernando Perez posted a LaTeX preamble to the NumPy listserver that dramatically improved the PDF version of this manual.\nThe Newfoundland pedigree was taken from the NewFoundland Dog database and is used with permission.\nThe pedigree of European royalty used in the GEDCOM discussion, ged3.ged, was taken from the Genealogy Forum website. It is believed to be in the public domain, and is used with the knowledge of the website administrators.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Preface</span>"
+    ]
+  },
+  {
+    "objectID": "introduction.html",
+    "href": "introduction.html",
+    "title": "2  Introduction",
+    "section": "",
+    "text": "2.1 What is PyPedal?\nThis chapter introduces PyPedal, a Python-language tool for working with pedigrees.\nPyPedal (Python Pedigree Analysis) is a tool for analyzing pedigree files. It calculates several quantitative measures of genetic diversity from pedigrees, including average coefficients of inbreeding and relationship, effective founder numbers, and effective ancestor numbers. Checks are performed catch common mistakes in pedigree files, such as parents with more recent birthdates or smaller ID numbers than their offspring and animals appearing as both sires and dams in the pedigree. Tools for pedigree visualization and report generation are also provided. PyPedal only makes use of information on pedigree structure, not individual genotypes. Genotypes can be assigned to founders for use in gene-dropping simulations to calculate the effective number of founder genomes.\nPyPedal is a Python language module that may be called by programs or used interactively. You must have Python 3.11 (or later) installed in order to use PyPedal. The NumPy module must also be installed in order for you to use PyPedal. In addition, there are several third-party packages used by PyPedal, which are discussed in the chapter on installing PyPedal.\nThis manual is the official documentation for PyPedal. It includes a tutorial and is the most authoritative source of information about PyPedal with the exception of the source code. The tutorial material will walk you through a series of manipulations of a simple pedigree. All users of PyPedal are encouraged to follow the tutorial with a working installation.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "introduction.html#features",
+    "href": "introduction.html#features",
+    "title": "2  Introduction",
+    "section": "2.2 Features",
+    "text": "2.2 Features\nKey features of PyPedal include:\n\nReading pedigree files in user-defined formats;\nChecking pedigree integrity (duplicate IDs, parents younger than offspring, etc.);\nGenerating summary information such as frequency of appearance in the pedigree file;\nReordering and renumbering of pedigree files;\nComputation of the numerator relationship matrix (A) from a pedigree file using the tabular method;\nInbreeding and relationship calculations for large pedigrees (pedigrees up to 600,000 animals have been processed with PyPedal);\nComputation of coefficients of inbreeding using the Meuwissen and Luo (1992) and modified Meuwissen and Luo (Quaas, 1995, unpublished) algorithms;\nComputation of average total and individual coefficients of inbreeding and relationship;\nCalculation of coefficients of partial inbreeding using an iterative tabular method (Lacy, Alaks, and Walsh 1996; Gulisija et al. 2006);\nCalculation of coefficients of ancestral inbreeding using the methods of Ballou (1997) or Suwanlee et al. (2007);\nDecomposition of A into T and D such that A=TDT';\nComputation of the direct inverse of A (not accounting for inbreeding) using the method of Henderson (1976);\nComputation of the direct inverse of A (accounting for inbreeding) using the method of Quaas (1976);\nStorage of A and its inverse between user sessions as persistent Python objects using the pickle module to avoid unnecessary calculations;\nCalculation of theoretical and actual effective population sizes;\nComputation of effective founder number using the exact algorithm of Lacy (1989);\nComputation of effective founder number using the approximate algorithm of Boichard et al. (1997);\nComputation of effective ancestor number using the algorithms of Boichard et al. (1997);\nSelection of subpedigrees containing all ancestors of an animal;\nIdentification of the common relatives of two animals;\nCalculation of the inbreeding of offspring from a prospective mating;\nOutput to ASCII text files, including matrices, coefficients of inbreeding and relationship, and summary information;\nImportation and exportation of GEDCOM 5.5 files;\nImportation and exportation of GENES 1.20 (dBase III) files;\nLoading pedigrees from, and saving them to, MySQL, Postgres, and SQLite databases;\nSimulation of pedigrees using an algorithm derived from that used in Matvec 1.1a;\nSet operations on pedigrees (unions and intersections);\n\nPyPedal has been used to perform calculations on pedigrees as large as 600,000 animals and has been used in scientific research (Cole, Franke, and Leighton 2004; Cole 2007).",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "introduction.html#where-to-get-information-and-code",
+    "href": "introduction.html#where-to-get-information-and-code",
+    "title": "2  Introduction",
+    "section": "2.3 Where to get information and code",
+    "text": "2.3 Where to get information and code\nPyPedal and its documentation are available from the PyPedal 3 Github repository.\n\n\n\n\n\n\nBallou, J. D. 1997. “Ancestral Inbreeding Only Minimally Affects Inbreeding Depression in Mammalian Populations.” Journal of Heredity 88: 169–78.\n\n\nBoichard, D., L. Maignel, and E. Verrier. 1997. “The Value of Using Probabilities of Gene Origin to Measure Genetic Variability in a Population.” Genetics Selection Evolution 29: 5–23.\n\n\nCole, J. B. 2007. “PyPedal: A Computer Program for Pedigree Analysis.” Computers and Electronics in Agriculture 57: 107–13.\n\n\nCole, J. B., D. E. Franke, and E. A. Leighton. 2004. “Population Structure of a Colony of Dog Guides.” Journal of Animal Science 82: 2906–12.\n\n\nGulisija, D., D. Gianola, K. A. Weigel, and M. A. Toro. 2006. “Between-Founder Heterogeneity in Inbreeding Depression for Production in Jersey Cows.” Livestock Science 104: 244–53.\n\n\nHenderson, C. R. 1976. “A Simple Method for Computing the Inverse of a Numerator Relationship Matrix Used in Prediction of Breeding Values.” Biometrics 32: 69–83.\n\n\nLacy, R. C. 1989. “Analysis of Founder Representation in Pedigrees: Founder Equivalents and Founder Genome Equivalents.” Zoo Biology. 8: 111–23.\n\n\nLacy, R. C., G. Alaks, and A. Walsh. 1996. “Hierarchical Analysis of Inbreeding Depression in Peromyscus Polionotus.” Evolution 50: 2187–2200.\n\n\nMeuwissen, H. E., and Z. Luo. 1992. “Computing Inbreeding Coefficients in Large Populations.” Genetics Selection Evolution 24: 305–13.\n\n\nQuaas, R. L. 1976. “Computing the Diagonal Elements and Inverse of a Large Numerator Relationship Matrix.” Biometrics 32: 949–53.\n\n\nSuwanlee, S., R. Baumung, J. Sölkner, and I. Curik. 2007. “Evaluation of Ancestral Inbreeding Coefficients: Ballou’s Formula Versus Gene Dropping.” Conservation Genetics 8: 489–95.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "getting_started.html",
+    "href": "getting_started.html",
+    "title": "3  Getting Started",
+    "section": "",
+    "text": "For am example of how to load a pedigree, see Listing 3.1.\n\n\n\nListing 3.1\n\n\n\nCode\nfrom PyPedal import pyp_newclasses\noptions = {\n    'renumber': 0,\n    'pedfile': '../test_files/mrode.ped',\n    'pedformat': 'asd',\n    'pedname': 'Mrode Pedigree Table 2.1',\n    'pedigree_is_renumbered': 1,\n    'messages': 'quiet',\n}\nresult = pyp_newclasses.load_pedigree(options)\nresult.metadata.printme()\n\n\nMetadata for Mrode Pedigree Table 2.1 (../test_files/mrode.ped)\n    Records:        6\n    Unique Sires:       3\n    Unique Dams:        2\n    Unique Gens:        1\n    Unique Years:       1\n    Unique Founders:    2\n    Unique Herds:       1\n    Pedigree Code:      asd",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Getting Started</span>"
+    ]
+  },
+  {
+    "objectID": "references.html",
+    "href": "references.html",
+    "title": "References",
+    "section": "",
+    "text": "Ballou, J. D. 1997. “Ancestral Inbreeding Only Minimally Affects\nInbreeding Depression in Mammalian Populations.” Journal of\nHeredity 88: 169–78.\n\n\nBoichard, D., L. Maignel, and E. Verrier. 1997. “The Value of\nUsing Probabilities of Gene Origin to Measure Genetic Variability in a\nPopulation.” Genetics Selection Evolution 29: 5–23.\n\n\nCole, J. B. 2007. “PyPedal: A Computer\nProgram for Pedigree Analysis.” Computers and Electronics in\nAgriculture 57: 107–13.\n\n\nCole, J. B., D. E. Franke, and E. A. Leighton. 2004. “Population\nStructure of a Colony of Dog Guides.” Journal of Animal\nScience 82: 2906–12.\n\n\nGulisija, D., D. Gianola, K. A. Weigel, and M. A. Toro. 2006.\n“Between-Founder Heterogeneity in Inbreeding Depression for\nProduction in Jersey Cows.” Livestock\nScience 104: 244–53.\n\n\nHenderson, C. R. 1976. “A Simple Method for Computing the Inverse\nof a Numerator Relationship Matrix Used in Prediction of Breeding\nValues.” Biometrics 32: 69–83.\n\n\nLacy, R. C. 1989. “Analysis of Founder Representation in\nPedigrees: Founder Equivalents and Founder Genome Equivalents.”\nZoo Biology. 8: 111–23.\n\n\nLacy, R. C., G. Alaks, and A. Walsh. 1996. “Hierarchical Analysis\nof Inbreeding Depression in Peromyscus\nPolionotus.” Evolution 50: 2187–2200.\n\n\nMeuwissen, H. E., and Z. Luo. 1992. “Computing Inbreeding\nCoefficients in Large Populations.” Genetics Selection\nEvolution 24: 305–13.\n\n\nQuaas, R. L. 1976. “Computing the Diagonal Elements and Inverse of\na Large Numerator Relationship Matrix.” Biometrics 32:\n949–53.\n\n\nSuwanlee, S., R. Baumung, J. Sölkner, and I. Curik. 2007.\n“Evaluation of Ancestral Inbreeding Coefficients: Ballou’s Formula\nVersus Gene Dropping.” Conservation Genetics 8: 489–95.",
+    "crumbs": [
+      "References"
+    ]
+  }
+]

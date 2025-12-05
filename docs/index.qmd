@@ -1,0 +1,23 @@
+---
+title: "Preface"
+---
+
+## Acknowledgments
+PyPedal was initially written to support the author's dissertation research while at [Louisiana State
+University](http://www.lsu.edu/). The initial development was supported in part by a grant from The Seeing Eye, Inc.
+(Morristown, NJ). The author wishes to thank Paul VanRaden for many helpful suggestions for improving the ability of
+PyPedal to handle computations in large pedigrees. Additional feedback in the form of bug reports, feature requests,
+and discussion of computing strategies was provided by Dan Cieslak, Bradley J. Heins (University of Minnesota), Edward
+H. Hagen (Institute for Theoretical Biology, Humboldt-Universität zu Berlin), Kathy Hanford (University of Nebraska),
+Thomas Kelly (Department of Animal and Poultry Science, University of Guelph), Thomas von Hassell, Gianluca Saba, and
+Ken Severin (University of Alaska -- Fairbanks). Gregor Gorjanc wrote a blog entry describing [how to install PyPedal
+on Debian Linux](http://ggorjan.blogspot.com/2007/04/installing-pypedal-under-debian.html). Fernando Perez posted a
+LaTeX preamble to the NumPy listserver that dramatically improved the PDF version of this manual.
+
+The Newfoundland pedigree was taken from the [NewFoundland Dog database](http://www.newfoundlanddog-database.net/en/)
+and is used with permission.
+
+The pedigree of European royalty used in the GEDCOM discussion,
+[ged3.ged](http://www.genealogyforum.com/gedcom/gedcom1/ged3.htm), was taken from the [Genealogy Forum
+website](http://www.genealogyforum.com/). It is believed to be in the public domain, and is used with the knowledge of
+the website administrators.

@@ -38,7 +38,7 @@
 ##
 
 import logging, numpy, pickle, string, time
-import pyp_nrm
+from PyPedal import pyp_nrm
 from PyPedal import pyp_utils
 
 global PYPEDAL_OUTPUT_TYPE

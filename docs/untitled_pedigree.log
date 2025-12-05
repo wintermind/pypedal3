@@ -1,0 +1,12 @@
+Fri, 05 Dec 2025 08:49:41 INFO     Logfile untitled_pedigree.log instantiated.
+Fri, 05 Dec 2025 08:49:41 INFO     Preprocessing ../test_files/mrode.ped
+Fri, 05 Dec 2025 08:49:41 INFO     Opening pedigree file ../test_files/mrode.ped
+Fri, 05 Dec 2025 08:49:41 INFO     Pedigree comment (line 1): # Pedigree from Mrode (2005) Table 2.1
+Fri, 05 Dec 2025 08:49:41 INFO     Records read: 1 
+Fri, 05 Dec 2025 08:49:41 INFO     Records read: 1 
+Fri, 05 Dec 2025 08:49:41 INFO     Records read: 1 
+Fri, 05 Dec 2025 08:49:41 INFO     Records read: 1 
+Fri, 05 Dec 2025 08:49:41 INFO     Records read: 1 
+Fri, 05 Dec 2025 08:49:41 INFO     Records read: 1 
+Fri, 05 Dec 2025 08:49:41 INFO     Reached end-of-line in ../test_files/mrode.ped after reading 7 lines.
+Fri, 05 Dec 2025 08:49:41 INFO     Closing pedigree file

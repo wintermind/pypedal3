@@ -1,0 +1,67 @@
+---
+title: "Introduction"
+---
+
+::: {.callout-note appearance="simple"}
+Any sufficiently disguised bug is indistinguishable from a feature. --- Rich Kulawiec
+:::
+
+## What is PyPedal?
+
+This chapter introduces PyPedal, a Python-language tool for working with pedigrees.
+
+PyPedal (**Py**thon **Ped**igree An**al**ysis) is a tool for analyzing pedigree files. It calculates several
+quantitative measures of genetic diversity from pedigrees, including average coefficients of inbreeding and
+relationship, effective founder numbers, and effective ancestor numbers. Checks are performed catch common mistakes in
+pedigree files, such as parents with more recent birthdates or smaller ID numbers than their offspring and animals
+appearing as both sires and dams in the pedigree. Tools for pedigree visualization and report generation are also
+provided. PyPedal only makes use of information on pedigree structure, not individual genotypes. Genotypes can be
+assigned to founders for use in gene-dropping simulations to calculate the effective number of founder genomes.
+
+PyPedal is a [Python](http://www.python.org/) language module that may be called by programs or used interactively. You
+must have Python 3.11 (or later) installed in order to use PyPedal. The NumPy module must also be installed in order
+for you to use PyPedal. In addition, there are several third-party packages used by PyPedal, which are discussed in the
+chapter on installing PyPedal.
+
+This manual is the official documentation for PyPedal. It includes a tutorial and is the most authoritative source of
+information about PyPedal with the exception of the source code. The tutorial material will walk you through a series
+of manipulations of a simple pedigree. All users of PyPedal are encouraged to follow the tutorial with a working
+installation.
+
+## Features
+
+Key features of PyPedal include:
+
+* Reading pedigree files in user-defined formats;
+* Checking pedigree integrity (duplicate IDs, parents younger than offspring, etc.);
+* Generating summary information such as frequency of appearance in the pedigree file;
+* Reordering and renumbering of pedigree files;
+* Computation of the numerator relationship matrix ($A$) from a pedigree file using the tabular method;
+* Inbreeding and relationship calculations for large pedigrees (pedigrees up to 600,000 animals have been processed with PyPedal);
+* Computation of coefficients of inbreeding using the Meuwissen and Luo [-@ref585] and modified Meuwissen and Luo (Quaas, 1995, unpublished) algorithms;
+* Computation of average total and individual coefficients of inbreeding and relationship;
+* Calculation of coefficients of partial inbreeding using an iterative tabular method [@LacyAW1996; @GulisijaGWT2006];
+* Calculation of coefficients of ancestral inbreeding using the methods of Ballou [-@Ballou1997] or Suwanlee et al. [-@SuwanleeBSC2007];
+* Decomposition of $A$ into $T$ and $D$ such that $A=TDT'$;
+* Computation of the direct inverse of $A$ (not accounting for inbreeding) using the method of Henderson [-@ref143];
+* Computation of the direct inverse of $A$ (accounting for inbreeding) using the method of Quaas [-@ref235];
+* Storage of $A$ and its inverse between user sessions as persistent Python objects using the `pickle` module to avoid unnecessary calculations;
+* Calculation of theoretical and actual effective population sizes;
+* Computation of effective founder number using the exact algorithm of Lacy [-@ref640];
+* Computation of effective founder number using the approximate algorithm of Boichard et al. [-@ref352];
+* Computation of effective ancestor number using the algorithms of Boichard et al. [-@ref352];
+* Selection of subpedigrees containing all ancestors of an animal;
+* Identification of the common relatives of two animals;
+* Calculation of the inbreeding of offspring from a prospective mating;
+* Output to ASCII text files, including matrices, coefficients of inbreeding and relationship, and summary information;
+* Importation and exportation of GEDCOM 5.5 files;
+* Importation and exportation of GENES 1.20 (dBase III) files;
+* Loading pedigrees from, and saving them to, MySQL, Postgres, and SQLite databases;
+* Simulation of pedigrees using an algorithm derived from that used in Matvec 1.1a;
+* Set operations on pedigrees (unions and intersections);
+
+PyPedal has been used to perform calculations on pedigrees as large as 600,000 animals and has been used in scientific
+research [@Cole2004a; @Cole2007a].
+
+## Where to get information and code
+PyPedal and its documentation are available from the [PyPedal 3 Github repository](https://github.com/wintermind/pypedal3).

@@ -57,8 +57,7 @@ class NewPedigree:
                       '%s!' % kwfile)
                 import sys
                 sys.exit(0)
-            # The dict method converts the Dict4Ini object to an actual
-            # Python dictionary.
+            # The dict method converts the Dict4Ini object to an actual Python dictionary.
             kw = kw.dict()
 
         # Handle the Main Keywords.

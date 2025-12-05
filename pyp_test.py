@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 ###############################################################################
 # NAME: pyp_test.py
 # VERSION: 3.0.0 (2DECEMBER2025)
@@ -11,6 +9,7 @@
 #   test_pyp_nrm_a_matrix()
 #   test_pyp_nrm_fast_a_matrix()
 #   test_pyp_nrm_fast_a_matrix_r()
+#   test_pyp_db_connect_to_database()
 ###############################################################################
 
 # @package pyp_test
@@ -143,3 +142,12 @@ if __name__ == '__main__':
           'using pyp_nrm/fast_a_matrix_r().')
 
 
+##
+# test_pyp_db_connect_to_database() returns a connection to the database named in pedobj.kw['database_name'].
+# @param pedobj A PyPedal pedigree object.
+# @retval A database connection on success, None on failure.
+def test_pyp_db_connect_to_database():
+    """
+    test_pyp_db_connect_to_database() returns a connection to the database named in pedobj.kw['database_name'].
+    """
+    pass

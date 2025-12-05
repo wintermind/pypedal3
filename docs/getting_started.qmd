@@ -1,0 +1,22 @@
+---
+title: "Getting Started"
+---
+
+For am example of how to load a pedigree, see @lst-load-pedigree.
+
+```{python}
+#| label: lst-load-pedigree
+#| fig-cap: "Loading a pedigree into PyPedal"
+
+from PyPedal import pyp_newclasses
+options = {
+    'renumber': 0,
+    'pedfile': '../test_files/mrode.ped',
+    'pedformat': 'asd',
+    'pedname': 'Mrode Pedigree Table 2.1',
+    'pedigree_is_renumbered': 1,
+    'messages': 'quiet',
+}
+result = pyp_newclasses.load_pedigree(options)
+result.metadata.printme()
+```

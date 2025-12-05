@@ -1,17 +1,17 @@
 ###############################################################################
 # NAME: pyp_db.py
-# VERSION: 3.0.0 (16MARCH2024)
+# VERSION: 3.0.0 (3DECEMBER2025)
 # AUTHOR: John B. Cole (john.cole@uscdcb.com)
 # LICENSE: LGPL
 ###############################################################################
 # FUNCTIONS:
 #   connect_to_database()
-#   createPedigreeTable()
-#   deleteTable()
-#   populatePedigreeTable()
+#   create_pedigree_table()
+#   delete_table()
+#   populate_pedigree_table()
 #   does_table_exist()
 #   table_count_rows()
-#   tableDropRows()
+#   table_drop_rows()
 ###############################################################################
 
 ## @package pyp_db
@@ -186,12 +186,14 @@ def delete_table(pedobj, table_name=False, db=False):
                       'to the database could not be established!')
     # If we did get a good connection then let the massacre begin! Won't someone please think of the poor data?
     else:
-        sql = 'DROP TABLE %s' % table_name
         # Did it work? Yes!
         try:
-            cursor = db.Execute(sql)
-            table_dropped = True
-            cursor.Close()
+            db['table_name'].drop()
+            if pedobj.kw['database_debug']:
+                print('[ERROR]: Deleted the table %s from the database %s in pyp_db/delete_table()!' %
+                      (table_name, pedobj.kw['database_name']))
+            logging.error('Deleted the table %s from the database %s in pyp_db/delete_table()!',
+                          table_name, pedobj.kw['database_name'])
         # ...or not.
         except:
             if pedobj.kw['database_debug']:
@@ -361,13 +363,13 @@ def table_count_rows(pedobj, db=None):
 # @param pedobj A PyPedal pedigree object.
 # @param table_name The name of the table to delete.
 # @param db An existing ADOdb connection or False to create one
-# @retval True on success, False otherwise.
+# @retval The number of rows dropped from the database.
 def table_drop_rows(pedobj, table_name=False, db=False):
     """
     table_drop_rows() deletes the rows from an existing table
     """
     if not table_name:
-        tablename = pedobj.kw['database_table']
+        table_name = pedobj.kw['database_table']
     rows_dropped = 0
     # If the user doesn't pass us a conn then try and connect to the database
     if not db:
@@ -382,11 +384,16 @@ def table_drop_rows(pedobj, table_name=False, db=False):
     else:
         if does_table_exist(pedobj, table_name, db):
             try:
-                sql = 'DELETE * FROM %s' % ( pedobj.kw['database_table'] )
-                cursor = db.Execute(sql)
-                rows = cursor.Affected_Rows()
-                rows_dropped = True
-                cursor.Close()
+                myquery = (db[table_name].animalID != None)
+                myset = db(myquery)
+                rows = myset.select()
+                rows_dropped = len(rows)
+                myset.delete()
+                if pedobj.kw['messages'] != 'quiet':
+                    print('[ERROR]: pyp_db/table_drop_rows() deleted %s rows from the table %s in the database '
+                          '%s!' % (rows_dropped, pedobj.kw['database_table'], pedobj.kw['database_name']))
+                logging.error('pyp_db/table_drop_rows() deleted %s rows from the table %s in the database '
+                              '%s!', rows_dropped, pedobj.kw['database_table'], pedobj.kw['database_name'])
             except:
                 if pedobj.kw['messages'] != 'quiet':
                     print('[ERROR]: pyp_db/table_drop_rows() could not delete rows from the table %s in the database '
