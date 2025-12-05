@@ -627,47 +627,48 @@ def fast_reorder(myped, filetag='_new_reordered_', io='no', debug=0):
 # offspring, the pedigree will be reordered. The renumbered pedigree is written to disc in
 # 'asd' format and a map file that associates sequential IDs with original IDs is also
 # written.
-# @param myped A PyPedal pedigree object.
+# @param pedobj A PyPedal pedigree object.
 # @param filetag A descriptor prepended to output file names.
 # @param io Indicates whether or not to write the renumbered pedigree to a file (yes|no).
 # @param outformat Flag to indicate whether or not to write an asd pedigree (0) or a full pedigree (1).
 # @param returnmap Indicates whether or not an ID map, as well as the renumbered pedigree, should be returned.
 #                  If nonzero, suppresses writing of ID maps to disc.
-# @param debug Flag to indicate whether or not progress messages are written to stdout.
 # @param missingparent Indicates the value used to indicate a missing parent.
 # @param animaltype Type of animal object used to populate pedigree
 # @param cleanmap Cleans-up (deletes) the ID map file after renumbering is complete.
 # @retval A reordered PyPedal pedigree.
-def renumber(myped, filetag='_renumbered_', io='no', outformat='0', debug=0, returnmap=0, missingparent=0,
+def renumber(pedobj, filetag='_renumbered_', io='no', outformat='0', returnmap=0, missingparent=0,
              animaltype='new', cleanmap=True):
     """
-    renumber() takes a pedigree as input and renumbers it such that the oldest
-    animal in the pedigree has an ID of '1' and the n-th animal has an ID of 'n'. If the
-    pedigree is not ordered from oldest to youngest such that all offspring precede their
-    offspring, the pedigree will be reordered. The renumbered pedigree is written to
-    disc in 'asd' format and a map file that associates sequential IDs with original IDs is also written.
+    renumber() takes a pedigree as input and renumbers it such that the oldest animal in the pedigree has an ID of '1'
+    and the n-th animal has an ID of 'n'. If the pedigree is not ordered from oldest to youngest such that all offspring
+    precede their offspring, the pedigree will be reordered. The renumbered pedigree is written to disc in 'asd' format
+    and a map file that associates sequential IDs with original IDs is also written.
     """
-    if debug == 1:
-        print('[DEBUG]: Pedigree of size %s passed to pyp_utils/renumber()' % len(myped))
+    if pedobj.kw['debug_messages']:
+        print ('-'*120)
+        print(f'[DEBUG]: pyp_utils/renumber(): Pedigree of size %s' % len(pedobj.pedigree))
+        print(f'[DEBUG]: pyp_utils/renumber(): pedobj is of type {type(pedobj)}')
+        print(vars(pedobj))
 
     # In the dictionary id_map, the old IDs are the keys and the
     # new IDs are the values.
     id_map = {}
     idnum = 1       # starting ID number for renumbered IDs
-    for l in range(len(myped)):
-        if debug == 1:
+    for l in range(len(pedobj.pedigree)):
+        if pedobj.kw['debug_messages']:
             if l == 0:
-                print('[DEBUG]: Renumbering the pedigree...')
+                print('[DEBUG]: pyp_utils/renumber(): Renumbering the pedigree...')
             if numpy.fmod(l, 10000) == 0:
                 print('\t%s ' % l)
-            print('[DEBUG]: An:%s (%s)\tSire: %s\tDam: %s' % (myped[l].animalID, myped[l].paddedID, myped[l].sireID,
-                                                              myped[l].damID))
-        id_map[myped[l].animalID] = idnum
-        # myped[l].animalID = id_map[myped[l].animalID]
-        if debug == 1:
-            print('\t[DEBUG]: Renumbering animal from %s to %s (iter %s)' % (myped[l].animalID, idnum, l))
-        myped[l].renumberedID = idnum
-        myped[l].animalID = idnum
+            print('[DEBUG]: An:%s (%s)\tSire: %s\tDam: %s' % (pedobj.pedigree[l].animalID, pedobj.pedigree[l].paddedID,
+                                                              pedobj.pedigree[l].sireID, pedobj.pedigree[l].damID))
+        id_map[pedobj.pedigree[l].animalID] = idnum
+        # myped.pedigree[l].animalID = id_map[myped.pedigree[l].animalID]
+        if pedobj.kw['debug_messages']:
+            print('\t[DEBUG]: Renumbering animal from %s to %s (iter %s)' % (pedobj.pedigree[l].animalID, idnum, l))
+        pedobj.pedigree[l].renumberedID = idnum
+        pedobj.pedigree[l].animalID = idnum
         # If an animal has its original ID as its name, we need
         # to change the name to match the renumbered ID so that
         # pedigree drawings using pyp_graphics/draw_pedigree()
@@ -675,38 +676,39 @@ def renumber(myped, filetag='_renumbered_', io='no', outformat='0', debug=0, ret
         #
         # Do we have NewAnimals? They have names and others do not.
         if animaltype == 'new':
-            if myped[l].name == myped[l].originalID:
-                myped[l].name = myped[l].renumberedID
-        # We cannot forget to renumber parents, too!
-        s = myped[l].sireID
+            if pedobj.pedigree[l].name == pedobj.pedigree[l].originalID:
+                pedobj.pedigree[l].name = pedobj.pedigree[l].renumberedID
+        # We can't forget to renumber parents, too!
+        s = pedobj.pedigree[l].sireID
         if str(s) != str(missingparent):
             # This is a hack to deal with offspring that have birthdates which precede their parents'.
             try:
-                if debug == 1:
+                if pedobj.kw['debug_messages']:
                     print('\t\t[DEBUG]: Renumbering sire from %s to %s' % (s, id_map[s]))
-                myped[l].sireID = id_map[s]
+                pedobj.pedigree[l].sireID = id_map[s]
             except:
-                myped[l].sireID = 0
-        d = myped[l].damID
+                pedobj.pedigree[l].sireID = 0
+        d = pedobj.pedigree[l].damID
         if str(d) != str(missingparent):
             # This is a hack to deal with offspring that have birthdates which precede their parents'.
             try:
-                if debug == 1:
+                if pedobj.kw['debug_messages']:
                     print('\t\t[DEBUG]: Renumbering dam from %s to %s' % (d, id_map[d]))
-                myped[l].damID = id_map[d]
+                pedobj.pedigree[l].damID = id_map[d]
             except:
-                myped[l].damID = 0
+                pedobj.pedigree[l].damID = 0
         idnum = idnum + 1
-        if debug == 1:
-            print('[DEBUG]: animal ID = %s (%s)' % (myped[l].animalID, myped[l].originalID))
-            print('[DEBUG]: An:%s\tSire: %s\tDam: %s' % (myped[l].animalID, myped[l].sireID, myped[l].damID))
+        if pedobj.kw['debug_messages']:
+            print('[DEBUG]: animal ID = %s (%s)' % (pedobj.pedigree[l].animalID, pedobj.pedigree[l].originalID))
+            print('[DEBUG]: An:%s\tSire: %s\tDam: %s' % (pedobj.pedigree[l].animalID, pedobj.pedigree[l].sireID,
+                                                         pedobj.pedigree[l].damID))
         # print()
 
     # This next bit renumbers the sons, daus, and unks dictionaries for
     # each animal.
     if animaltype == 'new':
         _sons, _daus, _unks = {}, {}, {}
-        for m in myped:
+        for m in pedobj.pedigree:
             # Renumber sons
             for k in list(m.sons.keys()):
                 try:
@@ -731,19 +733,23 @@ def renumber(myped, filetag='_renumbered_', io='no', outformat='0', debug=0, ret
 
     if io == 'yes':
         # Write the renumbered pedigree to a file
+        if pedobj.kw['debug_messages']:
+            print('[DEBUG]: pyp_utils/renumber(): Writing the renumbered pedigree to a file...')
         ped_outputfile = '%s%s%s' % (filetag, '_renum', '.ped')
         pout = open(ped_outputfile, 'w')
         pname = '# FILE: %s\n' % ped_outputfile
         pout.write(pname)
         pout.write('# RENUMBERED pedigree produced by PyPedal.\n')
         pout.write('% asd\n')
-        for l in range(len(myped)):
+        for l in range(len(pedobj.pedigree)):
             if outformat == '0' or outformat == 0:
-                pout.write('%s,%s,%s\n' % (myped[l].animalID, myped[l].sireID, myped[l].damID))
+                pout.write('%s,%s,%s\n' % (pedobj.pedigree[l].animalID, pedobj.pedigree[l].sireID,
+                                           pedobj.pedigree[l].damID))
             else:
-                pout.write('%s,%s,%s,%s,%s,%s,%s\n' % (myped[l].animalID, myped[l].sireID, myped[l].damID, myped[l].by,
-                           myped[l].sex, myped[l].fa, myped[l].gen))
+                pout.write('%s,%s,%s,%s,%s,%s,%s\n' % (pedobj[l].animalID, pedobj[l].sireID, pedobj[l].damID,
+                                                       pedobj[l].by, pedobj[l].sex, pedobj[l].fa, pedobj[l].gen))
         pout.close()
+
     if not returnmap:
         # Write the old ID -> new ID mapping to a file
         map_outputfile = '%s%s%s' % (filetag, '_id_map', '.map')
@@ -766,13 +772,18 @@ def renumber(myped, filetag='_renumbered_', io='no', outformat='0', debug=0, ret
         delete_id_map(filetag)
 
     # Update the metadata for the pedigree
-    myped.metadata = pyp_newclasses.PedigreeMetadata(myped.pedigree, myped.kw)
+    if pedobj.kw['debug_messages']:
+        print('-' * 120)
+        print(f'[DEBUG]: pyp_utils/renumber(): Updating the pedigree metadata...')
+        print(f'[DEBUG]: pyp_utils/renumber(): pedobj is of type {type(pedobj)}')
+        print(vars(pedobj))
+    pedobj.metadata = pyp_newclasses.PedigreeMetadata(pedobj.pedigree, pedobj.kw)
 
     # print 'ID map in renumber():%s' % (id_map)
     if not returnmap:
-        return myped
+        return pedobj
     else:
-        return myped, id_map
+        return pedobj, id_map
 
 
 ##

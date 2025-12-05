@@ -31,6 +31,7 @@ book:
     - index.qmd
     - introduction.qmd
     - getting_started.qmd
+    - methodology.qmd
     - references.qmd
 
 bibliography: pypedal.bib

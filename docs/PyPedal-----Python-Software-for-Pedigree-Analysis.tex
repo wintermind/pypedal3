@@ -252,7 +252,7 @@
 \@ifundefined{codebgcolor}{\definecolor{codebgcolor}{HTML}{f2f2f2}}{}
 \makeatother
 \makeatletter
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[sharp corners, enhanced, boxrule=0pt, breakable, borderline west={3pt}{0pt}{shadecolor}, frame hidden, colback={codebgcolor}]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt, breakable, sharp corners, colback={codebgcolor}, frame hidden, enhanced]}{\end{tcolorbox}}\fi
 \makeatother
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
@@ -314,7 +314,7 @@ the knowledge of the website administrators.
 
 \chapter{Introduction}\label{introduction}
 
-\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, breakable, toprule=.15mm, leftrule=.75mm, rightrule=.15mm, colback=white, opacityback=0, arc=.35mm, left=2mm, bottomrule=.15mm]
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, arc=.35mm, breakable, left=2mm, colback=white, opacityback=0, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, rightrule=.15mm]
 \begin{minipage}[t]{5.5mm}
 \textcolor{quarto-callout-note-color}{\faInfo}
 \end{minipage}%
@@ -497,6 +497,852 @@ Metadata for Mrode Pedigree Table 2.1 (../test_files/mrode.ped)
 
 \bookmarksetup{startatroot}
 
+\chapter{Methodology}\label{methodology}
+
+\begin{tcolorbox}[enhanced jigsaw, colframe=quarto-callout-note-color-frame, arc=.35mm, breakable, left=2mm, colback=white, opacityback=0, bottomrule=.15mm, leftrule=.75mm, toprule=.15mm, rightrule=.15mm]
+\begin{minipage}[t]{5.5mm}
+\textcolor{quarto-callout-note-color}{\faInfo}
+\end{minipage}%
+\begin{minipage}[t]{\textwidth - 5.5mm}
+
+To iterate is human, to recurse divine. --- L. Peter Deutsch
+
+\end{minipage}%
+\end{tcolorbox}
+
+In this chapter, a high-level overview of PyPedal is provided, giving
+the reader the definitions of the key components of the system. This
+section defines the concepts used by the remaining sections.
+
+\section{Reordering and Renumbering}\label{reordering-and-renumbering}
+
+Many computations on pedigrees require that the pedigree be renumbered
+such that animal IDs are consecutive from 1 to \(n\), where \(n\) is the
+total number of animals in the pedigree. By default, all pedigrees are
+renumbered at load time. If your pedigree is already renumbered and you
+don't want it renumbered again you must set the \texttt{renumber} option
+to 0. The renumbering process requires that the pedigree be reordered
+such that parents always precede their offspring in the list of animal
+IDs. The actual ID assigned to an animal is of no particular importance,
+and it is even possible for parents to have larger IDs than their
+offspring. PyPedal can reorder any pedigree unless there is an error in
+it that would prevent unambiguously placing parents before offspring.
+For example, a pedigree containing a keypunch error such that an animal
+is one of its own grandparents cannot be reordered because there is no
+way to unambiguously order the animals. The \texttt{pyp\_utils} module
+provides two routines for pedigree reordering, \texttt{reorder()} and
+\texttt{fast\_reorder()}. By default, \texttt{reorder()} is used to
+reorder pedigrees in place. It does this by maintaining a list of animal
+IDs that have been processed; whenever a parent that isn't in the list
+of encountered animals is found, the offspring of that parent are moved
+to the end of the pedigree. This ensures the pedigree is properly sorted
+such that all parents precede their offspring. Founders are also grouped
+together at the beginning of the pedigree. This procedure will always
+correctly reorder a pedigree but it can be quite inefficient as it is
+similar to an insertion sort, which has a worst-case runtime
+proportional to \(n^{2}\) (Cormen et al. 2003).
+
+\texttt{fast\_reorder()} provides a much faster means of reordering a
+pedigree, but can incorrectly reorder a pedigree in some cases. When an
+instance of a \texttt{NewAnimal} object is created the
+\texttt{pad\_id()} method is called. \texttt{pad\_id()} uses the animal
+ID and birth year to form an ID used by
+\texttt{pyp\_utils/fast\_reorder()} for quick sorting; if your pedigree
+file is numbered such that offspring always have larger IDs than their
+parents and your birth years (if provided) are correct (that is, parents
+always born BEFORE offspring) then \texttt{pyp\_utils.fast\_reorder()}
+works as expected. If you don't provide birth years in your pedigree
+file but your parent IDs are always smaller than your animal IDs, the
+reordering will be correct. If you do not provide birth years, all
+animals in the pedigree will be assigned a default value of
+\texttt{1900\textquotesingle{}.\ In\ that\ case,\ if\ parents\ have\ IDs\ larger\ than\ that\ of\ one\ or\ more\ of\ their\ offspring,\ the\ pedigree\ will\ be\ incorrectly\ reordered\ by}fast\_reorder()\texttt{.\ If\ your\ pedigree\ file\ contains\ birth\ years,\ or\ you\ know\ that\ parents\ always\ have\ smaller\ IDs\ than\ their\ offspring,\ then}fast\_reorder()\texttt{will\ correctly\ reorder\ your\ pedigree\ in\ linear\ time.\ Founders\ are\ not\ guaranteed\ to\ be\ grouped\ at\ the\ beginning\ of\ the\ pedigree\ when}fast\_reorder()\texttt{is\ used;\ if\ you\textquotesingle{}re\ going\ to\ calculate\ coefficients\ of\ partial\ inbreeding\ (Section\ @sec-methodology-partial-inbreeding)\ then\ you\ should\ instead\ use}reorder()`
+to reorder your pedigree.
+
+The performance difference between the two reordering routines is not
+very noticeable on pedigrees of a few hundred to a few thousand animals,
+but is quite dramatic for very large pedigrees. If your pedigree file is
+already reordered then there's essentially no performance difference
+between the two. When creating a pedigree file from data stored in a
+relational database, let the database perform the sort for you by using
+an \texttt{ORDER\ BY} statement.
+
+\section{Animal Identification and
+Cross-References}\label{sec-methodology-id-mapping}
+
+There are a number of identification attributes associated with animal
+objects in PyPedal pedigrees. A description of those fields, as well as
+their default values, is provided in Table
+\textbf{?@tbl-objects-animal-objects-new-animal-attributes}. This
+section describes the data structures provided for mapping between
+various animal IDs. Table Table~\ref{tbl-methodology-id-mapping} lists
+the four structures provided for ID mapping and lists the default values
+for pedigrees with integer (\texttt{asd} formats) and string
+(\texttt{ASD} formats) IDs. Renumbered PyPedal pedigree objects store
+animal objects in a list that is typically indexed by renumbered ID.
+When animal IDs are strings (see Section
+\textbf{?@sec-pedigree-format-codes}) they're hashed to an integer and
+the original ID is stored in a name field. In renumbered pedigrees the
+original ID is stored and replaced by a renumbered ID.
+
+Once your pedigree is renumbered it's quite easy to see how these maps
+can be used to convert between various IDs. The maps mean you don't have
+to worry about renumbered IDs and can continue to think about your
+animals in terms of their original IDs, whether they be ID numbers or
+names. Consider the Newfoundland pedigree presented in Figure
+\textbf{?@fig-newfoundland-colored-pedigree} -- it's much more
+convenient to think about the dog named Kaptn Kvols von Widdersdorf,
+rather than the dog whose name was hashed to the ID 5523557808241831142
+amd renumbered to 48. For example, suppose you wanted to determine his
+coefficient of inbreeding. It's simple to do using the maps:
+
+\begin{codelisting}
+
+\caption{\label{lst-methodology-id-map}}
+
+\centering{
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{from}\NormalTok{ PyPedal }\ImportTok{import}\NormalTok{ pyp\_newclasses}
+\ImportTok{from}\NormalTok{ PyPedal }\ImportTok{import}\NormalTok{ pyp\_nrm}
+
+\NormalTok{example }\OperatorTok{=}\NormalTok{ pyp\_newclasses.load\_pedigree(optionsfile}\OperatorTok{=}\StringTok{\textquotesingle{}../test\_files/newfoundland.ini\textquotesingle{}}\NormalTok{)}
+\NormalTok{newf\_f }\OperatorTok{=}\NormalTok{ pyp\_nrm.inbreeding(example)}
+\BuiltInTok{print}\NormalTok{(newf\_f[}\StringTok{\textquotesingle{}fx\textquotesingle{}}\NormalTok{][example.idmap[example.namemap[}\StringTok{\textquotesingle{}Kaptn Kvols von Widdersdorf\textquotesingle{}}\NormalTok{]]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[INFO]: Logfile untitled_pedigree.log instantiated.
+[INFO]: Preprocessing ../test_files/newfoundland.ped
+[INFO]: Opening pedigree file ../test_files/newfoundland.ped
+[NOTE]: Added pedigree entry for sire Highland Bear of Pouch Cove
+[NOTE]: Added pedigree entry for sire Schooners Yosef of Newton Ark
+[NOTE]: Added pedigree entry for sire Amitys Bearfoot of Pouch Cove
+[NOTE]: Added pedigree entry for sire Spokinewfs Cariboo Cowboy
+[NOTE]: Added pedigree entry for sire Nordbjorns Gringo
+[NOTE]: Added pedigree entry for sire Arvals Nordstrands Talisman
+[NOTE]: Added pedigree entry for sire Hector van het Heidemeer
+[NOTE]: Added pedigree entry for sire Fjordblinks Hakon
+[NOTE]: Added pedigree entry for sire Aaron van het Hoogveen
+[NOTE]: Added pedigree entry for sire Boedha van het Hoogveen
+[NOTE]: Added pedigree entry for sire Enrik von Luxemburg
+[NOTE]: Added pedigree entry for sire La Bellas Rigoletto
+[NOTE]: Added pedigree entry for sire As-Dur vom Weserwall
+[NOTE]: Added pedigree entry for sire Graaf Gabor van Overessinge
+[NOTE]: Added pedigree entry for sire Benno von Ammertal
+[NOTE]: Added pedigree entry for dam Ad Lib of Pouch Cove
+[NOTE]: Added pedigree entry for dam Souvenir of Pouch Cove
+[NOTE]: Added pedigree entry for dam Lifebuoys Penny of Bubbelina
+[NOTE]: Added pedigree entry for dam Jehaj Vilhelmina
+[NOTE]: Added pedigree entry for dam Black Domes Miss Caminickers
+[NOTE]: Added pedigree entry for dam Ellis-Bijou of the Thatch Roof
+[NOTE]: Added pedigree entry for dam Fenja vom Riesrand
+[NOTE]: Added pedigree entry for dam Gracia van de Papenhof
+[NOTE]: Added pedigree entry for dam Dukeroys Daphne
+[NOTE]: Added pedigree entry for dam Zarah von Luxemburg
+[NOTE]: Added pedigree entry for dam Frederikke
+[NOTE]: Added pedigree entry for dam Bonny vom Weserwall
+[NOTE]: Added pedigree entry for dam Fleur of the Coastguard
+[NOTE]: Added pedigree entry for dam Ina vom Forellenhof
+    [INFO]: Assigning sexes at Fri Dec  5 17:25:09 2025
+[NOTE]: pyp_utils/set_sexes() assigning a sex to all animals in pedigree Newfoundland Pedigree.
+[INFO]: Creating pedigree metadata object
+    [INFO]:  Instantiating a new PedigreeMetadata() object...
+    [INFO]:  Naming the Pedigree()...
+    [INFO]:  Assigning a filename...
+    [INFO]:  Attaching a pedigree...
+    [INFO]:  Setting the pedcode...
+    [INFO]:  Counting the number of animals in the pedigree...
+    [INFO]:  Counting and finding unique sires...
+    [INFO]:  Counting and finding unique dams...
+    [INFO]:  Setting renumbered flag...
+    [INFO]:  Counting and finding unique generations...
+    [INFO]:  Counting and finding unique birthyears...
+    [INFO]:  Counting and finding unique founders...
+    [INFO]:  Counting and finding unique herds...
+    [INFO]:  Detaching pedigree...
+Metadata for Newfoundland Pedigree (../test_files/newfoundland.ped)
+    Records:        59
+    Unique Sires:       29
+    Unique Dams:        29
+    Unique Gens:        1
+    Unique Years:       1
+    Unique Founders:    29
+    Unique Herds:       1
+    Pedigree Code:      ASD
+------------------------------------------------------------------------------------------------------------------------
+[DEBUG]: pyp_nrm/inbreeding(): pedobj is of type <class 'PyPedal.pyp_newclasses.NewPedigree'>
+{'kw': {'messages': 'verbose', 'pedfile': '../test_files/newfoundland.ped', 'pedformat': 'ASD', 'pedname': 'Newfoundland Pedigree', 'renumber': '1', 'sepchar': ',', 'set_sexes': '1', 'debug_messages': '1', 'simulate_pedigree': 0, 'pedigree_save': 0, 'has_header': 0, 'reorder': 0, 'auto_renumber': False, 'reorder_max_rounds': 100, 'pedigree_is_renumbered': 0, 'set_generations': 0, 'gen_coeff': 0, 'set_ancestors': 0, 'set_alleles': 0, 'set_offspring': 0, 'pedcomp': 0, 'pedcomp_gens': 3, 'alleles_sepchar': '/', 'counter': 1000, 'slow_reorder': 1, 'missing_bdate': '01011900', 'missing_byear': 1900, 'missing_parent': 0, 'missing_name': 'Unknown_Name', 'missing_breed': 'Unknown_Breed', 'missing_herd': 'Unknown_Herd', 'missing_sex': 'u', 'missing_inbreeding': 0.0, 'missing_alive': 0, 'missing_age': -999, 'missing_gen': -999.0, 'missing_gencoeff': -999.0, 'missing_igen': -999.0, 'missing_pedcomp': -999.0, 'missing_alleles': ['', ''], 'missing_userfield': '', 'missing_value': -999.0, 'file_io': '1', 'form_nrm': 0, 'nrm_method': 'nrm', 'nrm_format': 'text', 'f_computed': 0, 'log_ped_lines': 0, 'log_long_filenames': 0, 'pedigree_summary': 1, 'animal_type': 'new', 'filetag': 'untitled_pedigree', 'database_name': 'pypedal', 'database_table': 'untitled_pedigree', 'database_debug': False, 'database_type': 'sqlite', 'database_host': 'localhost', 'database_user': 'anonymous', 'database_passwd': 'anonymous', 'database_port': '', 'database_sql': 'SELECT * FROM %s', 'foundercoi': 0.0, 'paper_size': 'letter', 'default_unit': 'inch', 'default_fontsize': 10, 'default_report': 'untitled_pedigree', 'matrix_type': 'dense', 'newanimal_caller': 'loader', 'trait_names': [], 'trait_auto_name': 1, 'trait_count': 0, 'match_rule': 'asd', 'logfile': 'untitled_pedigree.log'}, 'pedigree': [<PyPedal.pyp_newclasses.NewAnimal object at 0x12f6aca90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10fc233d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169d32810>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525a8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b5d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525ba90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bb90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bc90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525be90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c0d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c210>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c410>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c610>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cad0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cdd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ce10>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cd50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ce90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d010>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d650>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d850>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526da50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dc50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dcd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526de90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526df90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e090>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e290>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e390>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e490>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e590>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e790>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e890>], 'metadata': <PyPedal.pyp_newclasses.PedigreeMetadata object at 0x174dd2a10>, 'idmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'backmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'namemap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 'Highland Bear of Pouch Cove': 3341104379020897765, 'Schooners Yosef of Newton Ark': 6540185341083782379, 'Amitys Bearfoot of Pouch Cove': 750426523932749285, 'Spokinewfs Cariboo Cowboy': 153053339571600313, 'Nordbjorns Gringo': 6203669701732792751, 'Arvals Nordstrands Talisman': 2642092761767659566, 'Hector van het Heidemeer': 4806214055200180530, 'Fjordblinks Hakon': 7102050401217850286, 'Aaron van het Hoogveen': 1174197121660635438, 'Boedha van het Hoogveen': 456494354649729326, 'Enrik von Luxemburg': 6356207169159777511, 'La Bellas Rigoletto': 8659629825303207279, 'As-Dur vom Weserwall': 644012676537256812, 'Graaf Gabor van Overessinge': 4248806271037405605, 'Benno von Ammertal': 481994345089554476, 'Ad Lib of Pouch Cove': 2715929994198707685, 'Souvenir of Pouch Cove': 5328106389087383013, 'Lifebuoys Penny of Bubbelina': 8190824940211440609, 'Jehaj Vilhelmina': 4554606065730358241, 'Black Domes Miss Caminickers': 6852511380275875059, 'Ellis-Bijou of the Thatch Roof': 4862401939302706086, 'Fenja vom Riesrand': 537668234540616676, 'Gracia van de Papenhof': 7137011385971415974, 'Dukeroys Daphne': 8268705750936099813, 'Zarah von Luxemburg': 3145177199411154151, 'Frederikke': 1276088872910105253, 'Bonny vom Weserwall': 1762754753958906732, 'Fleur of the Coastguard': 3215953890156612836, 'Ina vom Forellenhof': 7529335822802131878}, 'namebackmap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 'Highland Bear of Pouch Cove', 6540185341083782379: 'Schooners Yosef of Newton Ark', 750426523932749285: 'Amitys Bearfoot of Pouch Cove', 153053339571600313: 'Spokinewfs Cariboo Cowboy', 6203669701732792751: 'Nordbjorns Gringo', 2642092761767659566: 'Arvals Nordstrands Talisman', 4806214055200180530: 'Hector van het Heidemeer', 7102050401217850286: 'Fjordblinks Hakon', 1174197121660635438: 'Aaron van het Hoogveen', 456494354649729326: 'Boedha van het Hoogveen', 6356207169159777511: 'Enrik von Luxemburg', 8659629825303207279: 'La Bellas Rigoletto', 644012676537256812: 'As-Dur vom Weserwall', 4248806271037405605: 'Graaf Gabor van Overessinge', 481994345089554476: 'Benno von Ammertal', 2715929994198707685: 'Ad Lib of Pouch Cove', 5328106389087383013: 'Souvenir of Pouch Cove', 8190824940211440609: 'Lifebuoys Penny of Bubbelina', 4554606065730358241: 'Jehaj Vilhelmina', 6852511380275875059: 'Black Domes Miss Caminickers', 4862401939302706086: 'Ellis-Bijou of the Thatch Roof', 537668234540616676: 'Fenja vom Riesrand', 7137011385971415974: 'Gracia van de Papenhof', 8268705750936099813: 'Dukeroys Daphne', 3145177199411154151: 'Zarah von Luxemburg', 1276088872910105253: 'Frederikke', 1762754753958906732: 'Bonny vom Weserwall', 3215953890156612836: 'Fleur of the Coastguard', 7529335822802131878: 'Ina vom Forellenhof'}, 'stringmap': {}, 'starline': '********************************************************************************', 'pedformat_codes': ['a', 's', 'd', 'g', 'x', 'b', 'f', 'r', 'n', 'y', 'l', 'e', 'p', 'A', 'S', 'D', 'L', 'Z', 'h', 'H', 'u', 'T'], 'new_animal_attr': {'a': 'animalID', 's': 'sireID', 'd': 'damID', 'g': 'gen', 'x': 'sex', 'b': 'bd', 'f': 'fa', 'r': 'breed', 'n': 'name', 'y': 'by', 'l': 'alive', 'e': 'age', 'p': 'gencoeff', 'A': 'name', 'S': 'sireName', 'D': 'damName', 'L': 'alleles', 'Z': False, 'h': 'herd', 'H': 'originalHerd', 'u': 'userField', 'T': 'traits'}}
+------------------------------------------------------------------------------------------------------------------------
+[DEBUG]: pyp_nrm/inbreeding_tabular(): pedobj is of type <class 'PyPedal.pyp_newclasses.NewPedigree'>
+{'kw': {'messages': 'verbose', 'pedfile': '../test_files/newfoundland.ped', 'pedformat': 'ASD', 'pedname': 'Newfoundland Pedigree', 'renumber': '1', 'sepchar': ',', 'set_sexes': '1', 'debug_messages': '1', 'simulate_pedigree': 0, 'pedigree_save': 0, 'has_header': 0, 'reorder': 0, 'auto_renumber': False, 'reorder_max_rounds': 100, 'pedigree_is_renumbered': 0, 'set_generations': 0, 'gen_coeff': 0, 'set_ancestors': 0, 'set_alleles': 0, 'set_offspring': 0, 'pedcomp': 0, 'pedcomp_gens': 3, 'alleles_sepchar': '/', 'counter': 1000, 'slow_reorder': 1, 'missing_bdate': '01011900', 'missing_byear': 1900, 'missing_parent': 0, 'missing_name': 'Unknown_Name', 'missing_breed': 'Unknown_Breed', 'missing_herd': 'Unknown_Herd', 'missing_sex': 'u', 'missing_inbreeding': 0.0, 'missing_alive': 0, 'missing_age': -999, 'missing_gen': -999.0, 'missing_gencoeff': -999.0, 'missing_igen': -999.0, 'missing_pedcomp': -999.0, 'missing_alleles': ['', ''], 'missing_userfield': '', 'missing_value': -999.0, 'file_io': '1', 'form_nrm': 0, 'nrm_method': 'nrm', 'nrm_format': 'text', 'f_computed': 0, 'log_ped_lines': 0, 'log_long_filenames': 0, 'pedigree_summary': 1, 'animal_type': 'new', 'filetag': 'untitled_pedigree', 'database_name': 'pypedal', 'database_table': 'untitled_pedigree', 'database_debug': False, 'database_type': 'sqlite', 'database_host': 'localhost', 'database_user': 'anonymous', 'database_passwd': 'anonymous', 'database_port': '', 'database_sql': 'SELECT * FROM %s', 'foundercoi': 0.0, 'paper_size': 'letter', 'default_unit': 'inch', 'default_fontsize': 10, 'default_report': 'untitled_pedigree', 'matrix_type': 'dense', 'newanimal_caller': 'loader', 'trait_names': [], 'trait_auto_name': 1, 'trait_count': 0, 'match_rule': 'asd', 'logfile': 'untitled_pedigree.log'}, 'pedigree': [<PyPedal.pyp_newclasses.NewAnimal object at 0x12f6aca90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10fc233d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169d32810>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525a8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b5d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525ba90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bb90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bc90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525be90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c0d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c210>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c410>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c610>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cad0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cdd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ce10>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cd50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ce90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d010>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d650>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d850>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526da50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dc50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dcd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526de90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526df90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e090>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e290>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e390>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e490>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e590>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e790>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e890>], 'metadata': <PyPedal.pyp_newclasses.PedigreeMetadata object at 0x174dd2a10>, 'idmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'backmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'namemap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 'Highland Bear of Pouch Cove': 3341104379020897765, 'Schooners Yosef of Newton Ark': 6540185341083782379, 'Amitys Bearfoot of Pouch Cove': 750426523932749285, 'Spokinewfs Cariboo Cowboy': 153053339571600313, 'Nordbjorns Gringo': 6203669701732792751, 'Arvals Nordstrands Talisman': 2642092761767659566, 'Hector van het Heidemeer': 4806214055200180530, 'Fjordblinks Hakon': 7102050401217850286, 'Aaron van het Hoogveen': 1174197121660635438, 'Boedha van het Hoogveen': 456494354649729326, 'Enrik von Luxemburg': 6356207169159777511, 'La Bellas Rigoletto': 8659629825303207279, 'As-Dur vom Weserwall': 644012676537256812, 'Graaf Gabor van Overessinge': 4248806271037405605, 'Benno von Ammertal': 481994345089554476, 'Ad Lib of Pouch Cove': 2715929994198707685, 'Souvenir of Pouch Cove': 5328106389087383013, 'Lifebuoys Penny of Bubbelina': 8190824940211440609, 'Jehaj Vilhelmina': 4554606065730358241, 'Black Domes Miss Caminickers': 6852511380275875059, 'Ellis-Bijou of the Thatch Roof': 4862401939302706086, 'Fenja vom Riesrand': 537668234540616676, 'Gracia van de Papenhof': 7137011385971415974, 'Dukeroys Daphne': 8268705750936099813, 'Zarah von Luxemburg': 3145177199411154151, 'Frederikke': 1276088872910105253, 'Bonny vom Weserwall': 1762754753958906732, 'Fleur of the Coastguard': 3215953890156612836, 'Ina vom Forellenhof': 7529335822802131878}, 'namebackmap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 'Highland Bear of Pouch Cove', 6540185341083782379: 'Schooners Yosef of Newton Ark', 750426523932749285: 'Amitys Bearfoot of Pouch Cove', 153053339571600313: 'Spokinewfs Cariboo Cowboy', 6203669701732792751: 'Nordbjorns Gringo', 2642092761767659566: 'Arvals Nordstrands Talisman', 4806214055200180530: 'Hector van het Heidemeer', 7102050401217850286: 'Fjordblinks Hakon', 1174197121660635438: 'Aaron van het Hoogveen', 456494354649729326: 'Boedha van het Hoogveen', 6356207169159777511: 'Enrik von Luxemburg', 8659629825303207279: 'La Bellas Rigoletto', 644012676537256812: 'As-Dur vom Weserwall', 4248806271037405605: 'Graaf Gabor van Overessinge', 481994345089554476: 'Benno von Ammertal', 2715929994198707685: 'Ad Lib of Pouch Cove', 5328106389087383013: 'Souvenir of Pouch Cove', 8190824940211440609: 'Lifebuoys Penny of Bubbelina', 4554606065730358241: 'Jehaj Vilhelmina', 6852511380275875059: 'Black Domes Miss Caminickers', 4862401939302706086: 'Ellis-Bijou of the Thatch Roof', 537668234540616676: 'Fenja vom Riesrand', 7137011385971415974: 'Gracia van de Papenhof', 8268705750936099813: 'Dukeroys Daphne', 3145177199411154151: 'Zarah von Luxemburg', 1276088872910105253: 'Frederikke', 1762754753958906732: 'Bonny vom Weserwall', 3215953890156612836: 'Fleur of the Coastguard', 7529335822802131878: 'Ina vom Forellenhof'}, 'stringmap': {}, 'starline': '********************************************************************************', 'pedformat_codes': ['a', 's', 'd', 'g', 'x', 'b', 'f', 'r', 'n', 'y', 'l', 'e', 'p', 'A', 'S', 'D', 'L', 'Z', 'h', 'H', 'u', 'T'], 'new_animal_attr': {'a': 'animalID', 's': 'sireID', 'd': 'damID', 'g': 'gen', 'x': 'sex', 'b': 'bd', 'f': 'fa', 'r': 'breed', 'n': 'name', 'y': 'by', 'l': 'alive', 'e': 'age', 'p': 'gencoeff', 'A': 'name', 'S': 'sireName', 'D': 'damName', 'L': 'alleles', 'Z': False, 'h': 'herd', 'H': 'originalHerd', 'u': 'userField', 'T': 'traits'}}
+    [inbreeding_tabular]: Allocating fx
+    [inbreeding_tabular]: Calling pyp_nrm/fast_a_matrix() pedigree...
+------------------------------------------------------------------------------------------------------------------------
+[DEBUG]: pyp_nrm/fast_a_matrix(): pedobj is of type <class 'PyPedal.pyp_newclasses.NewPedigree'>
+{'kw': {'messages': 'verbose', 'pedfile': '../test_files/newfoundland.ped', 'pedformat': 'ASD', 'pedname': 'Newfoundland Pedigree', 'renumber': '1', 'sepchar': ',', 'set_sexes': '1', 'debug_messages': '1', 'simulate_pedigree': 0, 'pedigree_save': 0, 'has_header': 0, 'reorder': 0, 'auto_renumber': False, 'reorder_max_rounds': 100, 'pedigree_is_renumbered': 0, 'set_generations': 0, 'gen_coeff': 0, 'set_ancestors': 0, 'set_alleles': 0, 'set_offspring': 0, 'pedcomp': 0, 'pedcomp_gens': 3, 'alleles_sepchar': '/', 'counter': 1000, 'slow_reorder': 1, 'missing_bdate': '01011900', 'missing_byear': 1900, 'missing_parent': 0, 'missing_name': 'Unknown_Name', 'missing_breed': 'Unknown_Breed', 'missing_herd': 'Unknown_Herd', 'missing_sex': 'u', 'missing_inbreeding': 0.0, 'missing_alive': 0, 'missing_age': -999, 'missing_gen': -999.0, 'missing_gencoeff': -999.0, 'missing_igen': -999.0, 'missing_pedcomp': -999.0, 'missing_alleles': ['', ''], 'missing_userfield': '', 'missing_value': -999.0, 'file_io': '1', 'form_nrm': 0, 'nrm_method': 'nrm', 'nrm_format': 'text', 'f_computed': 0, 'log_ped_lines': 0, 'log_long_filenames': 0, 'pedigree_summary': 1, 'animal_type': 'new', 'filetag': 'untitled_pedigree', 'database_name': 'pypedal', 'database_table': 'untitled_pedigree', 'database_debug': False, 'database_type': 'sqlite', 'database_host': 'localhost', 'database_user': 'anonymous', 'database_passwd': 'anonymous', 'database_port': '', 'database_sql': 'SELECT * FROM %s', 'foundercoi': 0.0, 'paper_size': 'letter', 'default_unit': 'inch', 'default_fontsize': 10, 'default_report': 'untitled_pedigree', 'matrix_type': 'dense', 'newanimal_caller': 'loader', 'trait_names': [], 'trait_auto_name': 1, 'trait_count': 0, 'match_rule': 'asd', 'logfile': 'untitled_pedigree.log'}, 'pedigree': [<PyPedal.pyp_newclasses.NewAnimal object at 0x12f6aca90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10fc233d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169d32810>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525a8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b5d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525ba90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bb90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bc90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525be90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c0d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c210>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c410>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c610>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cad0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cdd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ce10>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cd50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ce90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d010>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d650>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d850>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526da50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dc50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dcd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526de90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526df90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e090>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e290>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e390>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e490>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e590>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e790>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e890>], 'metadata': <PyPedal.pyp_newclasses.PedigreeMetadata object at 0x174dd2a10>, 'idmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'backmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'namemap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 'Highland Bear of Pouch Cove': 3341104379020897765, 'Schooners Yosef of Newton Ark': 6540185341083782379, 'Amitys Bearfoot of Pouch Cove': 750426523932749285, 'Spokinewfs Cariboo Cowboy': 153053339571600313, 'Nordbjorns Gringo': 6203669701732792751, 'Arvals Nordstrands Talisman': 2642092761767659566, 'Hector van het Heidemeer': 4806214055200180530, 'Fjordblinks Hakon': 7102050401217850286, 'Aaron van het Hoogveen': 1174197121660635438, 'Boedha van het Hoogveen': 456494354649729326, 'Enrik von Luxemburg': 6356207169159777511, 'La Bellas Rigoletto': 8659629825303207279, 'As-Dur vom Weserwall': 644012676537256812, 'Graaf Gabor van Overessinge': 4248806271037405605, 'Benno von Ammertal': 481994345089554476, 'Ad Lib of Pouch Cove': 2715929994198707685, 'Souvenir of Pouch Cove': 5328106389087383013, 'Lifebuoys Penny of Bubbelina': 8190824940211440609, 'Jehaj Vilhelmina': 4554606065730358241, 'Black Domes Miss Caminickers': 6852511380275875059, 'Ellis-Bijou of the Thatch Roof': 4862401939302706086, 'Fenja vom Riesrand': 537668234540616676, 'Gracia van de Papenhof': 7137011385971415974, 'Dukeroys Daphne': 8268705750936099813, 'Zarah von Luxemburg': 3145177199411154151, 'Frederikke': 1276088872910105253, 'Bonny vom Weserwall': 1762754753958906732, 'Fleur of the Coastguard': 3215953890156612836, 'Ina vom Forellenhof': 7529335822802131878}, 'namebackmap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 'Highland Bear of Pouch Cove', 6540185341083782379: 'Schooners Yosef of Newton Ark', 750426523932749285: 'Amitys Bearfoot of Pouch Cove', 153053339571600313: 'Spokinewfs Cariboo Cowboy', 6203669701732792751: 'Nordbjorns Gringo', 2642092761767659566: 'Arvals Nordstrands Talisman', 4806214055200180530: 'Hector van het Heidemeer', 7102050401217850286: 'Fjordblinks Hakon', 1174197121660635438: 'Aaron van het Hoogveen', 456494354649729326: 'Boedha van het Hoogveen', 6356207169159777511: 'Enrik von Luxemburg', 8659629825303207279: 'La Bellas Rigoletto', 644012676537256812: 'As-Dur vom Weserwall', 4248806271037405605: 'Graaf Gabor van Overessinge', 481994345089554476: 'Benno von Ammertal', 2715929994198707685: 'Ad Lib of Pouch Cove', 5328106389087383013: 'Souvenir of Pouch Cove', 8190824940211440609: 'Lifebuoys Penny of Bubbelina', 4554606065730358241: 'Jehaj Vilhelmina', 6852511380275875059: 'Black Domes Miss Caminickers', 4862401939302706086: 'Ellis-Bijou of the Thatch Roof', 537668234540616676: 'Fenja vom Riesrand', 7137011385971415974: 'Gracia van de Papenhof', 8268705750936099813: 'Dukeroys Daphne', 3145177199411154151: 'Zarah von Luxemburg', 1276088872910105253: 'Frederikke', 1762754753958906732: 'Bonny vom Weserwall', 3215953890156612836: 'Fleur of the Coastguard', 7529335822802131878: 'Ina vom Forellenhof'}, 'stringmap': {}, 'starline': '********************************************************************************', 'pedformat_codes': ['a', 's', 'd', 'g', 'x', 'b', 'f', 'r', 'n', 'y', 'l', 'e', 'p', 'A', 'S', 'D', 'L', 'Z', 'h', 'H', 'u', 'T'], 'new_animal_attr': {'a': 'animalID', 's': 'sireID', 'd': 'damID', 'g': 'gen', 'x': 'sex', 'b': 'bd', 'f': 'fa', 'r': 'breed', 'n': 'name', 'y': 'by', 'l': 'alive', 'e': 'age', 'p': 'gencoeff', 'A': 'name', 'S': 'sireName', 'D': 'damName', 'L': 'alleles', 'Z': False, 'h': 'herd', 'H': 'originalHerd', 'u': 'userField', 'T': 'traits'}}
+        [pyp_nrm/fast_a_matrix()] Pedigree is not renumbered, renumbering...
+        [INFO]: pyp_newclasses/renumber(): Renumbering at Fri Dec  5 17:25:09 2025
+------------------------------------------------------------------------------------------------------------------------
+    [DEBUG]: pyp_newclasses/renumber(): Renumbering pedigree at Fri Dec  5 17:25:09 2025
+    [DEBUG]: pyp_newclasses/renumber(): pedobj is of type <class 'PyPedal.pyp_newclasses.NewPedigree'>
+{'kw': {'messages': 'verbose', 'pedfile': '../test_files/newfoundland.ped', 'pedformat': 'ASD', 'pedname': 'Newfoundland Pedigree', 'renumber': '1', 'sepchar': ',', 'set_sexes': '1', 'debug_messages': '1', 'simulate_pedigree': 0, 'pedigree_save': 0, 'has_header': 0, 'reorder': 0, 'auto_renumber': False, 'reorder_max_rounds': 100, 'pedigree_is_renumbered': 0, 'set_generations': 0, 'gen_coeff': 0, 'set_ancestors': 0, 'set_alleles': 0, 'set_offspring': 0, 'pedcomp': 0, 'pedcomp_gens': 3, 'alleles_sepchar': '/', 'counter': 1000, 'slow_reorder': 1, 'missing_bdate': '01011900', 'missing_byear': 1900, 'missing_parent': 0, 'missing_name': 'Unknown_Name', 'missing_breed': 'Unknown_Breed', 'missing_herd': 'Unknown_Herd', 'missing_sex': 'u', 'missing_inbreeding': 0.0, 'missing_alive': 0, 'missing_age': -999, 'missing_gen': -999.0, 'missing_gencoeff': -999.0, 'missing_igen': -999.0, 'missing_pedcomp': -999.0, 'missing_alleles': ['', ''], 'missing_userfield': '', 'missing_value': -999.0, 'file_io': '1', 'form_nrm': 0, 'nrm_method': 'nrm', 'nrm_format': 'text', 'f_computed': 0, 'log_ped_lines': 0, 'log_long_filenames': 0, 'pedigree_summary': 1, 'animal_type': 'new', 'filetag': 'untitled_pedigree', 'database_name': 'pypedal', 'database_table': 'untitled_pedigree', 'database_debug': False, 'database_type': 'sqlite', 'database_host': 'localhost', 'database_user': 'anonymous', 'database_passwd': 'anonymous', 'database_port': '', 'database_sql': 'SELECT * FROM %s', 'foundercoi': 0.0, 'paper_size': 'letter', 'default_unit': 'inch', 'default_fontsize': 10, 'default_report': 'untitled_pedigree', 'matrix_type': 'dense', 'newanimal_caller': 'loader', 'trait_names': [], 'trait_auto_name': 1, 'trait_count': 0, 'match_rule': 'asd', 'logfile': 'untitled_pedigree.log'}, 'pedigree': [<PyPedal.pyp_newclasses.NewAnimal object at 0x17526e790>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e590>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e490>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e390>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e290>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e090>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526df90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526de90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dcd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dc50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526da50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d850>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d650>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12d87b510>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10a644f90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17268e550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12c79b710>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169cd5cd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bb90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bc90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525a8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525be90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12f6aca90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ef90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c0d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c210>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10fc233d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c410>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c610>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b5d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525ba90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169d32810>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cad0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c350>], 'metadata': <PyPedal.pyp_newclasses.PedigreeMetadata object at 0x174dd2a10>, 'idmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'backmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'namemap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 'Highland Bear of Pouch Cove': 3341104379020897765, 'Schooners Yosef of Newton Ark': 6540185341083782379, 'Amitys Bearfoot of Pouch Cove': 750426523932749285, 'Spokinewfs Cariboo Cowboy': 153053339571600313, 'Nordbjorns Gringo': 6203669701732792751, 'Arvals Nordstrands Talisman': 2642092761767659566, 'Hector van het Heidemeer': 4806214055200180530, 'Fjordblinks Hakon': 7102050401217850286, 'Aaron van het Hoogveen': 1174197121660635438, 'Boedha van het Hoogveen': 456494354649729326, 'Enrik von Luxemburg': 6356207169159777511, 'La Bellas Rigoletto': 8659629825303207279, 'As-Dur vom Weserwall': 644012676537256812, 'Graaf Gabor van Overessinge': 4248806271037405605, 'Benno von Ammertal': 481994345089554476, 'Ad Lib of Pouch Cove': 2715929994198707685, 'Souvenir of Pouch Cove': 5328106389087383013, 'Lifebuoys Penny of Bubbelina': 8190824940211440609, 'Jehaj Vilhelmina': 4554606065730358241, 'Black Domes Miss Caminickers': 6852511380275875059, 'Ellis-Bijou of the Thatch Roof': 4862401939302706086, 'Fenja vom Riesrand': 537668234540616676, 'Gracia van de Papenhof': 7137011385971415974, 'Dukeroys Daphne': 8268705750936099813, 'Zarah von Luxemburg': 3145177199411154151, 'Frederikke': 1276088872910105253, 'Bonny vom Weserwall': 1762754753958906732, 'Fleur of the Coastguard': 3215953890156612836, 'Ina vom Forellenhof': 7529335822802131878}, 'namebackmap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 'Highland Bear of Pouch Cove', 6540185341083782379: 'Schooners Yosef of Newton Ark', 750426523932749285: 'Amitys Bearfoot of Pouch Cove', 153053339571600313: 'Spokinewfs Cariboo Cowboy', 6203669701732792751: 'Nordbjorns Gringo', 2642092761767659566: 'Arvals Nordstrands Talisman', 4806214055200180530: 'Hector van het Heidemeer', 7102050401217850286: 'Fjordblinks Hakon', 1174197121660635438: 'Aaron van het Hoogveen', 456494354649729326: 'Boedha van het Hoogveen', 6356207169159777511: 'Enrik von Luxemburg', 8659629825303207279: 'La Bellas Rigoletto', 644012676537256812: 'As-Dur vom Weserwall', 4248806271037405605: 'Graaf Gabor van Overessinge', 481994345089554476: 'Benno von Ammertal', 2715929994198707685: 'Ad Lib of Pouch Cove', 5328106389087383013: 'Souvenir of Pouch Cove', 8190824940211440609: 'Lifebuoys Penny of Bubbelina', 4554606065730358241: 'Jehaj Vilhelmina', 6852511380275875059: 'Black Domes Miss Caminickers', 4862401939302706086: 'Ellis-Bijou of the Thatch Roof', 537668234540616676: 'Fenja vom Riesrand', 7137011385971415974: 'Gracia van de Papenhof', 8268705750936099813: 'Dukeroys Daphne', 3145177199411154151: 'Zarah von Luxemburg', 1276088872910105253: 'Frederikke', 1762754753958906732: 'Bonny vom Weserwall', 3215953890156612836: 'Fleur of the Coastguard', 7529335822802131878: 'Ina vom Forellenhof'}, 'stringmap': {}, 'starline': '********************************************************************************', 'pedformat_codes': ['a', 's', 'd', 'g', 'x', 'b', 'f', 'r', 'n', 'y', 'l', 'e', 'p', 'A', 'S', 'D', 'L', 'Z', 'h', 'H', 'u', 'T'], 'new_animal_attr': {'a': 'animalID', 's': 'sireID', 'd': 'damID', 'g': 'gen', 'x': 'sex', 'b': 'bd', 'f': 'fa', 'r': 'breed', 'n': 'name', 'y': 'by', 'l': 'alive', 'e': 'age', 'p': 'gencoeff', 'A': 'name', 'S': 'sireName', 'D': 'damName', 'L': 'alleles', 'Z': False, 'h': 'herd', 'H': 'originalHerd', 'u': 'userField', 'T': 'traits'}}
+------------------------------------------------------------------------------------------------------------------------
+[DEBUG]: pyp_utils/renumber(): Pedigree of size 59
+[DEBUG]: pyp_utils/renumber(): pedobj is of type <class 'PyPedal.pyp_newclasses.NewPedigree'>
+{'kw': {'messages': 'verbose', 'pedfile': '../test_files/newfoundland.ped', 'pedformat': 'ASD', 'pedname': 'Newfoundland Pedigree', 'renumber': '1', 'sepchar': ',', 'set_sexes': '1', 'debug_messages': '1', 'simulate_pedigree': 0, 'pedigree_save': 0, 'has_header': 0, 'reorder': 0, 'auto_renumber': False, 'reorder_max_rounds': 100, 'pedigree_is_renumbered': 0, 'set_generations': 0, 'gen_coeff': 0, 'set_ancestors': 0, 'set_alleles': 0, 'set_offspring': 0, 'pedcomp': 0, 'pedcomp_gens': 3, 'alleles_sepchar': '/', 'counter': 1000, 'slow_reorder': 1, 'missing_bdate': '01011900', 'missing_byear': 1900, 'missing_parent': 0, 'missing_name': 'Unknown_Name', 'missing_breed': 'Unknown_Breed', 'missing_herd': 'Unknown_Herd', 'missing_sex': 'u', 'missing_inbreeding': 0.0, 'missing_alive': 0, 'missing_age': -999, 'missing_gen': -999.0, 'missing_gencoeff': -999.0, 'missing_igen': -999.0, 'missing_pedcomp': -999.0, 'missing_alleles': ['', ''], 'missing_userfield': '', 'missing_value': -999.0, 'file_io': '1', 'form_nrm': 0, 'nrm_method': 'nrm', 'nrm_format': 'text', 'f_computed': 0, 'log_ped_lines': 0, 'log_long_filenames': 0, 'pedigree_summary': 1, 'animal_type': 'new', 'filetag': 'untitled_pedigree', 'database_name': 'pypedal', 'database_table': 'untitled_pedigree', 'database_debug': False, 'database_type': 'sqlite', 'database_host': 'localhost', 'database_user': 'anonymous', 'database_passwd': 'anonymous', 'database_port': '', 'database_sql': 'SELECT * FROM %s', 'foundercoi': 0.0, 'paper_size': 'letter', 'default_unit': 'inch', 'default_fontsize': 10, 'default_report': 'untitled_pedigree', 'matrix_type': 'dense', 'newanimal_caller': 'loader', 'trait_names': [], 'trait_auto_name': 1, 'trait_count': 0, 'match_rule': 'asd', 'logfile': 'untitled_pedigree.log'}, 'pedigree': [<PyPedal.pyp_newclasses.NewAnimal object at 0x17526e790>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e590>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e490>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e390>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e290>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e090>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526df90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526de90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dcd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dc50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526da50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d850>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d650>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12d87b510>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10a644f90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17268e550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12c79b710>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169cd5cd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bb90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bc90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525a8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525be90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12f6aca90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ef90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c0d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c210>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10fc233d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c410>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c610>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b5d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525ba90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169d32810>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cad0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c350>], 'metadata': <PyPedal.pyp_newclasses.PedigreeMetadata object at 0x174dd2a10>, 'idmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'backmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'namemap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 'Highland Bear of Pouch Cove': 3341104379020897765, 'Schooners Yosef of Newton Ark': 6540185341083782379, 'Amitys Bearfoot of Pouch Cove': 750426523932749285, 'Spokinewfs Cariboo Cowboy': 153053339571600313, 'Nordbjorns Gringo': 6203669701732792751, 'Arvals Nordstrands Talisman': 2642092761767659566, 'Hector van het Heidemeer': 4806214055200180530, 'Fjordblinks Hakon': 7102050401217850286, 'Aaron van het Hoogveen': 1174197121660635438, 'Boedha van het Hoogveen': 456494354649729326, 'Enrik von Luxemburg': 6356207169159777511, 'La Bellas Rigoletto': 8659629825303207279, 'As-Dur vom Weserwall': 644012676537256812, 'Graaf Gabor van Overessinge': 4248806271037405605, 'Benno von Ammertal': 481994345089554476, 'Ad Lib of Pouch Cove': 2715929994198707685, 'Souvenir of Pouch Cove': 5328106389087383013, 'Lifebuoys Penny of Bubbelina': 8190824940211440609, 'Jehaj Vilhelmina': 4554606065730358241, 'Black Domes Miss Caminickers': 6852511380275875059, 'Ellis-Bijou of the Thatch Roof': 4862401939302706086, 'Fenja vom Riesrand': 537668234540616676, 'Gracia van de Papenhof': 7137011385971415974, 'Dukeroys Daphne': 8268705750936099813, 'Zarah von Luxemburg': 3145177199411154151, 'Frederikke': 1276088872910105253, 'Bonny vom Weserwall': 1762754753958906732, 'Fleur of the Coastguard': 3215953890156612836, 'Ina vom Forellenhof': 7529335822802131878}, 'namebackmap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 'Highland Bear of Pouch Cove', 6540185341083782379: 'Schooners Yosef of Newton Ark', 750426523932749285: 'Amitys Bearfoot of Pouch Cove', 153053339571600313: 'Spokinewfs Cariboo Cowboy', 6203669701732792751: 'Nordbjorns Gringo', 2642092761767659566: 'Arvals Nordstrands Talisman', 4806214055200180530: 'Hector van het Heidemeer', 7102050401217850286: 'Fjordblinks Hakon', 1174197121660635438: 'Aaron van het Hoogveen', 456494354649729326: 'Boedha van het Hoogveen', 6356207169159777511: 'Enrik von Luxemburg', 8659629825303207279: 'La Bellas Rigoletto', 644012676537256812: 'As-Dur vom Weserwall', 4248806271037405605: 'Graaf Gabor van Overessinge', 481994345089554476: 'Benno von Ammertal', 2715929994198707685: 'Ad Lib of Pouch Cove', 5328106389087383013: 'Souvenir of Pouch Cove', 8190824940211440609: 'Lifebuoys Penny of Bubbelina', 4554606065730358241: 'Jehaj Vilhelmina', 6852511380275875059: 'Black Domes Miss Caminickers', 4862401939302706086: 'Ellis-Bijou of the Thatch Roof', 537668234540616676: 'Fenja vom Riesrand', 7137011385971415974: 'Gracia van de Papenhof', 8268705750936099813: 'Dukeroys Daphne', 3145177199411154151: 'Zarah von Luxemburg', 1276088872910105253: 'Frederikke', 1762754753958906732: 'Bonny vom Weserwall', 3215953890156612836: 'Fleur of the Coastguard', 7529335822802131878: 'Ina vom Forellenhof'}, 'stringmap': {}, 'starline': '********************************************************************************', 'pedformat_codes': ['a', 's', 'd', 'g', 'x', 'b', 'f', 'r', 'n', 'y', 'l', 'e', 'p', 'A', 'S', 'D', 'L', 'Z', 'h', 'H', 'u', 'T'], 'new_animal_attr': {'a': 'animalID', 's': 'sireID', 'd': 'damID', 'g': 'gen', 'x': 'sex', 'b': 'bd', 'f': 'fa', 'r': 'breed', 'n': 'name', 'y': 'by', 'l': 'alive', 'e': 'age', 'p': 'gencoeff', 'A': 'name', 'S': 'sireName', 'D': 'damName', 'L': 'alleles', 'Z': False, 'h': 'herd', 'H': 'originalHerd', 'u': 'userField', 'T': 'traits'}}
+[DEBUG]: pyp_utils/renumber(): Renumbering the pedigree...
+    0 
+[DEBUG]: An:7529335822802131878 (1900752933582280213187819) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 7529335822802131878 to 1 (iter 0)
+[DEBUG]: animal ID = 1 (7529335822802131878)
+[DEBUG]: An:1   Sire: 0 Dam: 0
+[DEBUG]: An:3215953890156612836 (1900321595389015661283619) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 3215953890156612836 to 2 (iter 1)
+[DEBUG]: animal ID = 2 (3215953890156612836)
+[DEBUG]: An:2   Sire: 0 Dam: 0
+[DEBUG]: An:1762754753958906732 (1900176275475395890673219) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 1762754753958906732 to 3 (iter 2)
+[DEBUG]: animal ID = 3 (1762754753958906732)
+[DEBUG]: An:3   Sire: 0 Dam: 0
+[DEBUG]: An:1276088872910105253 (1900127608887291010525319) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 1276088872910105253 to 4 (iter 3)
+[DEBUG]: animal ID = 4 (1276088872910105253)
+[DEBUG]: An:4   Sire: 0 Dam: 0
+[DEBUG]: An:3145177199411154151 (1900314517719941115415119) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 3145177199411154151 to 5 (iter 4)
+[DEBUG]: animal ID = 5 (3145177199411154151)
+[DEBUG]: An:5   Sire: 0 Dam: 0
+[DEBUG]: An:8268705750936099813 (1900826870575093609981319) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 8268705750936099813 to 6 (iter 5)
+[DEBUG]: animal ID = 6 (8268705750936099813)
+[DEBUG]: An:6   Sire: 0 Dam: 0
+[DEBUG]: An:7137011385971415974 (1900713701138597141597419) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 7137011385971415974 to 7 (iter 6)
+[DEBUG]: animal ID = 7 (7137011385971415974)
+[DEBUG]: An:7   Sire: 0 Dam: 0
+[DEBUG]: An:537668234540616676 (190053766823454061667618)   Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 537668234540616676 to 8 (iter 7)
+[DEBUG]: animal ID = 8 (537668234540616676)
+[DEBUG]: An:8   Sire: 0 Dam: 0
+[DEBUG]: An:4862401939302706086 (1900486240193930270608619) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 4862401939302706086 to 9 (iter 8)
+[DEBUG]: animal ID = 9 (4862401939302706086)
+[DEBUG]: An:9   Sire: 0 Dam: 0
+[DEBUG]: An:6852511380275875059 (1900685251138027587505919) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 6852511380275875059 to 10 (iter 9)
+[DEBUG]: animal ID = 10 (6852511380275875059)
+[DEBUG]: An:10  Sire: 0 Dam: 0
+[DEBUG]: An:4554606065730358241 (1900455460606573035824119) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 4554606065730358241 to 11 (iter 10)
+[DEBUG]: animal ID = 11 (4554606065730358241)
+[DEBUG]: An:11  Sire: 0 Dam: 0
+[DEBUG]: An:8190824940211440609 (1900819082494021144060919) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 8190824940211440609 to 12 (iter 11)
+[DEBUG]: animal ID = 12 (8190824940211440609)
+[DEBUG]: An:12  Sire: 0 Dam: 0
+[DEBUG]: An:5328106389087383013 (1900532810638908738301319) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 5328106389087383013 to 13 (iter 12)
+[DEBUG]: animal ID = 13 (5328106389087383013)
+[DEBUG]: An:13  Sire: 0 Dam: 0
+[DEBUG]: An:2715929994198707685 (1900271592999419870768519) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 2715929994198707685 to 14 (iter 13)
+[DEBUG]: animal ID = 14 (2715929994198707685)
+[DEBUG]: An:14  Sire: 0 Dam: 0
+[DEBUG]: An:481994345089554476 (190048199434508955447618)   Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 481994345089554476 to 15 (iter 14)
+[DEBUG]: animal ID = 15 (481994345089554476)
+[DEBUG]: An:15  Sire: 0 Dam: 0
+[DEBUG]: An:4248806271037405605 (1900424880627103740560519) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 4248806271037405605 to 16 (iter 15)
+[DEBUG]: animal ID = 16 (4248806271037405605)
+[DEBUG]: An:16  Sire: 0 Dam: 0
+[DEBUG]: An:644012676537256812 (190064401267653725681218)   Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 644012676537256812 to 17 (iter 16)
+[DEBUG]: animal ID = 17 (644012676537256812)
+[DEBUG]: An:17  Sire: 0 Dam: 0
+[DEBUG]: An:8659629825303207279 (1900865962982530320727919) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 8659629825303207279 to 18 (iter 17)
+[DEBUG]: animal ID = 18 (8659629825303207279)
+[DEBUG]: An:18  Sire: 0 Dam: 0
+[DEBUG]: An:6356207169159777511 (1900635620716915977751119) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 6356207169159777511 to 19 (iter 18)
+[DEBUG]: animal ID = 19 (6356207169159777511)
+[DEBUG]: An:19  Sire: 0 Dam: 0
+[DEBUG]: An:456494354649729326 (190045649435464972932618)   Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 456494354649729326 to 20 (iter 19)
+[DEBUG]: animal ID = 20 (456494354649729326)
+[DEBUG]: An:20  Sire: 0 Dam: 0
+[DEBUG]: An:1174197121660635438 (1900117419712166063543819) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 1174197121660635438 to 21 (iter 20)
+[DEBUG]: animal ID = 21 (1174197121660635438)
+[DEBUG]: An:21  Sire: 0 Dam: 0
+[DEBUG]: An:7102050401217850286 (1900710205040121785028619) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 7102050401217850286 to 22 (iter 21)
+[DEBUG]: animal ID = 22 (7102050401217850286)
+[DEBUG]: An:22  Sire: 0 Dam: 0
+[DEBUG]: An:4806214055200180530 (1900480621405520018053019) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 4806214055200180530 to 23 (iter 22)
+[DEBUG]: animal ID = 23 (4806214055200180530)
+[DEBUG]: An:23  Sire: 0 Dam: 0
+[DEBUG]: An:2642092761767659566 (1900264209276176765956619) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 2642092761767659566 to 24 (iter 23)
+[DEBUG]: animal ID = 24 (2642092761767659566)
+[DEBUG]: An:24  Sire: 0 Dam: 0
+[DEBUG]: An:6203669701732792751 (1900620366970173279275119) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 6203669701732792751 to 25 (iter 24)
+[DEBUG]: animal ID = 25 (6203669701732792751)
+[DEBUG]: An:25  Sire: 0 Dam: 0
+[DEBUG]: An:153053339571600313 (190015305333957160031318)   Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 153053339571600313 to 26 (iter 25)
+[DEBUG]: animal ID = 26 (153053339571600313)
+[DEBUG]: An:26  Sire: 0 Dam: 0
+[DEBUG]: An:750426523932749285 (190075042652393274928518)   Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 750426523932749285 to 27 (iter 26)
+[DEBUG]: animal ID = 27 (750426523932749285)
+[DEBUG]: An:27  Sire: 0 Dam: 0
+[DEBUG]: An:6540185341083782379 (1900654018534108378237919) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 6540185341083782379 to 28 (iter 27)
+[DEBUG]: animal ID = 28 (6540185341083782379)
+[DEBUG]: An:28  Sire: 0 Dam: 0
+[DEBUG]: An:3341104379020897765 (1900334110437902089776519) Sire: 0 Dam: 0
+    [DEBUG]: Renumbering animal from 3341104379020897765 to 29 (iter 28)
+[DEBUG]: animal ID = 29 (3341104379020897765)
+[DEBUG]: An:29  Sire: 0 Dam: 0
+[DEBUG]: An:2619340377270447589 (1900261934037727044758919) Sire: 3341104379020897765   Dam: 2715929994198707685
+    [DEBUG]: Renumbering animal from 2619340377270447589 to 30 (iter 29)
+        [DEBUG]: Renumbering sire from 3341104379020897765 to 29
+        [DEBUG]: Renumbering dam from 2715929994198707685 to 14
+[DEBUG]: animal ID = 30 (2619340377270447589)
+[DEBUG]: An:30  Sire: 29    Dam: 14
+[DEBUG]: An:2072302027301866676 (1900207230202730186667619) Sire: 6540185341083782379   Dam: 5328106389087383013
+    [DEBUG]: Renumbering animal from 2072302027301866676 to 31 (iter 30)
+        [DEBUG]: Renumbering sire from 6540185341083782379 to 28
+        [DEBUG]: Renumbering dam from 5328106389087383013 to 13
+[DEBUG]: animal ID = 31 (2072302027301866676)
+[DEBUG]: An:31  Sire: 28    Dam: 13
+[DEBUG]: An:8206414421663369633 (1900820641442166336963319) Sire: 2619340377270447589   Dam: 2072302027301866676
+    [DEBUG]: Renumbering animal from 8206414421663369633 to 32 (iter 31)
+        [DEBUG]: Renumbering sire from 2619340377270447589 to 30
+        [DEBUG]: Renumbering dam from 2072302027301866676 to 31
+[DEBUG]: animal ID = 32 (8206414421663369633)
+[DEBUG]: An:32  Sire: 30    Dam: 31
+[DEBUG]: An:6939413601770466789 (1900693941360177046678919) Sire: 750426523932749285    Dam: 2715929994198707685
+    [DEBUG]: Renumbering animal from 6939413601770466789 to 33 (iter 32)
+        [DEBUG]: Renumbering sire from 750426523932749285 to 27
+        [DEBUG]: Renumbering dam from 2715929994198707685 to 14
+[DEBUG]: animal ID = 33 (6939413601770466789)
+[DEBUG]: An:33  Sire: 27    Dam: 14
+[DEBUG]: An:4348236458004531255 (1900434823645800453125519) Sire: 153053339571600313    Dam: 8190824940211440609
+    [DEBUG]: Renumbering animal from 4348236458004531255 to 34 (iter 33)
+        [DEBUG]: Renumbering sire from 153053339571600313 to 26
+        [DEBUG]: Renumbering dam from 8190824940211440609 to 12
+[DEBUG]: animal ID = 34 (4348236458004531255)
+[DEBUG]: An:34  Sire: 26    Dam: 12
+[DEBUG]: An:4567267633800559461 (1900456726763380055946119) Sire: 6939413601770466789   Dam: 4348236458004531255
+    [DEBUG]: Renumbering animal from 4567267633800559461 to 35 (iter 34)
+        [DEBUG]: Renumbering sire from 6939413601770466789 to 33
+        [DEBUG]: Renumbering dam from 4348236458004531255 to 34
+[DEBUG]: animal ID = 35 (4567267633800559461)
+[DEBUG]: An:35  Sire: 33    Dam: 34
+[DEBUG]: An:690151200743647860 (190069015120074364786018)   Sire: 8206414421663369633   Dam: 4567267633800559461
+    [DEBUG]: Renumbering animal from 690151200743647860 to 36 (iter 35)
+        [DEBUG]: Renumbering sire from 8206414421663369633 to 32
+        [DEBUG]: Renumbering dam from 4567267633800559461 to 35
+[DEBUG]: animal ID = 36 (690151200743647860)
+[DEBUG]: An:36  Sire: 32    Dam: 35
+[DEBUG]: An:8712075224177069300 (1900871207522417706930019) Sire: 6203669701732792751   Dam: 4554606065730358241
+    [DEBUG]: Renumbering animal from 8712075224177069300 to 37 (iter 36)
+        [DEBUG]: Renumbering sire from 6203669701732792751 to 25
+        [DEBUG]: Renumbering dam from 4554606065730358241 to 11
+[DEBUG]: animal ID = 37 (8712075224177069300)
+[DEBUG]: An:37  Sire: 25    Dam: 11
+[DEBUG]: An:7793801443051965669 (1900779380144305196566919) Sire: 2642092761767659566   Dam: 6852511380275875059
+    [DEBUG]: Renumbering animal from 7793801443051965669 to 38 (iter 37)
+        [DEBUG]: Renumbering sire from 2642092761767659566 to 24
+        [DEBUG]: Renumbering dam from 6852511380275875059 to 10
+[DEBUG]: animal ID = 38 (7793801443051965669)
+[DEBUG]: An:38  Sire: 24    Dam: 10
+[DEBUG]: An:9046712775669930290 (1900904671277566993029019) Sire: 8712075224177069300   Dam: 7793801443051965669
+    [DEBUG]: Renumbering animal from 9046712775669930290 to 39 (iter 38)
+        [DEBUG]: Renumbering sire from 8712075224177069300 to 37
+        [DEBUG]: Renumbering dam from 7793801443051965669 to 38
+[DEBUG]: animal ID = 39 (9046712775669930290)
+[DEBUG]: An:39  Sire: 37    Dam: 38
+[DEBUG]: An:8441513894652865446 (1900844151389465286544619) Sire: 4806214055200180530   Dam: 4862401939302706086
+    [DEBUG]: Renumbering animal from 8441513894652865446 to 40 (iter 39)
+        [DEBUG]: Renumbering sire from 4806214055200180530 to 23
+        [DEBUG]: Renumbering dam from 4862401939302706086 to 9
+[DEBUG]: animal ID = 40 (8441513894652865446)
+[DEBUG]: An:40  Sire: 23    Dam: 9
+[DEBUG]: An:427898701232344036 (190042789870123234403618)   Sire: 7102050401217850286   Dam: 537668234540616676
+    [DEBUG]: Renumbering animal from 427898701232344036 to 41 (iter 40)
+        [DEBUG]: Renumbering sire from 7102050401217850286 to 22
+        [DEBUG]: Renumbering dam from 537668234540616676 to 8
+[DEBUG]: animal ID = 41 (427898701232344036)
+[DEBUG]: An:41  Sire: 22    Dam: 8
+[DEBUG]: An:3092096162963786724 (1900309209616296378672419) Sire: 8441513894652865446   Dam: 427898701232344036
+    [DEBUG]: Renumbering animal from 3092096162963786724 to 42 (iter 41)
+        [DEBUG]: Renumbering sire from 8441513894652865446 to 40
+        [DEBUG]: Renumbering dam from 427898701232344036 to 41
+[DEBUG]: animal ID = 42 (3092096162963786724)
+[DEBUG]: An:42  Sire: 40    Dam: 41
+[DEBUG]: An:938361794685962489 (190093836179468596248918)   Sire: 9046712775669930290   Dam: 3092096162963786724
+    [DEBUG]: Renumbering animal from 938361794685962489 to 43 (iter 42)
+        [DEBUG]: Renumbering sire from 9046712775669930290 to 39
+        [DEBUG]: Renumbering dam from 3092096162963786724 to 42
+[DEBUG]: animal ID = 43 (938361794685962489)
+[DEBUG]: An:43  Sire: 39    Dam: 42
+[DEBUG]: An:5523557808241831142 (1900552355780824183114219) Sire: 690151200743647860    Dam: 938361794685962489
+    [DEBUG]: Renumbering animal from 5523557808241831142 to 44 (iter 43)
+        [DEBUG]: Renumbering sire from 690151200743647860 to 36
+        [DEBUG]: Renumbering dam from 938361794685962489 to 43
+[DEBUG]: animal ID = 44 (5523557808241831142)
+[DEBUG]: An:44  Sire: 36    Dam: 43
+[DEBUG]: An:4909228177291422637 (1900490922817729142263719) Sire: 1174197121660635438   Dam: 7137011385971415974
+    [DEBUG]: Renumbering animal from 4909228177291422637 to 45 (iter 44)
+        [DEBUG]: Renumbering sire from 1174197121660635438 to 21
+        [DEBUG]: Renumbering dam from 7137011385971415974 to 7
+[DEBUG]: animal ID = 45 (4909228177291422637)
+[DEBUG]: An:45  Sire: 21    Dam: 7
+[DEBUG]: An:8789313808696826465 (1900878931380869682646519) Sire: 456494354649729326    Dam: 8268705750936099813
+    [DEBUG]: Renumbering animal from 8789313808696826465 to 46 (iter 45)
+        [DEBUG]: Renumbering sire from 456494354649729326 to 20
+        [DEBUG]: Renumbering dam from 8268705750936099813 to 6
+[DEBUG]: animal ID = 46 (8789313808696826465)
+[DEBUG]: An:46  Sire: 20    Dam: 6
+[DEBUG]: An:2550269299911969326 (1900255026929991196932619) Sire: 4909228177291422637   Dam: 8789313808696826465
+    [DEBUG]: Renumbering animal from 2550269299911969326 to 47 (iter 46)
+        [DEBUG]: Renumbering sire from 4909228177291422637 to 45
+        [DEBUG]: Renumbering dam from 8789313808696826465 to 46
+[DEBUG]: animal ID = 47 (2550269299911969326)
+[DEBUG]: An:47  Sire: 45    Dam: 46
+[DEBUG]: An:169426728715767015 (190016942672871576701518)   Sire: 6356207169159777511   Dam: 3145177199411154151
+    [DEBUG]: Renumbering animal from 169426728715767015 to 48 (iter 47)
+        [DEBUG]: Renumbering sire from 6356207169159777511 to 19
+        [DEBUG]: Renumbering dam from 3145177199411154151 to 5
+[DEBUG]: animal ID = 48 (169426728715767015)
+[DEBUG]: An:48  Sire: 19    Dam: 5
+[DEBUG]: An:5121205533345 (19000512120553334513)    Sire: 8659629825303207279   Dam: 1276088872910105253
+    [DEBUG]: Renumbering animal from 5121205533345 to 49 (iter 48)
+        [DEBUG]: Renumbering sire from 8659629825303207279 to 18
+        [DEBUG]: Renumbering dam from 1276088872910105253 to 4
+[DEBUG]: animal ID = 49 (5121205533345)
+[DEBUG]: An:49  Sire: 18    Dam: 4
+[DEBUG]: An:373821819502631846 (190037382181950263184618)   Sire: 169426728715767015    Dam: 5121205533345
+    [DEBUG]: Renumbering animal from 373821819502631846 to 50 (iter 49)
+        [DEBUG]: Renumbering sire from 169426728715767015 to 48
+        [DEBUG]: Renumbering dam from 5121205533345 to 49
+[DEBUG]: animal ID = 50 (373821819502631846)
+[DEBUG]: An:50  Sire: 48    Dam: 49
+[DEBUG]: An:1505669635222223209 (1900150566963522222320919) Sire: 2550269299911969326   Dam: 373821819502631846
+    [DEBUG]: Renumbering animal from 1505669635222223209 to 51 (iter 50)
+        [DEBUG]: Renumbering sire from 2550269299911969326 to 47
+        [DEBUG]: Renumbering dam from 373821819502631846 to 50
+[DEBUG]: animal ID = 51 (1505669635222223209)
+[DEBUG]: An:51  Sire: 47    Dam: 50
+[DEBUG]: An:3570942135095659372 (1900357094213509565937219) Sire: 644012676537256812    Dam: 1762754753958906732
+    [DEBUG]: Renumbering animal from 3570942135095659372 to 52 (iter 51)
+        [DEBUG]: Renumbering sire from 644012676537256812 to 17
+        [DEBUG]: Renumbering dam from 1762754753958906732 to 3
+[DEBUG]: animal ID = 52 (3570942135095659372)
+[DEBUG]: An:52  Sire: 17    Dam: 3
+[DEBUG]: An:4791275325727051053 (1900479127532572705105319) Sire: 169426728715767015    Dam: 3570942135095659372
+    [DEBUG]: Renumbering animal from 4791275325727051053 to 53 (iter 52)
+        [DEBUG]: Renumbering sire from 169426728715767015 to 48
+        [DEBUG]: Renumbering dam from 3570942135095659372 to 52
+[DEBUG]: animal ID = 53 (4791275325727051053)
+[DEBUG]: An:53  Sire: 48    Dam: 52
+[DEBUG]: An:790984424690760999 (190079098442469076099918)   Sire: 4248806271037405605   Dam: 3215953890156612836
+    [DEBUG]: Renumbering animal from 790984424690760999 to 54 (iter 53)
+        [DEBUG]: Renumbering sire from 4248806271037405605 to 16
+        [DEBUG]: Renumbering dam from 3215953890156612836 to 2
+[DEBUG]: animal ID = 54 (790984424690760999)
+[DEBUG]: An:54  Sire: 16    Dam: 2
+[DEBUG]: An:5925207705673157863 (1900592520770567315786319) Sire: 481994345089554476    Dam: 7529335822802131878
+    [DEBUG]: Renumbering animal from 5925207705673157863 to 55 (iter 54)
+        [DEBUG]: Renumbering sire from 481994345089554476 to 15
+        [DEBUG]: Renumbering dam from 7529335822802131878 to 1
+[DEBUG]: animal ID = 55 (5925207705673157863)
+[DEBUG]: An:55  Sire: 15    Dam: 1
+[DEBUG]: An:5959889956490857703 (1900595988995649085770319) Sire: 790984424690760999    Dam: 5925207705673157863
+    [DEBUG]: Renumbering animal from 5959889956490857703 to 56 (iter 55)
+        [DEBUG]: Renumbering sire from 790984424690760999 to 54
+        [DEBUG]: Renumbering dam from 5925207705673157863 to 55
+[DEBUG]: animal ID = 56 (5959889956490857703)
+[DEBUG]: An:56  Sire: 54    Dam: 55
+[DEBUG]: An:1668599308451204083 (1900166859930845120408319) Sire: 4791275325727051053   Dam: 5959889956490857703
+    [DEBUG]: Renumbering animal from 1668599308451204083 to 57 (iter 56)
+        [DEBUG]: Renumbering sire from 4791275325727051053 to 53
+        [DEBUG]: Renumbering dam from 5959889956490857703 to 56
+[DEBUG]: animal ID = 57 (1668599308451204083)
+[DEBUG]: An:57  Sire: 53    Dam: 56
+[DEBUG]: An:6548222738069924140 (1900654822273806992414019) Sire: 1505669635222223209   Dam: 1668599308451204083
+    [DEBUG]: Renumbering animal from 6548222738069924140 to 58 (iter 57)
+        [DEBUG]: Renumbering sire from 1505669635222223209 to 51
+        [DEBUG]: Renumbering dam from 1668599308451204083 to 57
+[DEBUG]: animal ID = 58 (6548222738069924140)
+[DEBUG]: An:58  Sire: 51    Dam: 57
+[DEBUG]: An:6396216486474230060 (1900639621648647423006019) Sire: 5523557808241831142   Dam: 6548222738069924140
+    [DEBUG]: Renumbering animal from 6396216486474230060 to 59 (iter 58)
+        [DEBUG]: Renumbering sire from 5523557808241831142 to 44
+        [DEBUG]: Renumbering dam from 6548222738069924140 to 58
+[DEBUG]: animal ID = 59 (6396216486474230060)
+[DEBUG]: An:59  Sire: 44    Dam: 58
+------------------------------------------------------------------------------------------------------------------------
+[DEBUG]: pyp_utils/renumber(): Updating the pedigree metadata...
+[DEBUG]: pyp_utils/renumber(): pedobj is of type <class 'PyPedal.pyp_newclasses.NewPedigree'>
+{'kw': {'messages': 'verbose', 'pedfile': '../test_files/newfoundland.ped', 'pedformat': 'ASD', 'pedname': 'Newfoundland Pedigree', 'renumber': '1', 'sepchar': ',', 'set_sexes': '1', 'debug_messages': '1', 'simulate_pedigree': 0, 'pedigree_save': 0, 'has_header': 0, 'reorder': 0, 'auto_renumber': False, 'reorder_max_rounds': 100, 'pedigree_is_renumbered': 0, 'set_generations': 0, 'gen_coeff': 0, 'set_ancestors': 0, 'set_alleles': 0, 'set_offspring': 0, 'pedcomp': 0, 'pedcomp_gens': 3, 'alleles_sepchar': '/', 'counter': 1000, 'slow_reorder': 1, 'missing_bdate': '01011900', 'missing_byear': 1900, 'missing_parent': 0, 'missing_name': 'Unknown_Name', 'missing_breed': 'Unknown_Breed', 'missing_herd': 'Unknown_Herd', 'missing_sex': 'u', 'missing_inbreeding': 0.0, 'missing_alive': 0, 'missing_age': -999, 'missing_gen': -999.0, 'missing_gencoeff': -999.0, 'missing_igen': -999.0, 'missing_pedcomp': -999.0, 'missing_alleles': ['', ''], 'missing_userfield': '', 'missing_value': -999.0, 'file_io': '1', 'form_nrm': 0, 'nrm_method': 'nrm', 'nrm_format': 'text', 'f_computed': 0, 'log_ped_lines': 0, 'log_long_filenames': 0, 'pedigree_summary': 1, 'animal_type': 'new', 'filetag': 'untitled_pedigree', 'database_name': 'pypedal', 'database_table': 'untitled_pedigree', 'database_debug': False, 'database_type': 'sqlite', 'database_host': 'localhost', 'database_user': 'anonymous', 'database_passwd': 'anonymous', 'database_port': '', 'database_sql': 'SELECT * FROM %s', 'foundercoi': 0.0, 'paper_size': 'letter', 'default_unit': 'inch', 'default_fontsize': 10, 'default_report': 'untitled_pedigree', 'matrix_type': 'dense', 'newanimal_caller': 'loader', 'trait_names': [], 'trait_auto_name': 1, 'trait_count': 0, 'match_rule': 'asd', 'logfile': 'untitled_pedigree.log'}, 'pedigree': [<PyPedal.pyp_newclasses.NewAnimal object at 0x17526e790>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e590>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e490>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e390>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e290>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e090>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526df90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526de90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dcd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dc50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526da50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d850>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d650>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12d87b510>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10a644f90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17268e550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12c79b710>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169cd5cd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bb90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bc90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525a8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525be90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12f6aca90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ef90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c0d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c210>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10fc233d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c410>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c610>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b5d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525ba90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169d32810>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cad0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c350>], 'metadata': <PyPedal.pyp_newclasses.PedigreeMetadata object at 0x174dd2a10>, 'idmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'backmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'namemap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 'Highland Bear of Pouch Cove': 3341104379020897765, 'Schooners Yosef of Newton Ark': 6540185341083782379, 'Amitys Bearfoot of Pouch Cove': 750426523932749285, 'Spokinewfs Cariboo Cowboy': 153053339571600313, 'Nordbjorns Gringo': 6203669701732792751, 'Arvals Nordstrands Talisman': 2642092761767659566, 'Hector van het Heidemeer': 4806214055200180530, 'Fjordblinks Hakon': 7102050401217850286, 'Aaron van het Hoogveen': 1174197121660635438, 'Boedha van het Hoogveen': 456494354649729326, 'Enrik von Luxemburg': 6356207169159777511, 'La Bellas Rigoletto': 8659629825303207279, 'As-Dur vom Weserwall': 644012676537256812, 'Graaf Gabor van Overessinge': 4248806271037405605, 'Benno von Ammertal': 481994345089554476, 'Ad Lib of Pouch Cove': 2715929994198707685, 'Souvenir of Pouch Cove': 5328106389087383013, 'Lifebuoys Penny of Bubbelina': 8190824940211440609, 'Jehaj Vilhelmina': 4554606065730358241, 'Black Domes Miss Caminickers': 6852511380275875059, 'Ellis-Bijou of the Thatch Roof': 4862401939302706086, 'Fenja vom Riesrand': 537668234540616676, 'Gracia van de Papenhof': 7137011385971415974, 'Dukeroys Daphne': 8268705750936099813, 'Zarah von Luxemburg': 3145177199411154151, 'Frederikke': 1276088872910105253, 'Bonny vom Weserwall': 1762754753958906732, 'Fleur of the Coastguard': 3215953890156612836, 'Ina vom Forellenhof': 7529335822802131878}, 'namebackmap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 'Highland Bear of Pouch Cove', 6540185341083782379: 'Schooners Yosef of Newton Ark', 750426523932749285: 'Amitys Bearfoot of Pouch Cove', 153053339571600313: 'Spokinewfs Cariboo Cowboy', 6203669701732792751: 'Nordbjorns Gringo', 2642092761767659566: 'Arvals Nordstrands Talisman', 4806214055200180530: 'Hector van het Heidemeer', 7102050401217850286: 'Fjordblinks Hakon', 1174197121660635438: 'Aaron van het Hoogveen', 456494354649729326: 'Boedha van het Hoogveen', 6356207169159777511: 'Enrik von Luxemburg', 8659629825303207279: 'La Bellas Rigoletto', 644012676537256812: 'As-Dur vom Weserwall', 4248806271037405605: 'Graaf Gabor van Overessinge', 481994345089554476: 'Benno von Ammertal', 2715929994198707685: 'Ad Lib of Pouch Cove', 5328106389087383013: 'Souvenir of Pouch Cove', 8190824940211440609: 'Lifebuoys Penny of Bubbelina', 4554606065730358241: 'Jehaj Vilhelmina', 6852511380275875059: 'Black Domes Miss Caminickers', 4862401939302706086: 'Ellis-Bijou of the Thatch Roof', 537668234540616676: 'Fenja vom Riesrand', 7137011385971415974: 'Gracia van de Papenhof', 8268705750936099813: 'Dukeroys Daphne', 3145177199411154151: 'Zarah von Luxemburg', 1276088872910105253: 'Frederikke', 1762754753958906732: 'Bonny vom Weserwall', 3215953890156612836: 'Fleur of the Coastguard', 7529335822802131878: 'Ina vom Forellenhof'}, 'stringmap': {}, 'starline': '********************************************************************************', 'pedformat_codes': ['a', 's', 'd', 'g', 'x', 'b', 'f', 'r', 'n', 'y', 'l', 'e', 'p', 'A', 'S', 'D', 'L', 'Z', 'h', 'H', 'u', 'T'], 'new_animal_attr': {'a': 'animalID', 's': 'sireID', 'd': 'damID', 'g': 'gen', 'x': 'sex', 'b': 'bd', 'f': 'fa', 'r': 'breed', 'n': 'name', 'y': 'by', 'l': 'alive', 'e': 'age', 'p': 'gencoeff', 'A': 'name', 'S': 'sireName', 'D': 'damName', 'L': 'alleles', 'Z': False, 'h': 'herd', 'H': 'originalHerd', 'u': 'userField', 'T': 'traits'}}
+    [INFO]:  Instantiating a new PedigreeMetadata() object...
+    [INFO]:  Naming the Pedigree()...
+    [INFO]:  Assigning a filename...
+    [INFO]:  Attaching a pedigree...
+    [INFO]:  Setting the pedcode...
+    [INFO]:  Counting the number of animals in the pedigree...
+    [INFO]:  Counting and finding unique sires...
+    [INFO]:  Counting and finding unique dams...
+    [INFO]:  Setting renumbered flag...
+    [INFO]:  Counting and finding unique generations...
+    [INFO]:  Counting and finding unique birthyears...
+    [INFO]:  Counting and finding unique founders...
+    [INFO]:  Counting and finding unique herds...
+    [INFO]:  Detaching pedigree...
+        [INFO]: Updating ID map at Fri Dec  5 17:25:09 2025
+------------------------------------------------------------------------------------------------------------------------
+    [DEBUG]: pyp_newclasses/renumber(): Updating ID map at Fri Dec  5 17:25:09 2025
+    [DEBUG]: pyp_newclasses/renumber(): pedobj is of type <class 'PyPedal.pyp_newclasses.NewPedigree'>
+{'kw': {'messages': 'verbose', 'pedfile': '../test_files/newfoundland.ped', 'pedformat': 'ASD', 'pedname': 'Newfoundland Pedigree', 'renumber': '1', 'sepchar': ',', 'set_sexes': '1', 'debug_messages': '1', 'simulate_pedigree': 0, 'pedigree_save': 0, 'has_header': 0, 'reorder': 0, 'auto_renumber': False, 'reorder_max_rounds': 100, 'pedigree_is_renumbered': 0, 'set_generations': 0, 'gen_coeff': 0, 'set_ancestors': 0, 'set_alleles': 0, 'set_offspring': 0, 'pedcomp': 0, 'pedcomp_gens': 3, 'alleles_sepchar': '/', 'counter': 1000, 'slow_reorder': 1, 'missing_bdate': '01011900', 'missing_byear': 1900, 'missing_parent': 0, 'missing_name': 'Unknown_Name', 'missing_breed': 'Unknown_Breed', 'missing_herd': 'Unknown_Herd', 'missing_sex': 'u', 'missing_inbreeding': 0.0, 'missing_alive': 0, 'missing_age': -999, 'missing_gen': -999.0, 'missing_gencoeff': -999.0, 'missing_igen': -999.0, 'missing_pedcomp': -999.0, 'missing_alleles': ['', ''], 'missing_userfield': '', 'missing_value': -999.0, 'file_io': '1', 'form_nrm': 0, 'nrm_method': 'nrm', 'nrm_format': 'text', 'f_computed': 0, 'log_ped_lines': 0, 'log_long_filenames': 0, 'pedigree_summary': 1, 'animal_type': 'new', 'filetag': 'untitled_pedigree', 'database_name': 'pypedal', 'database_table': 'untitled_pedigree', 'database_debug': False, 'database_type': 'sqlite', 'database_host': 'localhost', 'database_user': 'anonymous', 'database_passwd': 'anonymous', 'database_port': '', 'database_sql': 'SELECT * FROM %s', 'foundercoi': 0.0, 'paper_size': 'letter', 'default_unit': 'inch', 'default_fontsize': 10, 'default_report': 'untitled_pedigree', 'matrix_type': 'dense', 'newanimal_caller': 'loader', 'trait_names': [], 'trait_auto_name': 1, 'trait_count': 0, 'match_rule': 'asd', 'logfile': 'untitled_pedigree.log'}, 'pedigree': [<PyPedal.pyp_newclasses.NewAnimal object at 0x17526e790>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e590>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e490>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e390>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e290>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e090>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526df90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526de90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dcd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dc50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526da50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d850>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d650>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12d87b510>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10a644f90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17268e550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12c79b710>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169cd5cd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bb90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bc90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525a8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525be90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12f6aca90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ef90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c0d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c210>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10fc233d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c410>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c610>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b5d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525ba90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169d32810>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cad0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c350>], 'metadata': <PyPedal.pyp_newclasses.PedigreeMetadata object at 0x17268e250>, 'idmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'backmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'namemap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 'Highland Bear of Pouch Cove': 3341104379020897765, 'Schooners Yosef of Newton Ark': 6540185341083782379, 'Amitys Bearfoot of Pouch Cove': 750426523932749285, 'Spokinewfs Cariboo Cowboy': 153053339571600313, 'Nordbjorns Gringo': 6203669701732792751, 'Arvals Nordstrands Talisman': 2642092761767659566, 'Hector van het Heidemeer': 4806214055200180530, 'Fjordblinks Hakon': 7102050401217850286, 'Aaron van het Hoogveen': 1174197121660635438, 'Boedha van het Hoogveen': 456494354649729326, 'Enrik von Luxemburg': 6356207169159777511, 'La Bellas Rigoletto': 8659629825303207279, 'As-Dur vom Weserwall': 644012676537256812, 'Graaf Gabor van Overessinge': 4248806271037405605, 'Benno von Ammertal': 481994345089554476, 'Ad Lib of Pouch Cove': 2715929994198707685, 'Souvenir of Pouch Cove': 5328106389087383013, 'Lifebuoys Penny of Bubbelina': 8190824940211440609, 'Jehaj Vilhelmina': 4554606065730358241, 'Black Domes Miss Caminickers': 6852511380275875059, 'Ellis-Bijou of the Thatch Roof': 4862401939302706086, 'Fenja vom Riesrand': 537668234540616676, 'Gracia van de Papenhof': 7137011385971415974, 'Dukeroys Daphne': 8268705750936099813, 'Zarah von Luxemburg': 3145177199411154151, 'Frederikke': 1276088872910105253, 'Bonny vom Weserwall': 1762754753958906732, 'Fleur of the Coastguard': 3215953890156612836, 'Ina vom Forellenhof': 7529335822802131878}, 'namebackmap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 'Highland Bear of Pouch Cove', 6540185341083782379: 'Schooners Yosef of Newton Ark', 750426523932749285: 'Amitys Bearfoot of Pouch Cove', 153053339571600313: 'Spokinewfs Cariboo Cowboy', 6203669701732792751: 'Nordbjorns Gringo', 2642092761767659566: 'Arvals Nordstrands Talisman', 4806214055200180530: 'Hector van het Heidemeer', 7102050401217850286: 'Fjordblinks Hakon', 1174197121660635438: 'Aaron van het Hoogveen', 456494354649729326: 'Boedha van het Hoogveen', 6356207169159777511: 'Enrik von Luxemburg', 8659629825303207279: 'La Bellas Rigoletto', 644012676537256812: 'As-Dur vom Weserwall', 4248806271037405605: 'Graaf Gabor van Overessinge', 481994345089554476: 'Benno von Ammertal', 2715929994198707685: 'Ad Lib of Pouch Cove', 5328106389087383013: 'Souvenir of Pouch Cove', 8190824940211440609: 'Lifebuoys Penny of Bubbelina', 4554606065730358241: 'Jehaj Vilhelmina', 6852511380275875059: 'Black Domes Miss Caminickers', 4862401939302706086: 'Ellis-Bijou of the Thatch Roof', 537668234540616676: 'Fenja vom Riesrand', 7137011385971415974: 'Gracia van de Papenhof', 8268705750936099813: 'Dukeroys Daphne', 3145177199411154151: 'Zarah von Luxemburg', 1276088872910105253: 'Frederikke', 1762754753958906732: 'Bonny vom Weserwall', 3215953890156612836: 'Fleur of the Coastguard', 7529335822802131878: 'Ina vom Forellenhof'}, 'stringmap': {}, 'starline': '********************************************************************************', 'pedformat_codes': ['a', 's', 'd', 'g', 'x', 'b', 'f', 'r', 'n', 'y', 'l', 'e', 'p', 'A', 'S', 'D', 'L', 'Z', 'h', 'H', 'u', 'T'], 'new_animal_attr': {'a': 'animalID', 's': 'sireID', 'd': 'damID', 'g': 'gen', 'x': 'sex', 'b': 'bd', 'f': 'fa', 'r': 'breed', 'n': 'name', 'y': 'by', 'l': 'alive', 'e': 'age', 'p': 'gencoeff', 'A': 'name', 'S': 'sireName', 'D': 'damName', 'L': 'alleles', 'Z': False, 'h': 'herd', 'H': 'originalHerd', 'u': 'userField', 'T': 'traits'}}
+------------------------------------------------------------------------------------------------------------------------
+    [DEBUG]: pyp_newclasses/updateidmap(): Updating ID map at Fri Dec  5 17:25:09 2025
+    [DEBUG]: pyp_newclasses/updateidmap(): pedobj is of type <class 'PyPedal.pyp_newclasses.NewPedigree'>
+{'kw': {'messages': 'verbose', 'pedfile': '../test_files/newfoundland.ped', 'pedformat': 'ASD', 'pedname': 'Newfoundland Pedigree', 'renumber': '1', 'sepchar': ',', 'set_sexes': '1', 'debug_messages': '1', 'simulate_pedigree': 0, 'pedigree_save': 0, 'has_header': 0, 'reorder': 0, 'auto_renumber': False, 'reorder_max_rounds': 100, 'pedigree_is_renumbered': 0, 'set_generations': 0, 'gen_coeff': 0, 'set_ancestors': 0, 'set_alleles': 0, 'set_offspring': 0, 'pedcomp': 0, 'pedcomp_gens': 3, 'alleles_sepchar': '/', 'counter': 1000, 'slow_reorder': 1, 'missing_bdate': '01011900', 'missing_byear': 1900, 'missing_parent': 0, 'missing_name': 'Unknown_Name', 'missing_breed': 'Unknown_Breed', 'missing_herd': 'Unknown_Herd', 'missing_sex': 'u', 'missing_inbreeding': 0.0, 'missing_alive': 0, 'missing_age': -999, 'missing_gen': -999.0, 'missing_gencoeff': -999.0, 'missing_igen': -999.0, 'missing_pedcomp': -999.0, 'missing_alleles': ['', ''], 'missing_userfield': '', 'missing_value': -999.0, 'file_io': '1', 'form_nrm': 0, 'nrm_method': 'nrm', 'nrm_format': 'text', 'f_computed': 0, 'log_ped_lines': 0, 'log_long_filenames': 0, 'pedigree_summary': 1, 'animal_type': 'new', 'filetag': 'untitled_pedigree', 'database_name': 'pypedal', 'database_table': 'untitled_pedigree', 'database_debug': False, 'database_type': 'sqlite', 'database_host': 'localhost', 'database_user': 'anonymous', 'database_passwd': 'anonymous', 'database_port': '', 'database_sql': 'SELECT * FROM %s', 'foundercoi': 0.0, 'paper_size': 'letter', 'default_unit': 'inch', 'default_fontsize': 10, 'default_report': 'untitled_pedigree', 'matrix_type': 'dense', 'newanimal_caller': 'loader', 'trait_names': [], 'trait_auto_name': 1, 'trait_count': 0, 'match_rule': 'asd', 'logfile': 'untitled_pedigree.log'}, 'pedigree': [<PyPedal.pyp_newclasses.NewAnimal object at 0x17526e790>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e590>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e490>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e390>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e290>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526e090>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526df90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526de90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dcd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526dc50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526da50>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d850>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d650>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d350>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526d150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12d87b510>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10a644f90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17268e550>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12c79b710>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169cd5cd0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bb90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bc90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525a8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525bd90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525be90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12f6aca90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526ef90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c0d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c150>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b450>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c210>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c310>, <PyPedal.pyp_newclasses.NewAnimal object at 0x10fc233d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b190>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c410>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c610>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b5d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c690>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c8d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525ba90>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x169d32810>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526c9d0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17526cad0>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b950>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b750>, <PyPedal.pyp_newclasses.NewAnimal object at 0x17525b250>, <PyPedal.pyp_newclasses.NewAnimal object at 0x12dc2c350>], 'metadata': <PyPedal.pyp_newclasses.PedigreeMetadata object at 0x17268e250>, 'idmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'backmap': {'King von der Dussel': 'King von der Dussel', 'Kaptn Kvols von Widdersdorf': 'Kaptn Kvols von Widdersdorf', 'Cara von der Dussel': 'Cara von der Dussel', 'Bjornebandens Fit for Fight': 'Bjornebandens Fit for Fight', 'New-Fuur-Lands Rosemarys Baby': 'New-Fuur-Lands Rosemarys Baby', 'Eskapades Barcardi': 'Eskapades Barcardi', 'Anuschka von St. Clemens': 'Anuschka von St. Clemens', 'Pouch Coves Patriot of Cayuga': 'Pouch Coves Patriot of Cayuga', 'Bjornebandens Here comes Trouble': 'Bjornebandens Here comes Trouble', 'New-Fuur-Lands Block Buster': 'New-Fuur-Lands Block Buster', 'Biserka vom Riesrand': 'Biserka vom Riesrand', 'Bastiaan van Beerkestein': 'Bastiaan van Beerkestein', 'Eskapade vom Heckenhof': 'Eskapade vom Heckenhof', 'Bronco vom Derner Baum': 'Bronco vom Derner Baum', 'Caress-Bar vom Belmer Berg': 'Caress-Bar vom Belmer Berg', 'Johns Big Ben of Pouch Cove': 'Johns Big Ben of Pouch Cove', 'Pouch Coves Treasure Chest': 'Pouch Coves Treasure Chest', 'Yankee Peddler of Pouch Cove': 'Yankee Peddler of Pouch Cove', 'Bubbelinas Dekanawida Squaw': 'Bubbelinas Dekanawida Squaw', 'Jehaj Albert': 'Jehaj Albert', 'Black Domes Handle with Care': 'Black Domes Handle with Care', 'Ursus of the Thatch Roof': 'Ursus of the Thatch Roof', 'Liisa vom Riesrand': 'Liisa vom Riesrand', 'Fastwin of the Dark Blossom': 'Fastwin of the Dark Blossom', 'Dukeroys Elske Bertha': 'Dukeroys Elske Bertha', 'Graf von Luxemburg': 'Graf von Luxemburg', 'Katinka': 'Katinka', 'Iris vom Weserwall': 'Iris vom Weserwall', 'Fandi van de Knijpsbrug': 'Fandi van de Knijpsbrug', 'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 3341104379020897765, 6540185341083782379: 6540185341083782379, 750426523932749285: 750426523932749285, 153053339571600313: 153053339571600313, 6203669701732792751: 6203669701732792751, 2642092761767659566: 2642092761767659566, 4806214055200180530: 4806214055200180530, 7102050401217850286: 7102050401217850286, 1174197121660635438: 1174197121660635438, 456494354649729326: 456494354649729326, 6356207169159777511: 6356207169159777511, 8659629825303207279: 8659629825303207279, 644012676537256812: 644012676537256812, 4248806271037405605: 4248806271037405605, 481994345089554476: 481994345089554476, 2715929994198707685: 2715929994198707685, 5328106389087383013: 5328106389087383013, 8190824940211440609: 8190824940211440609, 4554606065730358241: 4554606065730358241, 6852511380275875059: 6852511380275875059, 4862401939302706086: 4862401939302706086, 537668234540616676: 537668234540616676, 7137011385971415974: 7137011385971415974, 8268705750936099813: 8268705750936099813, 3145177199411154151: 3145177199411154151, 1276088872910105253: 1276088872910105253, 1762754753958906732: 1762754753958906732, 3215953890156612836: 3215953890156612836, 7529335822802131878: 7529335822802131878}, 'namemap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 'Highland Bear of Pouch Cove': 3341104379020897765, 'Schooners Yosef of Newton Ark': 6540185341083782379, 'Amitys Bearfoot of Pouch Cove': 750426523932749285, 'Spokinewfs Cariboo Cowboy': 153053339571600313, 'Nordbjorns Gringo': 6203669701732792751, 'Arvals Nordstrands Talisman': 2642092761767659566, 'Hector van het Heidemeer': 4806214055200180530, 'Fjordblinks Hakon': 7102050401217850286, 'Aaron van het Hoogveen': 1174197121660635438, 'Boedha van het Hoogveen': 456494354649729326, 'Enrik von Luxemburg': 6356207169159777511, 'La Bellas Rigoletto': 8659629825303207279, 'As-Dur vom Weserwall': 644012676537256812, 'Graaf Gabor van Overessinge': 4248806271037405605, 'Benno von Ammertal': 481994345089554476, 'Ad Lib of Pouch Cove': 2715929994198707685, 'Souvenir of Pouch Cove': 5328106389087383013, 'Lifebuoys Penny of Bubbelina': 8190824940211440609, 'Jehaj Vilhelmina': 4554606065730358241, 'Black Domes Miss Caminickers': 6852511380275875059, 'Ellis-Bijou of the Thatch Roof': 4862401939302706086, 'Fenja vom Riesrand': 537668234540616676, 'Gracia van de Papenhof': 7137011385971415974, 'Dukeroys Daphne': 8268705750936099813, 'Zarah von Luxemburg': 3145177199411154151, 'Frederikke': 1276088872910105253, 'Bonny vom Weserwall': 1762754753958906732, 'Fleur of the Coastguard': 3215953890156612836, 'Ina vom Forellenhof': 7529335822802131878}, 'namebackmap': {'Alegra-Bar vom Belmer Berg': 'Alegra-Bar vom Belmer Berg', 3341104379020897765: 'Highland Bear of Pouch Cove', 6540185341083782379: 'Schooners Yosef of Newton Ark', 750426523932749285: 'Amitys Bearfoot of Pouch Cove', 153053339571600313: 'Spokinewfs Cariboo Cowboy', 6203669701732792751: 'Nordbjorns Gringo', 2642092761767659566: 'Arvals Nordstrands Talisman', 4806214055200180530: 'Hector van het Heidemeer', 7102050401217850286: 'Fjordblinks Hakon', 1174197121660635438: 'Aaron van het Hoogveen', 456494354649729326: 'Boedha van het Hoogveen', 6356207169159777511: 'Enrik von Luxemburg', 8659629825303207279: 'La Bellas Rigoletto', 644012676537256812: 'As-Dur vom Weserwall', 4248806271037405605: 'Graaf Gabor van Overessinge', 481994345089554476: 'Benno von Ammertal', 2715929994198707685: 'Ad Lib of Pouch Cove', 5328106389087383013: 'Souvenir of Pouch Cove', 8190824940211440609: 'Lifebuoys Penny of Bubbelina', 4554606065730358241: 'Jehaj Vilhelmina', 6852511380275875059: 'Black Domes Miss Caminickers', 4862401939302706086: 'Ellis-Bijou of the Thatch Roof', 537668234540616676: 'Fenja vom Riesrand', 7137011385971415974: 'Gracia van de Papenhof', 8268705750936099813: 'Dukeroys Daphne', 3145177199411154151: 'Zarah von Luxemburg', 1276088872910105253: 'Frederikke', 1762754753958906732: 'Bonny vom Weserwall', 3215953890156612836: 'Fleur of the Coastguard', 7529335822802131878: 'Ina vom Forellenhof'}, 'stringmap': {}, 'starline': '********************************************************************************', 'pedformat_codes': ['a', 's', 'd', 'g', 'x', 'b', 'f', 'r', 'n', 'y', 'l', 'e', 'p', 'A', 'S', 'D', 'L', 'Z', 'h', 'H', 'u', 'T'], 'new_animal_attr': {'a': 'animalID', 's': 'sireID', 'd': 'damID', 'g': 'gen', 'x': 'sex', 'b': 'bd', 'f': 'fa', 'r': 'breed', 'n': 'name', 'y': 'by', 'l': 'alive', 'e': 'age', 'p': 'gencoeff', 'A': 'name', 'S': 'sireName', 'D': 'damName', 'L': 'alleles', 'Z': False, 'h': 'herd', 'H': 'originalHerd', 'u': 'userField', 'T': 'traits'}}
+    [INFO]: Assigning offspring at Fri Dec  5 17:25:09 2025
+        [pyp_nrm/fast_a_matrix()] Started forming animal, sire, and dam lists at Fri Dec  5 17:25:09 2025
+        [pyp_nrm/fast_a_matrix()] Finished forming animal, sire, and dam lists at Fri Dec  5 17:25:09 2025
+        [pyp_nrm/fast_a_matrix()] Started computing A at Fri Dec  5 17:25:09 2025
+_animals:  {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8, 8: 9, 9: 10, 10: 11, 11: 12, 12: 13, 13: 14, 14: 15, 15: 16, 16: 17, 17: 18, 18: 19, 19: 20, 20: 21, 21: 22, 22: 23, 23: 24, 24: 25, 25: 26, 26: 27, 27: 28, 28: 29, 29: 30, 30: 31, 31: 32, 32: 33, 33: 34, 34: 35, 35: 36, 36: 37, 37: 38, 38: 39, 39: 40, 40: 41, 41: 42, 42: 43, 43: 44, 44: 45, 45: 46, 46: 47, 47: 48, 48: 49, 49: 50, 50: 51, 51: 52, 52: 53, 53: 54, 54: 55, 55: 56, 56: 57, 57: 58, 58: 59}
+_sires:  {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0, 26: 0, 27: 0, 28: 0, 29: 29, 30: 28, 31: 30, 32: 27, 33: 26, 34: 33, 35: 32, 36: 25, 37: 24, 38: 37, 39: 23, 40: 22, 41: 40, 42: 39, 43: 36, 44: 21, 45: 20, 46: 45, 47: 19, 48: 18, 49: 48, 50: 47, 51: 17, 52: 48, 53: 16, 54: 15, 55: 54, 56: 53, 57: 51, 58: 44}
+_dams:  {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0, 26: 0, 27: 0, 28: 0, 29: 14, 30: 13, 31: 31, 32: 14, 33: 12, 34: 34, 35: 35, 36: 11, 37: 10, 38: 38, 39: 9, 40: 8, 41: 41, 42: 42, 43: 43, 44: 7, 45: 6, 46: 46, 47: 5, 48: 4, 49: 49, 50: 50, 51: 3, 52: 52, 53: 2, 54: 1, 55: 55, 56: 56, 57: 57, 58: 58}
+missing_parent:  0
+        [pyp_nrm/fast_a_matrix()] Finished computing A at Fri Dec  5 17:25:09 2025
+0.0
+\end{verbatim}
+
+}
+
+\end{codelisting}%
+
+\texttt{example.namemap{[}\textquotesingle{}Kaptn\ Kvols\ von\ Widdersdorf\textquotesingle{}{]}}
+returns the original ID assigned to the name, while
+\texttt{example.idmap{[}...{]}} converts from the original ID to the
+renumbered ID. This sort of ID/name mapping is used in a number of
+places in PyPedal, such as in the three-generation pedigree routine in
+the \texttt{pyp\_reports} module.
+
+Note that if an animal has its original ID as its name, which is the
+default when integral IDs and no animal names are provided, the name is
+changed to the renumbered ID when the pedigree is renumbered.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1410}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1410}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0769}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0897}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1923}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1923}}@{}}
+\caption{Animal identification and
+cross-references.}\label{tbl-methodology-id-mapping}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Key
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Key
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Key
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Value
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Key
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Key
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Value
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Key
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Value
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+idmap & animal ID & animal ID & name & name & original ID & renumbered
+ID \\
+backmap & animal ID & animal ID & name & name & renumbered ID & original
+ID \\
+namemap & name & animal ID & name & name & name & original ID \\
+namebackmap & animal ID & name & name & name & original ID & name \\
+\end{longtable}
+
+\section{Measures of Genetic
+Variation}\label{sec-methodology-genetic-variation}
+
+Coefficients of inbreeding and relationship (Wright 1922) have been
+commonly used to describe the genetic diversity in livestock populations
+(Young and Seykora 1996). Inbreeding coefficients represent an
+individual's expected genetic homozygosity due to the relatedness of its
+parents. Coefficients of relationship describe the expected proportion
+of genes two individuals share due to their relatedness. These are
+relative measures that depend on such factors as the completeness and
+depth of pedigrees. Over time, these coefficients change in response to
+breeding and culling decisions, and they may be used as indicators of
+the genetic variability of a population. Rapid methods for calculating
+coefficients of inbreeding and relationship for large populations have
+been implemented (Wiggans, Van Raden, and Zuurbier 1995).
+
+Populations under study rarely conform to the theory established for the
+use of coefficients of inbreeding (Wright 1931). Lacy (1989) and
+Boichard et al. (1997) proposed measures of genetic variation based on
+ideas from conservation genetics. Lacy (1989) proposed the idea of the
+number of founder equivalents in assessing populations. A founder is an
+ancestor whose parents are unknown. If all founders contribute to the
+population equally, then the founder equivalent is equal to the number
+of founders. When founders contribute unequally to the population, the
+number of founder equivalents decreases. Boichard et al. (1997)
+developed the idea of founder ancestor equivalents, which is the minimum
+number of ancestors necessary to explain the genetic diversity of the
+current population. Founder ancestor equivalents account for
+bottlenecks, unlike founder equivalents, and are more accurate in
+populations undergoing intense selection. Caballero and Toro (2000)
+discussed the relationships among these and other measures of diversity
+in small populations, and demonstrate their use (Toro et al. 2000).
+
+Roughsedge et al. (1999) used average coefficients of inbreeding,
+average coefficients of relationship, founder equivalent numbers, and
+founder ancestor numbers to document the decrease in genetic diversity
+in the British dairy cattle population over the last 25 years. Changes
+in founder equivalent number and founder ancestor number reflected the
+use of a small number of influential individuals to improve the genetic
+merit of that population. Accompanying changes in average inbreeding and
+relationship did not accurately reflect that loss of diversity. Such
+results highlight the need for additional tools when assessing complex
+populations.
+
+\section{Computational
+Details}\label{sec-methodology-computational-details}
+
+Coefficients of relationship (\(r_{ij}\)) and inbreeding (\(f_{i}\)) are
+calculated using the method of Wiggans et al. (1995). An empty
+dictionary is created to store animal IDs and coefficients of
+inbreeding. For each animal in the pedigree, working from youngest to
+oldest, the dictionary is queried for the animal ID. If the animal does
+not have an entry in the dictionary, a subpedigree containing only
+relatives of that animal is extracted and the coefficients of inbreeding
+are calculated and stored in the dictionary. A second dictionary keeps
+track of sire-dam combinations seen in the pedigree. If a full-sib of an
+animal whose pedigree has already been processed is encountered the
+full-sib receives a COI identical to that of the animal already
+processed. This approach allows for computation of COI for arbitrarily
+large populations because it doesn't require allocation of a single NRM
+of order \(n^{2}\), where \(n\) is the size of the pedigreed population.
+In most cases, the NRM for a subpedigree is on the order of 200,
+although this can vary with species and population data structure.
+
+Average and maximum coefficients of inbreeding are computed for the
+entire population and for all individuals with non-zero inbreeding. The
+average relationship among all individuals is also computed. Theoretical
+and realized effective population sizes, \(N_{e(t)}\), and \(N_{e(r)}\),
+were estimated as (Falconer and MacKay 1996):
+
+\[ N_{e(t)} = \dfrac{ 4 N_m N_f } { N_m + N_f } \]
+
+and
+
+\[ N_{e(t)} = \dfrac{1}{2 \Delta f} \]
+
+where \(N_m\) and \(N_f\) are the number of sires and dams in the
+population, respectively, and \(\Delta f\) is the change in population
+average inbreeding between generations \textit{t} and \textit{t+1}.
+Interpretation of \(N_{e(t)}\) can be problematic when \(\Delta f\) is
+calculated from incomplete or error-prone pedigrees.
+
+\section{Ancestral
+Inbreeding}\label{sec-methodology-ancestral-inbreeding}
+
+Ballou (1997) described ancestral inbreeding, the probability that an
+individual inherited an allele that had undergone inbreeding in the past
+at least once, in a study of purging recessives and inbreeding in
+conservation genetics. This is a different idea than the usual
+coefficient of inbreeding as an individual that is not inbred may carry
+alleles that have been exposed to substantial inbreeding; recall that an
+individual may have inbred parents, but if the parents are not related
+to one another then the resulting offspring will not be themselves
+inbred. It has been proposed that animals deriving from highly inbred
+lines may be less susceptible to inbreeding depression because
+deleterious recessive alleles have been purged from the population, but
+literature reports on extant populations are inconsistent. Ancestral
+inbreeding is calculated using a recursion equation as:
+
+\[ f_a = [f_{a(s)} + (1 - f_{a(s)})f_s + f_{a(d)} + (1 - f_{a(d)})f_d ]/2 \]
+
+where \(f_a\) is the ancestral inbreeding coefficient for an individual,
+\(f\) is the usual coefficient of inbreeding, and subscripts \(s\) and
+\(d\) represent sires and dams, respectively. Calculations are from
+oldest to youngest in the population and require as inputs only
+coefficients of inbreeding.
+
+Suwanlee et al. (2007) extended the concept by presenting a
+gene-dropping approach (MacCluer et al. 1986) for calculating ancestral
+inbreeding, as well as modifying Ballou's equation to account for
+non-independence between individual inbreeding coefficients and
+ancestral inbreeding coefficients. Gene-dropping is also used in PyPedal
+for calculating founder genome equivalents (see: Section
+\textbf{?@sec-methodology-computation-founder-genome-equivalents}), and
+the code used by the
+\texttt{pyp\_metrics.dropped\_ancestral\_inbreeding()} and
+\texttt{pyp\_metrics.effective\_founder\_genomes()} routines are
+similar, although the former drops an arbitrary number of unlinked
+biallelic loci through the pedigree while the latter drops only a single
+locus.
+
+\section{Partial Inbreeding}\label{sec-methodology-partial-inbreeding}
+
+Partial inbreeding coefficients, \(F_{ij}\), measure the probability
+that the alleles at an arbitrary locus in individual \(i\) are
+identitical-by-descent and that the alleles were derived from an allele
+in founder \(j\) {[}LacyAW1996{]}; Gulisija et al. (2006) provide an
+excellent description of the tabular method for calculating \(F_{ij}\).
+Computational requirements may be high for large pedigrees with a large
+number of founders because partial kinship matrices are calculated for
+each founder in the pedigree. The usual coefficients of inbreeding may
+be obtained by summing the coefficients of partial inbreeding over all
+founders common to the parents of animal \(i\), that is,
+\(f_{i} = \sum_{j} F_{ij}\).
+
+For example, consider the pedigree presented in Figure 2 of Gulisija and
+Crow (2007). The individual of interest, \(I\), has an inbreeding
+coefficient of 0.375 and coefficients of partial inbreeding to founders
+J, K, and M of 0.21875,0.09375, and 0.0625, respectively. As asserted,
+\(0.21875 + 0.09375 + 0.0625 = 0.375\).
+
+\section{Generation Coefficients
+\{sec-methodology-computation-generation-coefficients\}}\label{generation-coefficients-sec-methodology-computation-generation-coefficients}
+
+Generation coefficients are assigned using the method of
+{[}Pattie1965{]}. Founders, defined as individuals with unknown parents,
+are assigned generation codes of 0. All other animals are assigned
+generation codes as:
+
+\[ GC_o = \dfrac{(GC_s+GC_d)}{2}+1 \]
+
+where \(GC_o\), \(GC_s\), \(GC_d\) represent offspring, sire, and dam
+codes, respectively.
+
+\section{Effective Founder Number
+\{sec-methodology-computation-effective-founder-number\}}\label{effective-founder-number-sec-methodology-computation-effective-founder-number}
+
+The effective founder number (\(f_e\)) was calculated as:
+
+\[ f_e = \dfrac{1}{\sum{p_i^2}} \]
+
+where \(p_i\) is the proportion of genes contributed by ancestor \(i\)
+to the current population (Lacy 1989). If all founders had contributed
+equally to the population, then \(f_e\) would be the same as the actual
+number of founders. When founders contribute to the population
+unequally, \(f_e\) is smaller than the actual number of founders. The
+greater the inequity in founder contributions, the smaller the effective
+founder number.
+
+A subpedigree approach, similar to that used for calculation of
+inbreeding (see \textbf{?@sec-methodology-computation-inbreeding} for
+details), is also used for calculating \(f_e\).
+
+\section{Founder Genome Equivalents
+\{sec-methodology-computation-founder-genome-equivalents\}}\label{founder-genome-equivalents-sec-methodology-computation-founder-genome-equivalents}
+
+Lacy (1989) also defined the number of founder genome equivalents
+(\(f_g\)) as a measure of genetic diversity. A founder genome equivalent
+is the number of founders that would produce a population with the same
+diversity of founder alleles as the pedigree population assuming all
+founders contributed equally to each generation of descendants. Founder
+genome equivalents are calculated as:
+
+\[ f_g = \dfrac{ 1 } { \sum{ \dfrac{p_i} {r_i} } } \]
+
+where \(p_i\) is the proportion of genes contributed by ancestor
+\textit{i} to the current population and \(r_i\) is the proportion of
+founder \textit{i}'s genes that are retained in the current population.
+Like \(f_e\), \(f_g\) accounts for unequal founder contributions. Unlike
+\(f_e\), \(f_g\) also accounts for the fraction of founder genomes lost
+from the pedigree through drift during bottlenecks. Although \(f_g\) is
+the more accurate description of the amount of founder variation present
+in a population, it can only be calculated directly for simple
+pedigrees. For large or complex pedigrees, the number of founder genome
+equivalents must be approximated based on computer simulation of a large
+number of segregations through the pedigree. This is done by assigning
+each founder a unique pair of alleles and randomly transmitting those
+alleles through the pedigree {[}ref1719{]}. The number of founder genome
+equivalents is similar to the effective founder number, but the former
+has been devalued based on the proportion of its genome that has
+probably been lost to drift {[}ref640{]}.
+
+\section{Effective Ancestor
+Number}\label{sec-methodology-computation-effective-ancestor-number}
+
+In populations that have undergone a bottleneck the effective number of
+founders computed using Lacy's (1989) approach is overestimated. Large
+contributions made by recent ancestors are more important to the
+population with respect to the loss of genetic diversity than equal
+contributions made long ago. Boichard et al. (1997) proposed a second
+measure of diversity to deal with such situations, the effective number
+of ancestors (\(f_a\)), which considers the genetic contribution of all
+ancestors in the population, not just founders. The effective number of
+ancestors treats all ancestors in the population the same way, and is
+computed as:
+
+\[ f_a = \dfrac{1}{\sum{q_i^2}} \]
+
+where \(q_i\) is the genetic contribution of the \(i\)-th ancestor not
+explained by the previous \(i-1\) ancestors. The ancestors with the
+greatest contributions are selected iteratively. The number of ancestors
+with a positive genetic contribution is less than or equal to the actual
+number of founders.
+
+\section{Pedigree Completeness
+\{sec-methodology-pedigre-completeness\}}\label{pedigree-completeness-sec-methodology-pedigre-completeness}
+
+Pedigree completeness {[}Cassell2003a{]}, the proportion of known
+pedigree information for an arbitrary number of generations, is computed
+as:
+
+\[ c_p = \dfrac{a_k}{\sum_{i=1}^g{2^i}} \]
+
+where \(c_p\) is pedigree completeness and \(a_k\) is the number of
+known ancestors in \(g\) generations. The default (which may be changed)
+is to compute four-generation pedigree completeness. Low \(c_p\)
+indicates that there is little pedigree information available for an
+individual, which may result in biased estimates of inbreeding and other
+measures of diversity. Pedigree completeness and ancestor loss
+coefficients, which are sometimes seen in dog breeding materials, are
+equivalent measures if the same number of generations were used in the
+calculations.
+
+\bookmarksetup{startatroot}
+
 \chapter*{References}\label{references}
 \addcontentsline{toc}{chapter}{References}
 
@@ -514,6 +1360,11 @@ Boichard, D., L. Maignel, and E. Verrier. 1997. {``The Value of Using
 Probabilities of Gene Origin to Measure Genetic Variability in a
 Population.''} \emph{Genetics Selection Evolution} 29: 5--23.
 
+\bibitem[\citeproctext]{ref-ref817}
+Caballero, A., and M. A. Toro. 2000. {``Interrelations Between Effective
+Population Size and Other Pedigree Tools for the Management of Conserved
+Populations.''} \emph{Genetical Research (Cambridge)} 75: 331--43.
+
 \bibitem[\citeproctext]{ref-Cole2007a}
 Cole, J. B. 2007. {``{P}y{P}edal: A Computer Program for Pedigree
 Analysis.''} \emph{Computers and Electronics in Agriculture} 57:
@@ -523,6 +1374,19 @@ Analysis.''} \emph{Computers and Electronics in Agriculture} 57:
 Cole, J. B., D. E. Franke, and E. A. Leighton. 2004. {``Population
 Structure of a Colony of Dog Guides.''} \emph{Journal of Animal Science}
 82: 2906--12.
+
+\bibitem[\citeproctext]{ref-Cormen2003}
+Cormen, T. H., C. E. Leiserson, R. L. Rivest, and C. Stein. 2003.
+\emph{Introduction to Algorithms, Second Edition}. Englewood Cliffs, NJ:
+Prentice-Hall.
+
+\bibitem[\citeproctext]{ref-ref91}
+Falconer, D. S., and F. C. MacKay. 1996. \emph{Introduction to
+Quantitative Genetics}. 4th ed. Longman.
+
+\bibitem[\citeproctext]{ref-GulisijaC2007}
+Gulisija, D., and J. F. Crow. 2007. {``Inferring Purging from Pedigree
+Data.''} \emph{Evolution} 61: 1043--51.
 
 \bibitem[\citeproctext]{ref-GulisijaGWT2006}
 Gulisija, D., D. Gianola, K. A. Weigel, and M. A. Toro. 2006.
@@ -544,6 +1408,11 @@ Lacy, R. C., G. Alaks, and A. Walsh. 1996. {``Hierarchical Analysis of
 Inbreeding Depression in \emph{{P}eromyscus Polionotus}.''}
 \emph{Evolution} 50: 2187--2200.
 
+\bibitem[\citeproctext]{ref-ref1719}
+MacCluer, J. W., J. L. VandeBerg, B. Read, and O. A. Ryder. 1986.
+{``Pedigree Analysis by Computer Simulation.''} \emph{Zoo Biology.} 5:
+147--60.
+
 \bibitem[\citeproctext]{ref-ref585}
 Meuwissen, H. E., and Z. Luo. 1992. {``Computing Inbreeding Coefficients
 in Large Populations.''} \emph{Genetics Selection Evolution} 24:
@@ -553,10 +1422,38 @@ in Large Populations.''} \emph{Genetics Selection Evolution} 24:
 Quaas, R. L. 1976. {``Computing the Diagonal Elements and Inverse of a
 Large Numerator Relationship Matrix.''} \emph{Biometrics} 32: 949--53.
 
+\bibitem[\citeproctext]{ref-ref641}
+Roughsedge, T., S. Brotherstone, and P. M. Visscher. 1999.
+{``Quantifying Genetic Contributions to a Dairy Cattle Population Using
+Pedigree Analysis.''} \emph{Livestock Production Science} 60: 359--69.
+
 \bibitem[\citeproctext]{ref-SuwanleeBSC2007}
 Suwanlee, S., R. Baumung, J. Sölkner, and I. Curik. 2007. {``Evaluation
 of Ancestral Inbreeding Coefficients: Ballou's Formula Versus Gene
 Dropping.''} \emph{Conservation Genetics} 8: 489--95.
+
+\bibitem[\citeproctext]{ref-ref435}
+Toro, M. A., J. Rodriganez, L. Silio., and C. Rodriguez. 2000.
+{``Genealogical Analysis of a Closed Herd of Black Hairless {I}berian
+Pigs.''} \emph{Conservation Biology} 14.
+
+\bibitem[\citeproctext]{ref-ref337}
+Wiggans, G. R., P. M. Van Raden, and J. Zuurbier. 1995. {``Calculation
+and Use of Inbreeding Coefficients for Genetic Evaluation of {U}nited
+{S}tates Dairy Cattle.''} \emph{Journal of Dairy Science} 78: 1584--90.
+
+\bibitem[\citeproctext]{ref-Wright1922}
+Wright, S. 1922. {``Coefficients of Inbreeding and Relationship.''}
+\emph{Amer. Nat.} 56: 330--38.
+
+\bibitem[\citeproctext]{ref-Wright1931}
+---------. 1931. {``Evolution in {M}endelian Populations.''}
+\emph{Genetics} 16: 97--159.
+
+\bibitem[\citeproctext]{ref-ref351}
+Young, C. W., and A. J. Seykora. 1996. {``Estimates of Inbreeding and
+Relationship Among Registered {H}olstein Females in the {U}nited
+{S}tates.''} \emph{Journal of Dairy Science} 79: 502--5.
 
 \end{CSLReferences}
 

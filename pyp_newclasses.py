@@ -305,11 +305,11 @@ class NewPedigree:
         self.kw = kw
 
         # Initialize the Big Main Data Structures to null values
-        self.pedigree = []  # We may start storing animals in a dictionary rather than in a list.  Maybe,
+        self.pedigree = []  # We may start storing animals in a dictionary rather than in a list. Maybe,
         self.metadata = {}  # Metadata will also be stored in a dictionary.
-        self.idmap = {}  # Used to map between original and renumbered IDs.
-        self.backmap = {}  # Used to map between renumbered and original IDs.
-        self.namemap = {}  # This is needed to map IDs to names when IDs are read using the string formats (ASD).
+        self.idmap = {}     # Used to map between original and renumbered IDs.
+        self.backmap = {}   # Used to map between renumbered and original IDs.
+        self.namemap = {}   # This is needed to map IDs to names when IDs are read using the string formats (ASD).
         self.backmap = {}
         self.namebackmap = {}
         self.stringmap = {}  # Maps original IDs to names in ASD pedigrees
@@ -1054,7 +1054,7 @@ class NewPedigree:
             logging.info('Assigning sexes')
             if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
                 print('\t[INFO]: Assigning sexes at %s' % (pyp_utils.pyp_nice_time()))
-            pyp_utils.assign_sexes(self)
+            pyp_utils.set_sexes(self)
         if self.kw['set_alleles']:
             logging.info('Gene dropping to compute founder genome equivalents')
             if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
@@ -1070,7 +1070,7 @@ class NewPedigree:
             logging.info('Assigning offspring')
             if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
                 print('\t[INFO]: Assigning offspring at %s' % (pyp_utils.pyp_nice_time()))
-            pyp_utils.assign_offspring(self)
+            pyp_utils.set_offspring(self)
         if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
             print('[INFO]: Creating pedigree metadata object')
         self.metadata = PedigreeMetadata(self.pedigree, self.kw)
@@ -2025,9 +2025,7 @@ class NewPedigree:
         renumber() updates the ID map after a pedigree has been renumbered so that all
         references are to renumbered rather than original IDs.
         """
-        if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
-            print('\t[INFO]: Renumbering pedigree at %s' % (pyp_utils.pyp_nice_time()))
-            print('\t\t[INFO]: Reordering pedigree at %s' % (pyp_utils.pyp_nice_time()))
+
         logging.info('Reordering pedigree')
         if ('b' in self.kw['pedformat'] or 'y' in self.kw['pedformat']) and not self.kw['slow_reorder']:
             self.pedigree = pyp_utils.fast_reorder(self.pedigree)
@@ -2037,19 +2035,31 @@ class NewPedigree:
         # self.pedigree = pyp_utils.reorder(self.pedigree,missingparent=self.kw['missing_parent'],
         # max_rounds=self.kw['reorder_max_rounds'])
         if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
-            print('\t\t[INFO]: Renumbering at %s' % (pyp_utils.pyp_nice_time()))
+            print('\t\t[INFO]: pyp_newclasses/renumber(): Renumbering at %s' % (pyp_utils.pyp_nice_time()))
         logging.info('Renumbering pedigree')
-        self.pedigree = pyp_utils.renumber(self.pedigree, missingparent=self.kw['missing_parent'],
-                                           animaltype=self.kw['animal_type'])
+
+        if self.kw['debug_messages']:
+            print('-' * 120)
+            print(f'\t[DEBUG]: pyp_newclasses/renumber(): Renumbering pedigree at %s' % (pyp_utils.pyp_nice_time()))
+            print(f'\t[DEBUG]: pyp_newclasses/renumber(): pedobj is of type {type(self)}')
+            print(vars(self))
+        # When I changed pyp_util/renumber() to accept and return pedobjs it broke this pedigree update.
+        self.pedigree = pyp_utils.renumber(self, missingparent=self.kw['missing_parent'],
+                                           animaltype=self.kw['animal_type']).pedigree
         if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
             print('\t\t[INFO]: Updating ID map at %s' % (pyp_utils.pyp_nice_time()))
         logging.info('Updating ID map')
+        if self.kw['debug_messages']:
+            print('-' * 120)
+            print(f'\t[DEBUG]: pyp_newclasses/renumber(): Updating ID map at %s' % (pyp_utils.pyp_nice_time()))
+            print(f'\t[DEBUG]: pyp_newclasses/renumber(): pedobj is of type {type(self)}')
+            print(vars(self))
         self.updateidmap()
 
         if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
             print('\t[INFO]: Assigning offspring at %s' % (pyp_utils.pyp_nice_time()))
         logging.info('Assigning offspring')
-        pyp_utils.assign_offspring(self)
+        pyp_utils.set_offspring(self)
         self.kw['pedigree_is_renumbered'] = 1
         self.kw['assign_offspring'] = 1
 
@@ -2166,10 +2176,21 @@ class NewPedigree:
         all references are to renumbered rather than original IDs.
         """
         # print '[updateidmap]: Entered...'
+
+        if self.kw['debug_messages']:
+            print('-' * 120)
+            print(f'\t[DEBUG]: pyp_newclasses/updateidmap(): Updating ID map at %s' % (pyp_utils.pyp_nice_time()))
+            print(f'\t[DEBUG]: pyp_newclasses/updateidmap(): pedobj is of type {type(self)}')
+            print(vars(self))
+
         self.idmap = {}
         self.backmap = {}
         self.namemap = {}
         self.namebackmap = {}
+
+        # self.metadata.printme()
+        # print(self.kw)
+
         for _a in self.pedigree:
             try:
                 # if str(_a.originalID) == '43859378':
@@ -3409,7 +3430,7 @@ class PedigreeMetadata:
     # @retval An instance of a Pedigree() object populated with data.
     def __init__(self, myped, kw):
         """
-        Initialize a pedigree record.
+        Initialize a pedigree metadata record.
         """
         self.kw = kw
         if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:

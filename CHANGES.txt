@@ -18,6 +18,16 @@ PyPedal 3 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+*** 12/05/2025  When I changed the function call signature for pyp_utils/renumber() it caused
+    pyp_newclasses/NewPedigree::renumber() to break. Instead of putting the updated pedigree (list of NewAnimals)
+    into the NewPedigree instance's 'pedigree' field it was putting in a copy of the entire NewPedigree instance.
+''' 12/05/2025  pyp_newclasses/NewPedigree.load() was calling pyp_utils.renumber() using an obsolete function signature.
+    The pedigree was being passed instead of a pedobj.
+''' 12/05/2025  pyp_nrm/inbreeding_tabular() wasn't calling fast_a_matrix correctly -- it was using the old function
+    signature in which the pedigree and pedopts were passed separately, instead of passing a pedobj.
+??? 12/05/2025  pyp_newclasses/load_pedigree() needs to handle text bette, e.g., Unicode charaters.
+''' 12/05/2025  Replaced calls to assign_sexes() and assign_offspring() with calls to set_sexes() and set_offspring()
+    in pyp_newclasses because the former are deprecated.
 !!! 12/05/2025  pypedal.bib needs to be pared-down and updated, I don't think most users want to sift through my
     12,000-line BiBTeX references from 15 years ago that doesn't even include DOI.
 ''' 12/05/2025  Much reworking of the _quarto.yml file used for generating the new documentation. Much inspiration from,
