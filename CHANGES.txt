@@ -18,6 +18,7 @@ PyPedal 3 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+''' 12/05/2025  I somehow deleted the README.md file but I was able to recover it from Github.
 *** 12/05/2025  When I changed the function call signature for pyp_utils/renumber() it caused
     pyp_newclasses/NewPedigree::renumber() to break. Instead of putting the updated pedigree (list of NewAnimals)
     into the NewPedigree instance's 'pedigree' field it was putting in a copy of the entire NewPedigree instance.
