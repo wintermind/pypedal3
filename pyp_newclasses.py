@@ -299,6 +299,10 @@ class NewPedigree:
         if 'match_rule' not in list(kw.keys()):
             kw['match_rule'] = 'asd'
 
+        # When resolving animal IDs, in what order should the alternatives be considered?
+        if 'id_priority' not in list(kw.keys()):
+            kw['id_priority'] = ['animalID', 'animalName', 'renumberedID'
+                                                           '']
         # Now that we have processed all the arguments in the options dictionary
         # we need to attach it to this object.
         #         print('Ending kw: ', kw )
@@ -829,8 +833,8 @@ class NewPedigree:
                                                                self.kw['database_table']))  # Create the table
             try:
                 # Connect to the database
-                if pyp_db.doesTableExist(self):
-                    conn = pyp_db.connectToDatabase(self)
+                if pyp_db.does_table_exist(self):
+                    conn = pyp_db.connect_to_database(self)
                     if conn:
                         # Contributed by Matt Kelly -- see also the 'database_sql' option
                         sql = self.kw['database_sql'] % (self.kw['database_table'])
@@ -2970,6 +2974,16 @@ class NewAnimal:
     # @retval None
     def __iter__(self):
         raise Exception("The NewAnimal class is not iterable")
+
+    ##
+    # @param
+    # @param self Reference to current object
+    # @id_order
+    # @retval None
+    def id(self, id_order=None):
+        if id_order is None:
+            id_order = ['animalID', 'animalName', 'renumberedID']
+        return None
 
     ##
     # printme() prints a summary of the data stored in the NewAnimal() object.

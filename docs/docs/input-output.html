@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="…">
+
+<title>4&nbsp; Input and Output – PyPedal --- Python Software for Pedigree Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./methodology.html" rel="next">
+<link href="./getting_started.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-68c8bffd90dad8f2b55c52d7b6410dc0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d0f2a56f10a1a9eb518452f01d2a17ec.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+</head>
+
+<body class="nav-sidebar floating fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./input-output.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Input and Output</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">PyPedal — Python Software for Pedigree Analysis</a> 
+        <div class="sidebar-tools-main">
+    <a href="./PyPedal-----Python-Software-for-Pedigree-Analysis.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./getting_started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Getting Started</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./input-output.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Input and Output</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./methodology.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Methodology</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Input and Output</span></h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>The only legitimate use of a computer is to play games. — Eugene Jarvis</p>
+</div>
+</div>
+</div>
+<p>Getting data into and out of programs, while extremely important to end-users, is often challenging. PyPedal can load pedigrees from — and save them to — many different sources. A list of supported input and output formats is shown in Table <a href="#tbl-input-output-methods" class="quarto-xref">Table&nbsp;<span>4.1</span></a>.</p>
+<div id="tbl-input-output-methods" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-input-output-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.1: PyPedal input and output methods.
+</figcaption>
+<div aria-describedby="tbl-input-output-methods-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 10%">
+<col style="width: 78%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Direction</th>
+<th style="text-align: left;">Source</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Input</td>
+<td style="text-align: left;">db</td>
+<td style="text-align: left;">Load an ASDx-formatted data from an SQLite database</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">fromgraph</td>
+<td style="text-align: left;">Load a pedigree from an instance of an XDiGraph object (not a file)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">gedcomfile</td>
+<td style="text-align: left;">Load a pedigree from a GEDCOM 5.5 file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">graphfile</td>
+<td style="text-align: left;">Load a pedigree from an adjacency list using the <code>read_adjlist()</code> function from NetworkX</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">simulate</td>
+<td style="text-align: left;">Simulate a pedigree rathen that loading it from a file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">textstream</td>
+<td style="text-align: left;">Load a pedigree from a string containing animal records</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Output</td>
+<td style="text-align: left;">save</td>
+<td style="text-align: left;">Save a pedigree with user-specified filenames, pedigree format codes, and separators</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">savedb</td>
+<td style="text-align: left;">Save a pedigree to a database table</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">savegedcom</td>
+<td style="text-align: left;">Save a pedigree to a GEDCOM 5.5 file</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">savegedcom</td>
+<td style="text-align: left;">Save a pedigree to a GENES 1.20 file (DBASE III format)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">savegraph</td>
+<td style="text-align: left;">Save a pedigree to a file as an adjacency list</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>It has evolved over time that the input methods are implemented as cases of <code>pedsource</code> in the <code>NewPedigree::load()</code> method, while output methods are implemented as individual methods of <code>NewPedigree</code>. While it is quite straightforward to add new methods for pedigree output, it is trickier to add new input sources. The greater difficulty in adding new input sources is largely due to the mysterious workings of the <code>NewPedigree::preprocess()</code> method, which walks through input line-by-line to load the pedigree and perform a number of integrity checks. Once the data are loaded into a <code>NewPedigree</code> object it’s easy to output them because there’s no need to check the integrity of the pedigree and relationships among the records in the pedigree. If you want to implement a new input source the sanity-saving way to go is to get the data into a list that you can pass to <code>preprocess()</code>; <code>preprocess()</code> can then walk the list as it would walk through the lines of an input file.</p>
+<p>Database operations are discussed in their own section at the end of this chapter.</p>
+<section id="input" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="input"><span class="header-section-number">4.1</span> Input</h2>
+<p>The process of data input has been made as simple as is reasonably possible, but it is ultimately the responsibility of the user to prepare their data. Most people will load their data from a simple text file, with one pedigree entry per line. A number of data integrity checks are performed when a pedigree is loaded. First, the pedigree format string is checked for validity and compared to a line of data to make sure that the specfied number of columns of data exist. Once that check is passed, individual records are loaded and checked one at a time. As individual records are validated they’re added to the pedigree. Duplicate records are eliminated, parents that appear in the pedigree but do not have their own record in the input data are added to the pedigree, and sexes are checked (animals cannot appear as both males and females). If animal IDs are strings they’re hashed to get numeric IDs for use in reordering and renumbering.</p>
+<p>If you used an earlier version of PyPedal you may have added a pedigree format string to your pedigree file. You don’t need to include that string in the current version of PyPedal, and if <code>NewPedigree::preprocess()</code> sees one while reading a pedigree file it will ignore it. You may include comment lines in your file as well; they will also be ignored.</p>
+<section id="graph-objects" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="graph-objects"><span class="header-section-number">4.1.1</span> Graph Objects</h3>
+<p>Pedigrees can be represented as a type of mathematical object called a directed graph (digraph; not to be confused with visualizations of data). The <code>NetworkX</code> module provides Python tools for working with digraphs, and PyPedal provides a convenient way for loading a pedigree from an instance of an <code>XDiGraph</code> object.</p>
+<div id="8433f4d1" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>example <span class="op">=</span> pyp_newclasses.loadPedigree(optionsfile<span class="op">=</span><span class="st">'new_networkx.ini'</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ng <span class="op">=</span> pyp_network.ped_to_graph(example)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>options <span class="op">=</span> {}</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>options[<span class="st">'pedfile'</span>] <span class="op">=</span> <span class="st">'dummy'</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>options[<span class="st">'pedformat'</span>] <span class="op">=</span> <span class="st">'asd'</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>example2 <span class="op">=</span> pyp_newclasses.loadPedigree(options,pedsource<span class="op">=</span><span class="st">'graph'</span>,pedgraph<span class="op">=</span>ng)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>example2.metadata.printme()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>You can see from the printout of the metadata from the new pedigree, <code>example2</code>, that the graph <code>ng</code> was successfully converted to a <code>NewPedigree</code> object.</p>
+<div id="76f4e38e" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Metadata <span class="cf">for</span>  Testing fromgraph() (dummy)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>Records:                <span class="dv">13</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Unique Sires:           <span class="dv">3</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>Unique Dams:            <span class="dv">4</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>Unique Gens:            <span class="dv">1</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>Unique Years:           <span class="dv">1</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Unique Founders:        <span class="dv">5</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>Unique Herds:           <span class="dv">1</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>Pedigree Code:          asd</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>\end{verbatim}</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> GEDCOM Files</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">A thorough description of support for GEDCOM files may be found in the Appendix.</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> GENES Files</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">A thorough description of support for GENES files may be found in the Appendix.</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> Text Files</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co">Most users will load their pedigrees from simple text files. As an example, consider a large dog pedigree, an excerpt of</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">which is presented below.</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">```{python}</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co"># dogID,fatherID,motherID,gender,born</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co">64 66 67 2 1979</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">63 64 65 1 1982</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co">62 191 195 2 1982</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">61 64 65 2 1982</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>This pedigree can be loaded using this short program:</p>
+<div id="e45322ac" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>\begin{verbatim}</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>options <span class="op">=</span> {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'pedfile'</span>: <span class="st">'dog.ped'</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'pedname'</span>: <span class="st">'A Large Dog Pedigree'</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'pedformat'</span>: <span class="st">'asdgb'</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">'__main__'</span>:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    test <span class="op">=</span> pyp_newclasses.loadPedigree(options)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>There are examples of loading pedigrees from text files throughout this manual.</p>
+</section>
+<section id="text-streams" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="text-streams"><span class="header-section-number">4.1.2</span> Text Streams</h3>
+<p>There are some use cases, such as web services, for which it may be desirable to load pedigrees from strings rather tham from files. This is done by passing the <code>pedsource</code> keyword to <code>pyp_newclasses.load_pedigree()</code> with a value of <code>textstream</code>, along with a string named `pedstream’:</p>
+<div id="840aecd5" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>options <span class="op">=</span> {}</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>options[<span class="st">'pedfile'</span>] <span class="op">=</span> <span class="st">''</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>options[<span class="st">'messages'</span>] <span class="op">=</span> <span class="st">'verbose'</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>options[<span class="st">'pedformat'</span>] <span class="op">=</span> <span class="st">'ASD'</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    pedstream <span class="op">=</span> <span class="st">'a1,s1,d1</span><span class="ch">\n</span><span class="st">a2,s2,d2</span><span class="ch">\n</span><span class="st">a3,a1,a2</span><span class="ch">\n</span><span class="st">'</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    test <span class="op">=</span> pyp_newclasses.loadPedigree(options, pedsource<span class="op">=</span><span class="st">'textstream'</span>, pedstream<span class="op">=</span>pedstream)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Only ASD-formatted pedigrees can be loaded this way, individual IDs are separated with commas, and successive records are separated by newlines. These restrictions are hard-coded into the <code>NewPedigree::load()</code> method. All records must contain a newline, including the last record in the string! You must also set the <code>pedfile</code> option to some value, even if that value is just an empty string, as in the example above.</p>
+<p>The expected use case is that the pedigree would be retrieved from a database, and the result set from the SQL query converted into a string. There’s an upper bound on the size of pedigree that can be loaded from a stream based on the physical memory available on your platform, and extremely large pedigrees should be loaded from a text file.</p>
+</section>
+</section>
+<section id="output" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="output"><span class="header-section-number">4.2</span> Output</h2>
+<section id="gedcom-files" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="gedcom-files"><span class="header-section-number">4.2.1</span> GEDCOM Files</h3>
+<p>A thorough description of GEDCOM file output may be found in the Appendix.</p>
+</section>
+<section id="genes-files" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="genes-files"><span class="header-section-number">4.2.2</span> GENES Files</h3>
+<p>A thorough description of GENES file output may be found in the Appendix.</p>
+</section>
+<section id="graph-objects-1" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="graph-objects-1"><span class="header-section-number">4.2.3</span> Graph Objects</h3>
+<p><code>NewPedigree::savegraph()</code> saves a pedigree to a file as an adjacency list, which is a commonly-used format for describing digraphs. If the pedigree has already been converted to a digraph, pass it using the <code>pedgraph</code> argument; otherwise, the method will call the appropriate converter:</p>
+<div id="4746f9d5" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>test.savegraph(pedoutfile<span class="op">=</span><span class="st">'test.adj'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The file <code>test.adj</code> has the following contents:</p>
+<div id="21f1c3ab" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sqlite.py</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># GMT Tue Mar  4 20:38:52 2008</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Text Stream</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="dv">5</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="dv">6</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span> <span class="dv">5</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span> <span class="dv">6</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span> <span class="dv">7</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="dv">6</span> <span class="dv">7</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="dv">7</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>This example shows there can be a considerable loss of information when going from a PyPedal pedigree to some other way of representing the pedigree, such as a graph.</p>
+</section>
+<section id="text-files" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="text-files"><span class="header-section-number">4.2.4</span> Text Files</h3>
+<p>The <code>NewPedigree::save()</code> method writes a PyPedal pedigree to a user-specified file based on a pedigree format string and optional column separator provided by the user. By default, the pedformat is <code>asd</code> and the sepchar is <code></code>. Any attribute of a <code>NewAnimal</code> object can be written to an output file.</p>
+<p><code>NewPedigree::save()</code> tries to never overwrite your data. If you don’t pass a filename argument a file whose name is derived from, but not the same as, the original pedigree filename will be used. The string <code>_saved</code> will be appended to the filename in order to distinguish it from the original pedigree file.</p>
+<p>There are a few points that you need to be aware of when using <code>NewPedigree::save()</code>. First, you may use any column separator you choose <strong>except</strong> the empty string (<code>sepchar=''</code>); if you try and do that the sepchar will be changed to the global default (currently <code></code>), and a message written to the log. This means there’s no way for you to run all the columns in your pedigree file together such that they cannot easily be separated. Sorry. You can use anoy other string you like to separate your columns (spaces, columns, and tabs have been tested). It <strong>is</strong> possible to write an incomplete pedigree file, that is, a file which does not include animal, sire, and dam information. PyPedal checks the pedformat to see if it contains either <code>asd</code> or <code>ASD</code> and warns you if it doesn’t, but it’ll still write the file you tell it to. The burden is on you, the user, to make sure your output file contains all the information you want it to. Finally, you can write whatever attribute you like to whichever column you like in the output file. For the sake of your sanity I strongly recommend that you always place the animal, sire, and dam IDs in the first three columns, but you’re an adult and may do what you like.</p>
+<p>Maybe a couple of examples will help clear that up. Here’s the simplest case, taking defaults:</p>
+<div id="924d5a09" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>test.save(<span class="st">'test_save_asd.ped'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>gets you the result:</p>
+<div id="128ffa9d" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># test_save_asd.ped created by PyPedal at Tue Sep 28 16:39:36 2010</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Current pedigree metadata:</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree file: test_save_asd.ped</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree name: Untitled</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree format: asd</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#       </span><span class="al">NOTE</span><span class="co">: Animal, sire, and dam IDs are RENUMBERED IDs, not original IDs!</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Original pedigree metadata:</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree file: ../simulated_pedigree.ped</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree name: Untitled</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree format: asdxg</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span> <span class="dv">0</span> <span class="dv">0</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span> <span class="dv">0</span> <span class="dv">0</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span> <span class="dv">0</span> <span class="dv">0</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="dv">21</span> <span class="dv">19</span> <span class="dv">10</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="dv">22</span> <span class="dv">9</span> <span class="dv">12</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="dv">23</span> <span class="dv">1</span> <span class="dv">10</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="dv">24</span> <span class="dv">1</span> <span class="dv">21</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="dv">25</span> <span class="dv">13</span> <span class="dv">8</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Note the friendly header to tell you what you’ve got and where it came from. The note about renumbered IDs is particularly important – if the <code>pedigree_is_renumbered</code> flag is set then you will get this message to alert you that comparing this file against your original source file may give confusing results. They’re not really conflicting, but if you compare renumbered with original IDs then you may assume there’s some kind of problem when really there is not. Original and renumbered pedigrees are mathematically equivalent assuming there were no errors in the original file that were corrected by PyPedal. Isn’t that reassuring? From here on out I will not show the header, and will include only the first five rows of data in the file for the sake of brevity (like I’ve ever let that stop me before). You can get the same thing as a CSV using the sepchar argument:</p>
+<div id="c9fd7ad8" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>test.save(<span class="st">'test_save_asd_csv.ped'</span>, sepchar<span class="op">=</span><span class="st">','</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>which produces:</p>
+<div id="d0b36869" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>,<span class="dv">0</span>,<span class="dv">0</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span>,<span class="dv">0</span>,<span class="dv">0</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span>,<span class="dv">0</span>,<span class="dv">0</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span>,<span class="dv">0</span>,<span class="dv">0</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Sometimes you want to go all the way and dump everything into a file. This is like one of those pizzas with every variety of cured meat known to food science piled up on top. Here you go:</p>
+<div id="3899b43f" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>test.save(<span class="st">'test_save_combo_all.ped'</span>, pedformat<span class="op">=</span><span class="st">'asdgxbfrnylepASDLhHu'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>which gives you what you asked for, even if many of the values aren’t particularly interesting:</p>
+<div id="6bdeead1" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> m <span class="dv">0</span><span class="er">1011900</span> <span class="fl">0.0</span> Unknown_Breed <span class="dv">7</span> <span class="dv">1900</span> <span class="dv">0</span> <span class="op">-</span><span class="dv">999</span> <span class="op">-</span><span class="fl">999.0</span> <span class="dv">7</span> Unknown_Name Unknown_Name [<span class="st">'1900000000000000071__1'</span>, <span class="st">'1900000000000000071__2'</span>] <span class="dv">57361</span><span class="er">b5fd9993f00437fbe4c4675feca</span> Unknown_Herd</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> m <span class="dv">0</span><span class="er">1011900</span> <span class="fl">0.0</span> Unknown_Breed <span class="dv">6</span> <span class="dv">1900</span> <span class="dv">0</span> <span class="op">-</span><span class="dv">999</span> <span class="op">-</span><span class="fl">999.0</span> <span class="dv">6</span> Unknown_Name Unknown_Name [<span class="st">'1900000000000000061__1'</span>, <span class="st">'1900000000000000061__2'</span>] <span class="dv">57361</span><span class="er">b5fd9993f00437fbe4c4675feca</span> Unknown_Herd</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> m <span class="dv">0</span><span class="er">1011900</span> <span class="fl">0.0</span> Unknown_Breed <span class="dv">5</span> <span class="dv">1900</span> <span class="dv">0</span> <span class="op">-</span><span class="dv">999</span> <span class="op">-</span><span class="fl">999.0</span> <span class="dv">5</span> Unknown_Name Unknown_Name [<span class="st">'1900000000000000051__1'</span>, <span class="st">'1900000000000000051__2'</span>] <span class="dv">57361</span><span class="er">b5fd9993f00437fbe4c4675feca</span> Unknown_Herd</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> f <span class="dv">0</span><span class="er">1011900</span> <span class="fl">0.0</span> Unknown_Breed <span class="dv">3</span> <span class="dv">1900</span> <span class="dv">0</span> <span class="op">-</span><span class="dv">999</span> <span class="op">-</span><span class="fl">999.0</span> <span class="dv">3</span> Unknown_Name Unknown_Name [<span class="st">'1900000000000000031__1'</span>, <span class="st">'1900000000000000031__2'</span>] <span class="dv">57361</span><span class="er">b5fd9993f00437fbe4c4675feca</span> Unknown_Herd</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> f <span class="dv">0</span><span class="er">1011900</span> <span class="fl">0.0</span> Unknown_Breed <span class="dv">2</span> <span class="dv">1900</span> <span class="dv">0</span> <span class="op">-</span><span class="dv">999</span> <span class="op">-</span><span class="fl">999.0</span> <span class="dv">2</span> Unknown_Name Unknown_Name [<span class="st">'1900000000000000021__1'</span>, <span class="st">'1900000000000000021__2'</span>] <span class="dv">57361</span><span class="er">b5fd9993f00437fbe4c4675feca</span> Unknown_Herd</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Okay, I get it. You’re like the Nigel Tufnel of Missouri – you want to see something that goes to 11. I pondered this for a while. You’ve read this far and deserve to be rewarded. So I tried to think of the most awesomest thing that I could think of. So here you go, LSU fans, straight from Death Valley by way of Beltsville, MD:</p>
+<div id="e4a732d5" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>test.save(<span class="st">'test_save_peterson.ped'</span>, pedformat<span class="op">=</span><span class="st">'asd'</span>, sepchar<span class="op">=</span><span class="st">'...Kneel before Zod!...'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Maybe Patrick Peterson is really into genealogy – you never know – stop looking at me like that! This is a perfectly cromulent example of the extremes to which the sepchar argument can be pushed:</p>
+<div id="b6298f48" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1.</span>..Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span>...Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fl">2.</span>..Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span>...Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fl">3.</span>..Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span>...Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fl">4.</span>..Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span>...Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fl">5.</span>..Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span>...Kneel before Zod<span class="op">!</span>..<span class="fl">.0</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>You’re thinking, “My eyes! Why would he do that?!” The same reason Zod gave us a little Heisman pose in the end zone after returning a West Virginia kickoff for 6 – because I can. (This kind of writing is probably going to get me in trouble one day, but the boss is out of town and there’s no one here to rein-in my behavior!) Wait, though. It gets better. PyPedal can get all Ourboros on this unholy creation:</p>
+<div id="f5cd456c" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># But, wait, can this actually work?</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>options2 <span class="op">=</span> options</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>options2[<span class="st">'pedfile'</span>] <span class="op">=</span> <span class="st">'test_save_peterson.ped'</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>options2[<span class="st">'sepchar'</span>] <span class="op">=</span> <span class="st">'...Kneel before Zod!...'</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>options2[<span class="st">'pedformat'</span>] <span class="op">=</span> <span class="st">'asd'</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>test2 <span class="op">=</span> pyp_newclasses.loadPedigree(options2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>When you run this bit of code you see that it poses no problem at all for PyPedal. Perhaps political dissidents can communicate secretly by doing strange things with <code>sepchar</code>, although it’s more likely that PhD students will find a clever way to abuse MS students with it, instead.</p>
+<div id="6fc820f3" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>[INFO]: Logfile untitled_pedigree.log instantiated.</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>[INFO]: Preprocessing test_save_peterson.ped</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>[INFO]: Opening pedigree <span class="bu">file</span> test_save_peterson.ped</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        [INFO]: Renumbering pedigree at Wed Sep <span class="dv">29</span> <span class="dv">13</span>:<span class="dv">42</span>:<span class="dv">0</span><span class="er">5</span> <span class="dv">2010</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                [INFO]: Reordering pedigree at Wed Sep <span class="dv">29</span> <span class="dv">13</span>:<span class="dv">42</span>:<span class="dv">0</span><span class="er">5</span> <span class="dv">2010</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>                [INFO]: Renumbering at Wed Sep <span class="dv">29</span> <span class="dv">13</span>:<span class="dv">42</span>:<span class="dv">0</span><span class="er">5</span> <span class="dv">2010</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>                [INFO]: Updating ID <span class="bu">map</span> at Wed Sep <span class="dv">29</span> <span class="dv">13</span>:<span class="dv">42</span>:<span class="dv">0</span><span class="er">5</span> <span class="dv">2010</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        [INFO]: Assigning offspring at Wed Sep <span class="dv">29</span> <span class="dv">13</span>:<span class="dv">42</span>:<span class="dv">0</span><span class="er">5</span> <span class="dv">2010</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>[INFO]: Creating pedigree metadata <span class="bu">object</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Instantiating a new PedigreeMetadata() <span class="bu">object</span>...</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Naming the Pedigree()...</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Assigning a filename...</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Attaching a pedigree...</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Setting the pedcode...</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Counting the number of animals <span class="kw">in</span> the pedigree...</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Counting <span class="kw">and</span> finding unique sires...</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Counting <span class="kw">and</span> finding unique dams...</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Setting renumbered flag...</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Counting <span class="kw">and</span> finding unique generations...</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Counting <span class="kw">and</span> finding unique birthyears...</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Counting <span class="kw">and</span> finding unique founders...</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Counting <span class="kw">and</span> finding unique herds...</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        [INFO]:  Detaching pedigree...</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>Metadata <span class="cf">for</span> Untitled (test_save_peterson.ped)</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        Records:                <span class="dv">25</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>        Unique Sires:           <span class="dv">7</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>        Unique Dams:            <span class="dv">7</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>        Unique Gens:            <span class="dv">1</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>        Unique Years:           <span class="dv">1</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>        Unique Founders:        <span class="dv">6</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>        Unique Herds:           <span class="dv">1</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>        Pedigree Code:          asd</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>How’s that for the strangest thing you’re likely to see all day? I’m not suggesting that you seriously use column separators the way I just did, but this example shows that you can do some unusual things with PyPedal, and perhaps you’ll come up with something very useful because of that flexibility. If nothing else, you now have a greater appreciation of what you can do with a dynamic language and questionable processing of user inputs. Remember, never trust any data a user gives you. They’re a shifty lot, users.</p>
+</section>
+<section id="text-streams-1" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="text-streams-1"><span class="header-section-number">4.2.5</span> Text Streams</h3>
+<p><code>NewPedigree::tostream()</code> returns a text stream from an instance of a <code>NewPedigree</code> object. The text stream contains an ASD-formatted pedigree as a string in which individual IDs are separated by commas and successive records are separated by newlines.</p>
+<div id="1c3af5cd" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> pedstream <span class="op">=</span> <span class="st">'a1,s1,d1</span><span class="ch">\n</span><span class="st">a2,s2,d2</span><span class="ch">\n</span><span class="st">a3,a1,a2</span><span class="ch">\n</span><span class="st">'</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> test <span class="op">=</span> pyp_newclasses.loadPedigree(options,pedsource<span class="op">=</span><span class="st">'textstream'</span>,pedstream<span class="op">=</span>pedstream)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> pedstream2 <span class="op">=</span> test.tostream()</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="bu">print</span> pedstream2</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">'d1,0,0</span><span class="ch">\n</span><span class="co">d2,0,0</span><span class="ch">\n</span><span class="co">s1,0,0</span><span class="ch">\n</span><span class="co">s2,0,0</span><span class="ch">\n</span><span class="co">a2,s2,d2</span><span class="ch">\n</span><span class="co">a1,s1,d1</span><span class="ch">\n</span><span class="co">a3,a1,a2</span><span class="ch">\n</span><span class="co">'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Note that in this example the input and output text streams differ because the input stream did not include pedigree entries for all animals in the pedigree (for example, sire <code>s1</code>). Recall that PyPedal adds missing entries for parents when the pedigree is loaded.</p>
+</section>
+<section id="databases" class="level3" data-number="4.2.6">
+<h3 data-number="4.2.6" class="anchored" data-anchor-id="databases"><span class="header-section-number">4.2.6</span> Databases</h3>
+<p>PyPedal is able to load pedigrees from, and save them to, three databases: MySQL, Postgres, and SQLite. PyPedal uses the pyDAL database abstraction library (https://github.com/web2py/pydal) to talk to these databases. Additional databases are supported by pyDAL and require only minor changes to the connection strings in the <code>connectToDatabase</code> function in the <code>pyp_db</code> module in order to work with PyPedal as well.</p>
+<p>A list of the database-related keywords may be found in Table <a href="#tbl-database-parameters" class="quarto-xref">Table&nbsp;<span>4.2</span></a>.</p>
+<div id="tbl-database-parameters" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-database-parameters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.2: Database access parameters and their default values.
+</figcaption>
+<div aria-describedby="tbl-database-parameters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 11%">
+<col style="width: 73%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Default</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">database_debug</td>
+<td style="text-align: left;">False</td>
+<td style="text-align: left;">Toggle debugging messages in the database module on and off.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">database_host</td>
+<td style="text-align: left;">‘localhost’</td>
+<td style="text-align: left;">The server on which the database is running.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">database_name</td>
+<td style="text-align: left;">‘pypedal’</td>
+<td style="text-align: left;">The name of the database to be used.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">database_passwd</td>
+<td style="text-align: left;">‘anonymous’</td>
+<td style="text-align: left;">The password needed to connect to your database.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">database_port</td>
+<td style="text-align: left;">’’</td>
+<td style="text-align: left;">The port on which your databse is listening for connections.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">database_table</td>
+<td style="text-align: left;">‘filetag’</td>
+<td style="text-align: left;">The name of the database table to which the current pedigree will be written.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">database_type</td>
+<td style="text-align: left;">‘sqlite’</td>
+<td style="text-align: left;">The type of database you are using (‘mysql’</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">database_user</td>
+<td style="text-align: left;">‘anonymous’</td>
+<td style="text-align: left;">The name of a user with access rights to your database.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="input-from-databases" class="level3" data-number="4.2.7">
+<h3 data-number="4.2.7" class="anchored" data-anchor-id="input-from-databases"><span class="header-section-number">4.2.7</span> Input from Databases</h3>
+<p>PyPedal can load <code>ASDx</code>-formatted pedigrees from an SQLite database using <code>pedsource='db'</code>. The pedigree will be loaded from the database and table specified in the <code>database_name</code> and <code>dbtable_name</code> variables. Consider the following example:</p>
+<div id="ba6095b2" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> pyp_newclasses.loadPedigree(options,pedsource<span class="op">=</span><span class="st">'db'</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>test.metadata.printme()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>This produces the output:</p>
+<div id="c7ea6252" class="cell" data-execution_count="19">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>Metadata <span class="cf">for</span>  DB Stream ()</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    Records:                <span class="dv">7</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    Unique Sires:           <span class="dv">3</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    Unique Dams:            <span class="dv">3</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    Unique Gens:            <span class="dv">1</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    Unique Years:           <span class="dv">1</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    Unique Founders:        <span class="dv">4</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    Unique Herds:           <span class="dv">1</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    Pedigree Code:          ASDx</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Note that user-supplied values of the pedigree format string will be over-written by the <code>load()</code> method and don’t affect database processing. Database importation is hard-coded to accept only pedigrees in that format.</p>
+<p>It’s possible to load pedigrees from a databse with a format different than that exected by PyPedal, but it requires that you make changes to the <code>NewPedigree</code> class’s <code>load()</code> method. Consider the database-loading code that’s located at about line 826 of <code>pyp_newclasses.py</code>:</p>
+<div id="5bdbee57" class="cell" data-execution_count="20">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> pedsource <span class="op">==</span> <span class="st">'db'</span>:</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.kw[<span class="st">'pedformat'</span>] <span class="op">=</span> <span class="st">'ASDx'</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.kw[<span class="st">'sepchar'</span>] <span class="op">=</span> <span class="st">','</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Connect to the database</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> pyp_db.does_table_exist(<span class="va">self</span>):</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>          conn <span class="op">=</span> pyp_db.connect_to_database(<span class="va">self</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> conn:</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                sql <span class="op">=</span> <span class="st">'SELECT * FROM </span><span class="sc">%s</span><span class="st">'</span> <span class="op">%</span> ( <span class="va">self</span>.kw[<span class="st">'database_table'</span>] )</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                dbstream <span class="op">=</span> conn.GetAll(sql)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>In order to load data from your own database you must change the pedigree format string to match the pedigree you want to load (see Table tbl-pedigree-format-codes for a list of pedigree format codes). You then need to change the SQL statement to match the column names in your database and the order of fields in your pedigree format string. The animal, sire, and dam IDs, respectively, should always be the first three columns in your records. The query results are stored as a list of tuples in <code>dbstream</code> and will be unpacked in the <code>preprocess()</code> method.</p>
+<p>Please note that I’ll try and answer questions about the way in which PyPedal handles loading pedigrees from databases, I cannot answer detailed questions about databases to which I don’t have access. You should carefully test your custom queries in SQL to ensure they’re working correctly before adding them to PyPedal. Also, please check your pedigree format string to make sure it matches your query.</p>
+</section>
+<section id="output-to-databases" class="level3" data-number="4.2.8">
+<h3 data-number="4.2.8" class="anchored" data-anchor-id="output-to-databases"><span class="header-section-number">4.2.8</span> Output to Databases</h3>
+<p>PyPedal can write <code>NewPedigree</code> pedigrees to ASDx-formatted SQLite tables using the <code>NewPedigree::savedb()</code> method. The following program will result in the creation of a table named <code>test_save</code> in the database <code>test_pypedal_save</code>.</p>
+<div id="745874f3" class="cell" data-execution_count="21">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>test.kw[<span class="st">'database_name'</span>] <span class="op">=</span> <span class="st">'test_pypedal_save'</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>test.kw[<span class="st">'dbtable_name'</span>] <span class="op">=</span> <span class="st">'test_save'</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>test.savedb()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The pedigree is saved to the database and table specified in the <code>database_name</code> and <code>dbtable_name</code> variables. If the specified table already exists then the records from the current pedigree will be added to the table. If you want to overwrite the existing database then you need to pass <code>drop=True</code> in the call to <code>savedb()</code>:</p>
+<div id="7b3ae9d3" class="cell" data-execution_count="22">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>test.savedb(drop<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>While this may strike some users as unexpected behavior it is based on the idea that you should never lose data unexpectedly. If you use only the defaults you’ll never lose data. However, if you try and save a renumbered pedigree on top of another renumbered pedigree you’ll run into problems because animal IDs are used as primary keys, and you’ll have constraint violations.</p>
+<p>It’s possible to save pedigrees to a databse with a format different than that exected by PyPedal, but it’s a little harder than changeing pedigree input. Changing the output table requires that you change the <code>NewPedigree</code> class’s <code>savedb</code> method. Consider the code that begins on or about line 1412 of <code>pyp_newclasses.py</code> in <code>savedb</code>:</p>
+<div id="fd3e3056" class="cell" data-execution_count="23">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>sql <span class="op">=</span> <span class="st">'create table </span><span class="sc">%s</span><span class="st"> ( </span><span class="op">\</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="st">    animalName   varchar(128) primary key, </span><span class="op">\</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="st">    sireName     varchar(128), </span><span class="op">\</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="st">    damName      varchar(128), </span><span class="op">\</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="st">    sex          char(1) </span><span class="op">\</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="st">    );'</span> <span class="op">%</span> ( <span class="va">self</span>.kw[<span class="st">'database_table'</span>] )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>You need to rewrite this statement to add or remove columns; the SQL for a table that includes all fields in a <code>NewAnimal</code> object may be found in the <code>create_pedigree_table</code> function of the <code>pyp_db</code> module. Note that not every field in a <code>NewAnimal</code> object has a corresponding pedigree format code. Consult Table tbl-pedigree-format-codes} for appropriate codes.</p>
+<p>Once you’ve updated the SQL used to create your custom pedigree table you’ll also need to change the code which prepares the input for writing to the database. This code is found on or about about line 1443 in <code>savedb</code>:</p>
+<div id="ce196a35" class="cell" data-execution_count="24">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>sql <span class="op">=</span> <span class="st">"INSERT INTO </span><span class="sc">%s</span><span class="st"> ( animalName, sireName, damName, sex ) VALUES ('</span><span class="sc">%s</span><span class="st">', '</span><span class="sc">%s</span><span class="st">', '</span><span class="sc">%s</span><span class="st">', '</span><span class="sc">%s</span><span class="st">')"</span> <span class="op">%</span> ( <span class="va">self</span>.kw[<span class="st">'database_table'</span>], an, si, da, p.sex )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Note that you’ll need to make appropriate casts yourself. For example, you’ll want to cast things that are stored as integers or reals to make sure that you don’t violate a column constraint. You must enclose strings in single-quotation marks (’’) yourself.</p>
+<p>By default PyPedal saves pedigrees in <code>ASD</code> format. If you want to save your pedigree in <code>asd</code> format then you’ll need to change the code on or about line 1436 from:</p>
+<div id="f4a43db7" class="cell" data-execution_count="25">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>an <span class="op">=</span> p.name</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>si <span class="op">=</span> p.sireName</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> p.damName</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>to:</p>
+<div id="296c730c" class="cell" data-execution_count="26">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>an <span class="op">=</span> p.animalID</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>si <span class="op">=</span> p.sireID</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> p.damID</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>It’s better to add a new method supporting your output format to <code>NewAnimal</code> rather than changing the <code>savedb</code> method.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./getting_started.html" class="pagination-link" aria-label="Getting Started">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Getting Started</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./methodology.html" class="pagination-link" aria-label="Methodology">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Methodology</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Input and Output"</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>The only legitimate use of a computer is to play games. --- Eugene Jarvis</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>Getting data into and out of programs, while extremely important to end-users, is often challenging. PyPedal can load</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>pedigrees from --- and save them to --- many different sources. A list of supported input and output formats is shown in</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>Table @tbl-input-output-methods.</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>::: {#tbl-input-output-methods}</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Direction   <span class="pp">|</span> Source     <span class="pp">|</span> Description                                                                              <span class="pp">|</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="pp">|:------------|:-----------|:-----------------------------------------------------------------------------------------|</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Input       <span class="pp">|</span> db         <span class="pp">|</span> Load an ASDx-formatted data from an SQLite database                                      <span class="pp">|</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>             <span class="pp">|</span> fromgraph  <span class="pp">|</span> Load a pedigree from an instance of an XDiGraph object (not a file)                      <span class="pp">|</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>             <span class="pp">|</span> gedcomfile <span class="pp">|</span> Load a pedigree from a GEDCOM 5.5 file                                                   <span class="pp">|</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>             <span class="pp">|</span> graphfile  <span class="pp">|</span> Load a pedigree from an adjacency list using the <span class="in">`read_adjlist()`</span> function from NetworkX <span class="pp">|</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>             <span class="pp">|</span> simulate   <span class="pp">|</span> Simulate a pedigree rathen that loading it from a file                                   <span class="pp">|</span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>             <span class="pp">|</span> textstream <span class="pp">|</span> Load a pedigree from a string containing animal records                                  <span class="pp">|</span></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Output      <span class="pp">|</span> save       <span class="pp">|</span> Save a pedigree with user-specified filenames, pedigree format codes, and separators     <span class="pp">|</span></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>             <span class="pp">|</span> savedb     <span class="pp">|</span> Save a pedigree to a database table                                                      <span class="pp">|</span></span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>             <span class="pp">|</span> savegedcom <span class="pp">|</span> Save a pedigree to a GEDCOM 5.5 file                                                     <span class="pp">|</span></span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>             <span class="pp">|</span> savegedcom <span class="pp">|</span> Save a pedigree to a GENES 1.20 file (DBASE III format)                                  <span class="pp">|</span></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>             <span class="pp">|</span> savegraph  <span class="pp">|</span> Save a pedigree to a file as an adjacency list                                           <span class="pp">|</span></span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>PyPedal input and output methods.</span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>It has evolved over time that the input methods are implemented as cases of <span class="in">`pedsource`</span> in the <span class="in">`NewPedigree::load()`</span></span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>method, while output methods are implemented as individual methods of <span class="in">`NewPedigree`</span>. While it is quite straightforward</span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>to add new methods for pedigree output, it is trickier to add new input sources. The greater difficulty in adding new</span>
+<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>input sources is largely due to the mysterious workings of the <span class="in">`NewPedigree::preprocess()`</span> method, which walks through</span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>input line-by-line to load the pedigree and perform a number of integrity checks. Once the data are loaded into a</span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a><span class="in">`NewPedigree`</span> object it's easy to output them because there's no need to check the integrity of the pedigree and</span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>relationships among the records in the pedigree. If you want to implement a new input source the sanity-saving way to</span>
+<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>go is to get the data into a list that you can pass to <span class="in">`preprocess()`</span>; <span class="in">`preprocess()`</span> can then walk the list as it</span>
+<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a>would walk through the lines of an input file.</span>
+<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a>Database operations are discussed in their own section at the end of this chapter.</span>
+<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a><span class="fu">## Input</span></span>
+<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a>The process of data input has been made as simple as is reasonably possible, but it is ultimately the responsibility of</span>
+<span id="cb27-45"><a href="#cb27-45" aria-hidden="true" tabindex="-1"></a>the user to prepare their data. Most people will load their data from a simple text file, with one pedigree entry per</span>
+<span id="cb27-46"><a href="#cb27-46" aria-hidden="true" tabindex="-1"></a>line. A number of data integrity checks are performed when a pedigree is loaded. First, the pedigree format string</span>
+<span id="cb27-47"><a href="#cb27-47" aria-hidden="true" tabindex="-1"></a>is checked for validity and compared to a line of data to make sure that the specfied number of columns of data exist.</span>
+<span id="cb27-48"><a href="#cb27-48" aria-hidden="true" tabindex="-1"></a>Once that check is passed, individual records are loaded and checked one at a time. As individual records are validated</span>
+<span id="cb27-49"><a href="#cb27-49" aria-hidden="true" tabindex="-1"></a>they're added to the pedigree. Duplicate records are eliminated, parents that appear in the pedigree but do not have</span>
+<span id="cb27-50"><a href="#cb27-50" aria-hidden="true" tabindex="-1"></a>their own record in the input data are added to the pedigree, and sexes are checked (animals cannot appear as both males</span>
+<span id="cb27-51"><a href="#cb27-51" aria-hidden="true" tabindex="-1"></a>and females). If animal IDs are strings they're hashed to get numeric IDs for use in reordering and renumbering.</span>
+<span id="cb27-52"><a href="#cb27-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-53"><a href="#cb27-53" aria-hidden="true" tabindex="-1"></a>If you used an earlier version of PyPedal you may have added a pedigree format string to your pedigree file. You don't</span>
+<span id="cb27-54"><a href="#cb27-54" aria-hidden="true" tabindex="-1"></a>need to include that string in the current version of PyPedal, and if <span class="in">`NewPedigree::preprocess()`</span> sees one while reading</span>
+<span id="cb27-55"><a href="#cb27-55" aria-hidden="true" tabindex="-1"></a>a pedigree file it will ignore it. You may include comment lines in your file as well; they will also be ignored.</span>
+<span id="cb27-56"><a href="#cb27-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-57"><a href="#cb27-57" aria-hidden="true" tabindex="-1"></a><span class="fu">### Graph Objects</span></span>
+<span id="cb27-58"><a href="#cb27-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-59"><a href="#cb27-59" aria-hidden="true" tabindex="-1"></a>Pedigrees can be represented as a type of mathematical object called a directed graph (digraph; not to be confused with</span>
+<span id="cb27-60"><a href="#cb27-60" aria-hidden="true" tabindex="-1"></a>visualizations of data). The <span class="in">`NetworkX`</span> module provides Python tools for working with digraphs, and PyPedal provides a</span>
+<span id="cb27-61"><a href="#cb27-61" aria-hidden="true" tabindex="-1"></a>convenient way for loading a pedigree from an instance of an <span class="in">`XDiGraph`</span> object.</span>
+<span id="cb27-62"><a href="#cb27-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-65"><a href="#cb27-65" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-66"><a href="#cb27-66" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-67"><a href="#cb27-67" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-68"><a href="#cb27-68" aria-hidden="true" tabindex="-1"></a>example <span class="op">=</span> pyp_newclasses.loadPedigree(optionsfile<span class="op">=</span><span class="st">'new_networkx.ini'</span>)</span>
+<span id="cb27-69"><a href="#cb27-69" aria-hidden="true" tabindex="-1"></a>ng <span class="op">=</span> pyp_network.ped_to_graph(example)</span>
+<span id="cb27-70"><a href="#cb27-70" aria-hidden="true" tabindex="-1"></a>options <span class="op">=</span> {}</span>
+<span id="cb27-71"><a href="#cb27-71" aria-hidden="true" tabindex="-1"></a>options[<span class="st">'pedfile'</span>] <span class="op">=</span> <span class="st">'dummy'</span></span>
+<span id="cb27-72"><a href="#cb27-72" aria-hidden="true" tabindex="-1"></a>options[<span class="st">'pedformat'</span>] <span class="op">=</span> <span class="st">'asd'</span></span>
+<span id="cb27-73"><a href="#cb27-73" aria-hidden="true" tabindex="-1"></a>example2 <span class="op">=</span> pyp_newclasses.loadPedigree(options,pedsource<span class="op">=</span><span class="st">'graph'</span>,pedgraph<span class="op">=</span>ng)</span>
+<span id="cb27-74"><a href="#cb27-74" aria-hidden="true" tabindex="-1"></a>example2.metadata.printme()</span>
+<span id="cb27-75"><a href="#cb27-75" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-76"><a href="#cb27-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-77"><a href="#cb27-77" aria-hidden="true" tabindex="-1"></a>You can see from the printout of the metadata from the new pedigree, <span class="in">`example2`</span>, that the graph <span class="in">`ng`</span> was successfully</span>
+<span id="cb27-78"><a href="#cb27-78" aria-hidden="true" tabindex="-1"></a>converted to a <span class="in">`NewPedigree`</span> object.</span>
+<span id="cb27-79"><a href="#cb27-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-82"><a href="#cb27-82" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-83"><a href="#cb27-83" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-84"><a href="#cb27-84" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-85"><a href="#cb27-85" aria-hidden="true" tabindex="-1"></a>Metadata <span class="cf">for</span>  Testing fromgraph() (dummy)</span>
+<span id="cb27-86"><a href="#cb27-86" aria-hidden="true" tabindex="-1"></a>Records:                <span class="dv">13</span></span>
+<span id="cb27-87"><a href="#cb27-87" aria-hidden="true" tabindex="-1"></a>Unique Sires:           <span class="dv">3</span></span>
+<span id="cb27-88"><a href="#cb27-88" aria-hidden="true" tabindex="-1"></a>Unique Dams:            <span class="dv">4</span></span>
+<span id="cb27-89"><a href="#cb27-89" aria-hidden="true" tabindex="-1"></a>Unique Gens:            <span class="dv">1</span></span>
+<span id="cb27-90"><a href="#cb27-90" aria-hidden="true" tabindex="-1"></a>Unique Years:           <span class="dv">1</span></span>
+<span id="cb27-91"><a href="#cb27-91" aria-hidden="true" tabindex="-1"></a>Unique Founders:        <span class="dv">5</span></span>
+<span id="cb27-92"><a href="#cb27-92" aria-hidden="true" tabindex="-1"></a>Unique Herds:           <span class="dv">1</span></span>
+<span id="cb27-93"><a href="#cb27-93" aria-hidden="true" tabindex="-1"></a>Pedigree Code:          asd</span>
+<span id="cb27-94"><a href="#cb27-94" aria-hidden="true" tabindex="-1"></a>\end{verbatim}</span>
+<span id="cb27-95"><a href="#cb27-95" aria-hidden="true" tabindex="-1"></a><span class="co">'''</span></span>
+<span id="cb27-96"><a href="#cb27-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-97"><a href="#cb27-97" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> GEDCOM Files</span></span>
+<span id="cb27-98"><a href="#cb27-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-99"><a href="#cb27-99" aria-hidden="true" tabindex="-1"></a><span class="co">A thorough description of support for GEDCOM files may be found in the Appendix.</span></span>
+<span id="cb27-100"><a href="#cb27-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-101"><a href="#cb27-101" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> GENES Files</span></span>
+<span id="cb27-102"><a href="#cb27-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-103"><a href="#cb27-103" aria-hidden="true" tabindex="-1"></a><span class="co">A thorough description of support for GENES files may be found in the Appendix.</span></span>
+<span id="cb27-104"><a href="#cb27-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-105"><a href="#cb27-105" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> Text Files</span></span>
+<span id="cb27-106"><a href="#cb27-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-107"><a href="#cb27-107" aria-hidden="true" tabindex="-1"></a><span class="co">Most users will load their pedigrees from simple text files. As an example, consider a large dog pedigree, an excerpt of</span></span>
+<span id="cb27-108"><a href="#cb27-108" aria-hidden="true" tabindex="-1"></a><span class="co">which is presented below.</span></span>
+<span id="cb27-109"><a href="#cb27-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-112"><a href="#cb27-112" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-113"><a href="#cb27-113" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-114"><a href="#cb27-114" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-115"><a href="#cb27-115" aria-hidden="true" tabindex="-1"></a><span class="co"># dogID,fatherID,motherID,gender,born</span></span>
+<span id="cb27-116"><a href="#cb27-116" aria-hidden="true" tabindex="-1"></a><span class="co">64 66 67 2 1979</span></span>
+<span id="cb27-117"><a href="#cb27-117" aria-hidden="true" tabindex="-1"></a><span class="co">63 64 65 1 1982</span></span>
+<span id="cb27-118"><a href="#cb27-118" aria-hidden="true" tabindex="-1"></a><span class="co">62 191 195 2 1982</span></span>
+<span id="cb27-119"><a href="#cb27-119" aria-hidden="true" tabindex="-1"></a><span class="co">61 64 65 2 1982</span></span>
+<span id="cb27-120"><a href="#cb27-120" aria-hidden="true" tabindex="-1"></a><span class="co">...</span></span>
+<span id="cb27-121"><a href="#cb27-121" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-122"><a href="#cb27-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-123"><a href="#cb27-123" aria-hidden="true" tabindex="-1"></a><span class="co">This pedigree can be loaded using this short program:</span></span>
+<span id="cb27-124"><a href="#cb27-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-127"><a href="#cb27-127" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-128"><a href="#cb27-128" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-129"><a href="#cb27-129" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-130"><a href="#cb27-130" aria-hidden="true" tabindex="-1"></a><span class="ch">\b</span><span class="co">egin{verbatim}</span></span>
+<span id="cb27-131"><a href="#cb27-131" aria-hidden="true" tabindex="-1"></a><span class="co">options = {</span></span>
+<span id="cb27-132"><a href="#cb27-132" aria-hidden="true" tabindex="-1"></a><span class="co">    'pedfile': 'dog.ped',</span></span>
+<span id="cb27-133"><a href="#cb27-133" aria-hidden="true" tabindex="-1"></a><span class="co">    'pedname': 'A Large Dog Pedigree',</span></span>
+<span id="cb27-134"><a href="#cb27-134" aria-hidden="true" tabindex="-1"></a><span class="co">    'pedformat': 'asdgb',</span></span>
+<span id="cb27-135"><a href="#cb27-135" aria-hidden="true" tabindex="-1"></a><span class="co">}</span></span>
+<span id="cb27-136"><a href="#cb27-136" aria-hidden="true" tabindex="-1"></a><span class="co">if __name__ == '__main__':</span></span>
+<span id="cb27-137"><a href="#cb27-137" aria-hidden="true" tabindex="-1"></a><span class="co">    test = pyp_newclasses.loadPedigree(options)</span></span>
+<span id="cb27-138"><a href="#cb27-138" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-139"><a href="#cb27-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-140"><a href="#cb27-140" aria-hidden="true" tabindex="-1"></a><span class="co">There are examples of loading pedigrees from text files throughout this manual.</span></span>
+<span id="cb27-141"><a href="#cb27-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-142"><a href="#cb27-142" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> Text Streams</span></span>
+<span id="cb27-143"><a href="#cb27-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-144"><a href="#cb27-144" aria-hidden="true" tabindex="-1"></a><span class="co">There are some use cases, such as web services, for which it may be desirable to load pedigrees from strings rather tham</span></span>
+<span id="cb27-145"><a href="#cb27-145" aria-hidden="true" tabindex="-1"></a><span class="co">from files. This is done by passing the `pedsource` keyword to `pyp_newclasses.load_pedigree()` with a value of</span></span>
+<span id="cb27-146"><a href="#cb27-146" aria-hidden="true" tabindex="-1"></a><span class="co">`textstream`, along with a string named `pedstream':</span></span>
+<span id="cb27-147"><a href="#cb27-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-150"><a href="#cb27-150" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-151"><a href="#cb27-151" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-152"><a href="#cb27-152" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-153"><a href="#cb27-153" aria-hidden="true" tabindex="-1"></a><span class="co">options = {}</span></span>
+<span id="cb27-154"><a href="#cb27-154" aria-hidden="true" tabindex="-1"></a><span class="co">options['pedfile'] = ''</span></span>
+<span id="cb27-155"><a href="#cb27-155" aria-hidden="true" tabindex="-1"></a><span class="co">options['messages'] = 'verbose'</span></span>
+<span id="cb27-156"><a href="#cb27-156" aria-hidden="true" tabindex="-1"></a><span class="co">options['pedformat'] = 'ASD'</span></span>
+<span id="cb27-157"><a href="#cb27-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-158"><a href="#cb27-158" aria-hidden="true" tabindex="-1"></a><span class="co">if __name__ == "__main__":</span></span>
+<span id="cb27-159"><a href="#cb27-159" aria-hidden="true" tabindex="-1"></a><span class="co">    pedstream = 'a1,s1,d1</span><span class="ch">\n</span><span class="co">a2,s2,d2</span><span class="ch">\n</span><span class="co">a3,a1,a2</span><span class="ch">\n</span><span class="co">'</span></span>
+<span id="cb27-160"><a href="#cb27-160" aria-hidden="true" tabindex="-1"></a><span class="co">    test = pyp_newclasses.loadPedigree(options, pedsource='textstream', pedstream=pedstream)</span></span>
+<span id="cb27-161"><a href="#cb27-161" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-162"><a href="#cb27-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-163"><a href="#cb27-163" aria-hidden="true" tabindex="-1"></a><span class="co">Only ASD-formatted pedigrees can be loaded this way, individual IDs are separated with commas, and successive records</span></span>
+<span id="cb27-164"><a href="#cb27-164" aria-hidden="true" tabindex="-1"></a><span class="co">are separated by newlines. These restrictions are hard-coded into the `NewPedigree::load()` method. All records must</span></span>
+<span id="cb27-165"><a href="#cb27-165" aria-hidden="true" tabindex="-1"></a><span class="co">contain a newline, including the last record in the string! You must also set the `pedfile` option to some value, even</span></span>
+<span id="cb27-166"><a href="#cb27-166" aria-hidden="true" tabindex="-1"></a><span class="co">if that value is just an empty string, as in the example above.</span></span>
+<span id="cb27-167"><a href="#cb27-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-168"><a href="#cb27-168" aria-hidden="true" tabindex="-1"></a><span class="co">The expected use case is that the pedigree would be retrieved from a database, and the result set from the SQL query</span></span>
+<span id="cb27-169"><a href="#cb27-169" aria-hidden="true" tabindex="-1"></a><span class="co">converted into a string. There's an upper bound on the size of pedigree that can be loaded from a stream based on the</span></span>
+<span id="cb27-170"><a href="#cb27-170" aria-hidden="true" tabindex="-1"></a><span class="co">physical memory available on your platform, and extremely large pedigrees should be loaded from a text file.</span></span>
+<span id="cb27-171"><a href="#cb27-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-172"><a href="#cb27-172" aria-hidden="true" tabindex="-1"></a><span class="co">## Output</span></span>
+<span id="cb27-173"><a href="#cb27-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-174"><a href="#cb27-174" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> GEDCOM Files</span></span>
+<span id="cb27-175"><a href="#cb27-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-176"><a href="#cb27-176" aria-hidden="true" tabindex="-1"></a><span class="co">A thorough description of GEDCOM file output may be found in the Appendix.</span></span>
+<span id="cb27-177"><a href="#cb27-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-178"><a href="#cb27-178" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> GENES Files</span></span>
+<span id="cb27-179"><a href="#cb27-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-180"><a href="#cb27-180" aria-hidden="true" tabindex="-1"></a><span class="co">A thorough description of GENES file output may be found in the Appendix.</span></span>
+<span id="cb27-181"><a href="#cb27-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-182"><a href="#cb27-182" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> Graph Objects</span></span>
+<span id="cb27-183"><a href="#cb27-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-184"><a href="#cb27-184" aria-hidden="true" tabindex="-1"></a><span class="co">`NewPedigree::savegraph()` saves a pedigree to a file as an adjacency list, which is a commonly-used format for</span></span>
+<span id="cb27-185"><a href="#cb27-185" aria-hidden="true" tabindex="-1"></a><span class="co">describing digraphs. If the pedigree has already been converted to a digraph, pass it using the `pedgraph` argument;</span></span>
+<span id="cb27-186"><a href="#cb27-186" aria-hidden="true" tabindex="-1"></a><span class="co">otherwise, the method will call the appropriate converter:</span></span>
+<span id="cb27-187"><a href="#cb27-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-190"><a href="#cb27-190" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-191"><a href="#cb27-191" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-192"><a href="#cb27-192" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-193"><a href="#cb27-193" aria-hidden="true" tabindex="-1"></a><span class="co">test.savegraph(pedoutfile='test.adj')</span></span>
+<span id="cb27-194"><a href="#cb27-194" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-195"><a href="#cb27-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-196"><a href="#cb27-196" aria-hidden="true" tabindex="-1"></a><span class="co">The file `test.adj` has the following contents:</span></span>
+<span id="cb27-197"><a href="#cb27-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-200"><a href="#cb27-200" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-201"><a href="#cb27-201" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-202"><a href="#cb27-202" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-203"><a href="#cb27-203" aria-hidden="true" tabindex="-1"></a><span class="co"># sqlite.py</span></span>
+<span id="cb27-204"><a href="#cb27-204" aria-hidden="true" tabindex="-1"></a><span class="co"># GMT Tue Mar  4 20:38:52 2008</span></span>
+<span id="cb27-205"><a href="#cb27-205" aria-hidden="true" tabindex="-1"></a><span class="co"># Text Stream</span></span>
+<span id="cb27-206"><a href="#cb27-206" aria-hidden="true" tabindex="-1"></a><span class="co">1 5</span></span>
+<span id="cb27-207"><a href="#cb27-207" aria-hidden="true" tabindex="-1"></a><span class="co">2 6</span></span>
+<span id="cb27-208"><a href="#cb27-208" aria-hidden="true" tabindex="-1"></a><span class="co">3 5</span></span>
+<span id="cb27-209"><a href="#cb27-209" aria-hidden="true" tabindex="-1"></a><span class="co">4 6</span></span>
+<span id="cb27-210"><a href="#cb27-210" aria-hidden="true" tabindex="-1"></a><span class="co">5 7</span></span>
+<span id="cb27-211"><a href="#cb27-211" aria-hidden="true" tabindex="-1"></a><span class="co">6 7</span></span>
+<span id="cb27-212"><a href="#cb27-212" aria-hidden="true" tabindex="-1"></a><span class="co">7</span></span>
+<span id="cb27-213"><a href="#cb27-213" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-214"><a href="#cb27-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-215"><a href="#cb27-215" aria-hidden="true" tabindex="-1"></a><span class="co">This example shows there can be a considerable loss of information when going from a PyPedal pedigree to some other way</span></span>
+<span id="cb27-216"><a href="#cb27-216" aria-hidden="true" tabindex="-1"></a><span class="co">of representing the pedigree, such as a graph.</span></span>
+<span id="cb27-217"><a href="#cb27-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-218"><a href="#cb27-218" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> Text Files</span></span>
+<span id="cb27-219"><a href="#cb27-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-220"><a href="#cb27-220" aria-hidden="true" tabindex="-1"></a><span class="co">The `NewPedigree::save()` method writes a PyPedal pedigree to a user-specified file based on a pedigree format string</span></span>
+<span id="cb27-221"><a href="#cb27-221" aria-hidden="true" tabindex="-1"></a><span class="co">and optional column separator provided by the user. By default, the pedformat is `asd` and the sepchar is ` `. Any</span></span>
+<span id="cb27-222"><a href="#cb27-222" aria-hidden="true" tabindex="-1"></a><span class="co">attribute of a `NewAnimal` object can be written to an output file.</span></span>
+<span id="cb27-223"><a href="#cb27-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-224"><a href="#cb27-224" aria-hidden="true" tabindex="-1"></a><span class="co">`NewPedigree::save()` tries to never overwrite your data. If you don't pass a filename argument a file whose name is</span></span>
+<span id="cb27-225"><a href="#cb27-225" aria-hidden="true" tabindex="-1"></a><span class="co">derived from, but not the same as, the original pedigree filename will be used. The string `_saved` will be appended to</span></span>
+<span id="cb27-226"><a href="#cb27-226" aria-hidden="true" tabindex="-1"></a><span class="co">the filename in order to distinguish it from the original pedigree file.</span></span>
+<span id="cb27-227"><a href="#cb27-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-228"><a href="#cb27-228" aria-hidden="true" tabindex="-1"></a><span class="co">There are a few points that you need to be aware of when using `NewPedigree::save()`. First, you may use any column</span></span>
+<span id="cb27-229"><a href="#cb27-229" aria-hidden="true" tabindex="-1"></a><span class="co">separator you choose **except** the empty string (`sepchar=''`); if you try and do that the sepchar will be changed to</span></span>
+<span id="cb27-230"><a href="#cb27-230" aria-hidden="true" tabindex="-1"></a><span class="co">the global default (currently ` `), and a message written to the log. This means there's no way for you to run all the</span></span>
+<span id="cb27-231"><a href="#cb27-231" aria-hidden="true" tabindex="-1"></a><span class="co">columns in your pedigree file together such that they cannot easily be separated. Sorry. You can use anoy other string</span></span>
+<span id="cb27-232"><a href="#cb27-232" aria-hidden="true" tabindex="-1"></a><span class="co">you like to separate your columns (spaces, columns, and tabs have been tested). It **is** possible to write an</span></span>
+<span id="cb27-233"><a href="#cb27-233" aria-hidden="true" tabindex="-1"></a><span class="co">incomplete pedigree file, that is, a file which does not include animal, sire, and dam information. PyPedal checks the</span></span>
+<span id="cb27-234"><a href="#cb27-234" aria-hidden="true" tabindex="-1"></a><span class="co">pedformat to see if it contains either `asd` or `ASD` and warns you if it doesn't, but it'll still write the file you</span></span>
+<span id="cb27-235"><a href="#cb27-235" aria-hidden="true" tabindex="-1"></a><span class="co">tell it to. The burden is on you, the user, to make sure your output file contains all the information you want it to.</span></span>
+<span id="cb27-236"><a href="#cb27-236" aria-hidden="true" tabindex="-1"></a><span class="co">Finally, you can write whatever attribute you like to whichever column you like in the output file. For the sake of your</span></span>
+<span id="cb27-237"><a href="#cb27-237" aria-hidden="true" tabindex="-1"></a><span class="co">sanity I strongly recommend that you always place the animal, sire, and dam IDs in the first three columns, but you're</span></span>
+<span id="cb27-238"><a href="#cb27-238" aria-hidden="true" tabindex="-1"></a><span class="co">an adult and may do what you like.</span></span>
+<span id="cb27-239"><a href="#cb27-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-240"><a href="#cb27-240" aria-hidden="true" tabindex="-1"></a><span class="co">Maybe a couple of examples will help clear that up. Here's the simplest case, taking defaults:</span></span>
+<span id="cb27-241"><a href="#cb27-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-244"><a href="#cb27-244" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-245"><a href="#cb27-245" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-246"><a href="#cb27-246" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-247"><a href="#cb27-247" aria-hidden="true" tabindex="-1"></a><span class="co">test.save('test_save_asd.ped')</span></span>
+<span id="cb27-248"><a href="#cb27-248" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-249"><a href="#cb27-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-250"><a href="#cb27-250" aria-hidden="true" tabindex="-1"></a><span class="co">gets you the result:</span></span>
+<span id="cb27-251"><a href="#cb27-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-254"><a href="#cb27-254" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-255"><a href="#cb27-255" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-256"><a href="#cb27-256" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-257"><a href="#cb27-257" aria-hidden="true" tabindex="-1"></a><span class="co"># test_save_asd.ped created by PyPedal at Tue Sep 28 16:39:36 2010</span></span>
+<span id="cb27-258"><a href="#cb27-258" aria-hidden="true" tabindex="-1"></a><span class="co"># Current pedigree metadata:</span></span>
+<span id="cb27-259"><a href="#cb27-259" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree file: test_save_asd.ped</span></span>
+<span id="cb27-260"><a href="#cb27-260" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree name: Untitled</span></span>
+<span id="cb27-261"><a href="#cb27-261" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree format: asd</span></span>
+<span id="cb27-262"><a href="#cb27-262" aria-hidden="true" tabindex="-1"></a><span class="co">#       </span><span class="al">NOTE</span><span class="co">: Animal, sire, and dam IDs are RENUMBERED IDs, not original IDs!</span></span>
+<span id="cb27-263"><a href="#cb27-263" aria-hidden="true" tabindex="-1"></a><span class="co"># Original pedigree metadata:</span></span>
+<span id="cb27-264"><a href="#cb27-264" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree file: ../simulated_pedigree.ped</span></span>
+<span id="cb27-265"><a href="#cb27-265" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree name: Untitled</span></span>
+<span id="cb27-266"><a href="#cb27-266" aria-hidden="true" tabindex="-1"></a><span class="co">#       pedigree format: asdxg</span></span>
+<span id="cb27-267"><a href="#cb27-267" aria-hidden="true" tabindex="-1"></a><span class="co">1 0 0</span></span>
+<span id="cb27-268"><a href="#cb27-268" aria-hidden="true" tabindex="-1"></a><span class="co">2 0 0</span></span>
+<span id="cb27-269"><a href="#cb27-269" aria-hidden="true" tabindex="-1"></a><span class="co">3 0 0</span></span>
+<span id="cb27-270"><a href="#cb27-270" aria-hidden="true" tabindex="-1"></a><span class="co">4 0 0</span></span>
+<span id="cb27-271"><a href="#cb27-271" aria-hidden="true" tabindex="-1"></a><span class="co">5 0 0</span></span>
+<span id="cb27-272"><a href="#cb27-272" aria-hidden="true" tabindex="-1"></a><span class="co">...</span></span>
+<span id="cb27-273"><a href="#cb27-273" aria-hidden="true" tabindex="-1"></a><span class="co">21 19 10</span></span>
+<span id="cb27-274"><a href="#cb27-274" aria-hidden="true" tabindex="-1"></a><span class="co">22 9 12</span></span>
+<span id="cb27-275"><a href="#cb27-275" aria-hidden="true" tabindex="-1"></a><span class="co">23 1 10</span></span>
+<span id="cb27-276"><a href="#cb27-276" aria-hidden="true" tabindex="-1"></a><span class="co">24 1 21</span></span>
+<span id="cb27-277"><a href="#cb27-277" aria-hidden="true" tabindex="-1"></a><span class="co">25 13 8</span></span>
+<span id="cb27-278"><a href="#cb27-278" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-279"><a href="#cb27-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-280"><a href="#cb27-280" aria-hidden="true" tabindex="-1"></a><span class="co">Note the friendly header to tell you what you've got and where it came from. The note about renumbered IDs is</span></span>
+<span id="cb27-281"><a href="#cb27-281" aria-hidden="true" tabindex="-1"></a><span class="co">particularly important -- if the `pedigree_is_renumbered` flag is set then you will get this message to alert you that</span></span>
+<span id="cb27-282"><a href="#cb27-282" aria-hidden="true" tabindex="-1"></a><span class="co">comparing this file against your original source file may give confusing results. They're not really conflicting, but if</span></span>
+<span id="cb27-283"><a href="#cb27-283" aria-hidden="true" tabindex="-1"></a><span class="co">you compare renumbered with original IDs then you may assume there's some kind of problem when really there is not.</span></span>
+<span id="cb27-284"><a href="#cb27-284" aria-hidden="true" tabindex="-1"></a><span class="co">Original and renumbered pedigrees are mathematically equivalent assuming there were no errors in the original file that</span></span>
+<span id="cb27-285"><a href="#cb27-285" aria-hidden="true" tabindex="-1"></a><span class="co">were corrected by PyPedal. Isn't that reassuring? From here on out I will not show the header, and will include only the</span></span>
+<span id="cb27-286"><a href="#cb27-286" aria-hidden="true" tabindex="-1"></a><span class="co">first five rows of data in the file for the sake of brevity (like I've ever let that stop me before). You can get the</span></span>
+<span id="cb27-287"><a href="#cb27-287" aria-hidden="true" tabindex="-1"></a><span class="co">same thing as a CSV using the sepchar argument:</span></span>
+<span id="cb27-288"><a href="#cb27-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-291"><a href="#cb27-291" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-292"><a href="#cb27-292" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-293"><a href="#cb27-293" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-294"><a href="#cb27-294" aria-hidden="true" tabindex="-1"></a><span class="co">test.save('test_save_asd_csv.ped', sepchar=',')</span></span>
+<span id="cb27-295"><a href="#cb27-295" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-296"><a href="#cb27-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-297"><a href="#cb27-297" aria-hidden="true" tabindex="-1"></a><span class="co">which produces:</span></span>
+<span id="cb27-298"><a href="#cb27-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-301"><a href="#cb27-301" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-302"><a href="#cb27-302" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-303"><a href="#cb27-303" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-304"><a href="#cb27-304" aria-hidden="true" tabindex="-1"></a><span class="co">1,0,0</span></span>
+<span id="cb27-305"><a href="#cb27-305" aria-hidden="true" tabindex="-1"></a><span class="co">2,0,0</span></span>
+<span id="cb27-306"><a href="#cb27-306" aria-hidden="true" tabindex="-1"></a><span class="co">3,0,0</span></span>
+<span id="cb27-307"><a href="#cb27-307" aria-hidden="true" tabindex="-1"></a><span class="co">4,0,0</span></span>
+<span id="cb27-308"><a href="#cb27-308" aria-hidden="true" tabindex="-1"></a><span class="co">5,0,0</span></span>
+<span id="cb27-309"><a href="#cb27-309" aria-hidden="true" tabindex="-1"></a><span class="co">...</span></span>
+<span id="cb27-310"><a href="#cb27-310" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-311"><a href="#cb27-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-312"><a href="#cb27-312" aria-hidden="true" tabindex="-1"></a><span class="co">Sometimes you want to go all the way and dump everything into a file. This is like one of those pizzas with every</span></span>
+<span id="cb27-313"><a href="#cb27-313" aria-hidden="true" tabindex="-1"></a><span class="co">variety of cured meat known to food science piled up on top. Here you go:</span></span>
+<span id="cb27-314"><a href="#cb27-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-317"><a href="#cb27-317" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-318"><a href="#cb27-318" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-319"><a href="#cb27-319" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-320"><a href="#cb27-320" aria-hidden="true" tabindex="-1"></a><span class="co">test.save('test_save_combo_all.ped', pedformat='asdgxbfrnylepASDLhHu')</span></span>
+<span id="cb27-321"><a href="#cb27-321" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-322"><a href="#cb27-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-323"><a href="#cb27-323" aria-hidden="true" tabindex="-1"></a><span class="co">which gives you what you asked for, even if many of the values aren't particularly interesting:</span></span>
+<span id="cb27-324"><a href="#cb27-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-327"><a href="#cb27-327" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-328"><a href="#cb27-328" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-329"><a href="#cb27-329" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-330"><a href="#cb27-330" aria-hidden="true" tabindex="-1"></a><span class="co">1 0 0 0 m 01011900 0.0 Unknown_Breed 7 1900 0 -999 -999.0 7 Unknown_Name Unknown_Name ['1900000000000000071__1', '1900000000000000071__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd</span></span>
+<span id="cb27-331"><a href="#cb27-331" aria-hidden="true" tabindex="-1"></a><span class="co">2 0 0 0 m 01011900 0.0 Unknown_Breed 6 1900 0 -999 -999.0 6 Unknown_Name Unknown_Name ['1900000000000000061__1', '1900000000000000061__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd</span></span>
+<span id="cb27-332"><a href="#cb27-332" aria-hidden="true" tabindex="-1"></a><span class="co">3 0 0 0 m 01011900 0.0 Unknown_Breed 5 1900 0 -999 -999.0 5 Unknown_Name Unknown_Name ['1900000000000000051__1', '1900000000000000051__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd</span></span>
+<span id="cb27-333"><a href="#cb27-333" aria-hidden="true" tabindex="-1"></a><span class="co">4 0 0 0 f 01011900 0.0 Unknown_Breed 3 1900 0 -999 -999.0 3 Unknown_Name Unknown_Name ['1900000000000000031__1', '1900000000000000031__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd</span></span>
+<span id="cb27-334"><a href="#cb27-334" aria-hidden="true" tabindex="-1"></a><span class="co">5 0 0 0 f 01011900 0.0 Unknown_Breed 2 1900 0 -999 -999.0 2 Unknown_Name Unknown_Name ['1900000000000000021__1', '1900000000000000021__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd</span></span>
+<span id="cb27-335"><a href="#cb27-335" aria-hidden="true" tabindex="-1"></a><span class="co">...</span></span>
+<span id="cb27-336"><a href="#cb27-336" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-337"><a href="#cb27-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-338"><a href="#cb27-338" aria-hidden="true" tabindex="-1"></a><span class="co">Okay, I get it. You're like the Nigel Tufnel of Missouri -- you want to see something that goes to 11. I pondered this</span></span>
+<span id="cb27-339"><a href="#cb27-339" aria-hidden="true" tabindex="-1"></a><span class="co">for a while. You've read this far and deserve to be rewarded. So I tried to think of the most awesomest thing that I</span></span>
+<span id="cb27-340"><a href="#cb27-340" aria-hidden="true" tabindex="-1"></a><span class="co">could think of. So here you go, LSU fans, straight from Death Valley by way of Beltsville, MD:</span></span>
+<span id="cb27-341"><a href="#cb27-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-344"><a href="#cb27-344" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-345"><a href="#cb27-345" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-346"><a href="#cb27-346" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-347"><a href="#cb27-347" aria-hidden="true" tabindex="-1"></a><span class="co">test.save('test_save_peterson.ped', pedformat='asd', sepchar='...Kneel before Zod!...'</span></span>
+<span id="cb27-348"><a href="#cb27-348" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-349"><a href="#cb27-349" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-350"><a href="#cb27-350" aria-hidden="true" tabindex="-1"></a><span class="co">Maybe Patrick Peterson is really into genealogy -- you never know -- stop looking at me like that! This is a perfectly</span></span>
+<span id="cb27-351"><a href="#cb27-351" aria-hidden="true" tabindex="-1"></a><span class="co">cromulent example of the extremes to which the sepchar argument can be pushed:</span></span>
+<span id="cb27-352"><a href="#cb27-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-355"><a href="#cb27-355" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-356"><a href="#cb27-356" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-357"><a href="#cb27-357" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-358"><a href="#cb27-358" aria-hidden="true" tabindex="-1"></a><span class="co">1...Kneel before Zod!...0...Kneel before Zod!...0</span></span>
+<span id="cb27-359"><a href="#cb27-359" aria-hidden="true" tabindex="-1"></a><span class="co">2...Kneel before Zod!...0...Kneel before Zod!...0</span></span>
+<span id="cb27-360"><a href="#cb27-360" aria-hidden="true" tabindex="-1"></a><span class="co">3...Kneel before Zod!...0...Kneel before Zod!...0</span></span>
+<span id="cb27-361"><a href="#cb27-361" aria-hidden="true" tabindex="-1"></a><span class="co">4...Kneel before Zod!...0...Kneel before Zod!...0</span></span>
+<span id="cb27-362"><a href="#cb27-362" aria-hidden="true" tabindex="-1"></a><span class="co">5...Kneel before Zod!...0...Kneel before Zod!...0</span></span>
+<span id="cb27-363"><a href="#cb27-363" aria-hidden="true" tabindex="-1"></a><span class="co">...</span></span>
+<span id="cb27-364"><a href="#cb27-364" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-365"><a href="#cb27-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-366"><a href="#cb27-366" aria-hidden="true" tabindex="-1"></a><span class="co">You're thinking, "My eyes! Why would he do that?!" The same reason Zod gave us a little Heisman pose in the end zone</span></span>
+<span id="cb27-367"><a href="#cb27-367" aria-hidden="true" tabindex="-1"></a><span class="co">after returning a West Virginia kickoff for 6 -- because I can. (This kind of writing is probably going to get me in</span></span>
+<span id="cb27-368"><a href="#cb27-368" aria-hidden="true" tabindex="-1"></a><span class="co">trouble one day, but the boss is out of town and there's no one here to rein-in my behavior!) Wait, though. It gets</span></span>
+<span id="cb27-369"><a href="#cb27-369" aria-hidden="true" tabindex="-1"></a><span class="co">better. PyPedal can get all Ourboros on this unholy creation:</span></span>
+<span id="cb27-370"><a href="#cb27-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-373"><a href="#cb27-373" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-374"><a href="#cb27-374" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-375"><a href="#cb27-375" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-376"><a href="#cb27-376" aria-hidden="true" tabindex="-1"></a><span class="co"># But, wait, can this actually work?</span></span>
+<span id="cb27-377"><a href="#cb27-377" aria-hidden="true" tabindex="-1"></a><span class="co">options2 = options</span></span>
+<span id="cb27-378"><a href="#cb27-378" aria-hidden="true" tabindex="-1"></a><span class="co">options2['pedfile'] = 'test_save_peterson.ped'</span></span>
+<span id="cb27-379"><a href="#cb27-379" aria-hidden="true" tabindex="-1"></a><span class="co">options2['sepchar'] = '...Kneel before Zod!...'</span></span>
+<span id="cb27-380"><a href="#cb27-380" aria-hidden="true" tabindex="-1"></a><span class="co">options2['pedformat'] = 'asd'</span></span>
+<span id="cb27-381"><a href="#cb27-381" aria-hidden="true" tabindex="-1"></a><span class="co">test2 = pyp_newclasses.loadPedigree(options2)</span></span>
+<span id="cb27-382"><a href="#cb27-382" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-383"><a href="#cb27-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-384"><a href="#cb27-384" aria-hidden="true" tabindex="-1"></a><span class="co">When you run this bit of code you see that it poses no problem at all for PyPedal. Perhaps political dissidents can</span></span>
+<span id="cb27-385"><a href="#cb27-385" aria-hidden="true" tabindex="-1"></a><span class="co">communicate secretly by doing strange things with `sepchar`, although it's more likely that PhD students will find a</span></span>
+<span id="cb27-386"><a href="#cb27-386" aria-hidden="true" tabindex="-1"></a><span class="co">clever way to abuse MS students with it, instead.</span></span>
+<span id="cb27-387"><a href="#cb27-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-390"><a href="#cb27-390" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-391"><a href="#cb27-391" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-392"><a href="#cb27-392" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-393"><a href="#cb27-393" aria-hidden="true" tabindex="-1"></a><span class="co">[INFO]: Logfile untitled_pedigree.log instantiated.</span></span>
+<span id="cb27-394"><a href="#cb27-394" aria-hidden="true" tabindex="-1"></a><span class="co">[INFO]: Preprocessing test_save_peterson.ped</span></span>
+<span id="cb27-395"><a href="#cb27-395" aria-hidden="true" tabindex="-1"></a><span class="co">[INFO]: Opening pedigree file test_save_peterson.ped</span></span>
+<span id="cb27-396"><a href="#cb27-396" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]: Renumbering pedigree at Wed Sep 29 13:42:05 2010</span></span>
+<span id="cb27-397"><a href="#cb27-397" aria-hidden="true" tabindex="-1"></a><span class="co">                [INFO]: Reordering pedigree at Wed Sep 29 13:42:05 2010</span></span>
+<span id="cb27-398"><a href="#cb27-398" aria-hidden="true" tabindex="-1"></a><span class="co">                [INFO]: Renumbering at Wed Sep 29 13:42:05 2010</span></span>
+<span id="cb27-399"><a href="#cb27-399" aria-hidden="true" tabindex="-1"></a><span class="co">                [INFO]: Updating ID map at Wed Sep 29 13:42:05 2010</span></span>
+<span id="cb27-400"><a href="#cb27-400" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]: Assigning offspring at Wed Sep 29 13:42:05 2010</span></span>
+<span id="cb27-401"><a href="#cb27-401" aria-hidden="true" tabindex="-1"></a><span class="co">[INFO]: Creating pedigree metadata object</span></span>
+<span id="cb27-402"><a href="#cb27-402" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Instantiating a new PedigreeMetadata() object...</span></span>
+<span id="cb27-403"><a href="#cb27-403" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Naming the Pedigree()...</span></span>
+<span id="cb27-404"><a href="#cb27-404" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Assigning a filename...</span></span>
+<span id="cb27-405"><a href="#cb27-405" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Attaching a pedigree...</span></span>
+<span id="cb27-406"><a href="#cb27-406" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Setting the pedcode...</span></span>
+<span id="cb27-407"><a href="#cb27-407" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Counting the number of animals in the pedigree...</span></span>
+<span id="cb27-408"><a href="#cb27-408" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Counting and finding unique sires...</span></span>
+<span id="cb27-409"><a href="#cb27-409" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Counting and finding unique dams...</span></span>
+<span id="cb27-410"><a href="#cb27-410" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Setting renumbered flag...</span></span>
+<span id="cb27-411"><a href="#cb27-411" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Counting and finding unique generations...</span></span>
+<span id="cb27-412"><a href="#cb27-412" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Counting and finding unique birthyears...</span></span>
+<span id="cb27-413"><a href="#cb27-413" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Counting and finding unique founders...</span></span>
+<span id="cb27-414"><a href="#cb27-414" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Counting and finding unique herds...</span></span>
+<span id="cb27-415"><a href="#cb27-415" aria-hidden="true" tabindex="-1"></a><span class="co">        [INFO]:  Detaching pedigree...</span></span>
+<span id="cb27-416"><a href="#cb27-416" aria-hidden="true" tabindex="-1"></a><span class="co">Metadata for Untitled (test_save_peterson.ped)</span></span>
+<span id="cb27-417"><a href="#cb27-417" aria-hidden="true" tabindex="-1"></a><span class="co">        Records:                25</span></span>
+<span id="cb27-418"><a href="#cb27-418" aria-hidden="true" tabindex="-1"></a><span class="co">        Unique Sires:           7</span></span>
+<span id="cb27-419"><a href="#cb27-419" aria-hidden="true" tabindex="-1"></a><span class="co">        Unique Dams:            7</span></span>
+<span id="cb27-420"><a href="#cb27-420" aria-hidden="true" tabindex="-1"></a><span class="co">        Unique Gens:            1</span></span>
+<span id="cb27-421"><a href="#cb27-421" aria-hidden="true" tabindex="-1"></a><span class="co">        Unique Years:           1</span></span>
+<span id="cb27-422"><a href="#cb27-422" aria-hidden="true" tabindex="-1"></a><span class="co">        Unique Founders:        6</span></span>
+<span id="cb27-423"><a href="#cb27-423" aria-hidden="true" tabindex="-1"></a><span class="co">        Unique Herds:           1</span></span>
+<span id="cb27-424"><a href="#cb27-424" aria-hidden="true" tabindex="-1"></a><span class="co">        Pedigree Code:          asd</span></span>
+<span id="cb27-425"><a href="#cb27-425" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-426"><a href="#cb27-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-427"><a href="#cb27-427" aria-hidden="true" tabindex="-1"></a><span class="co">How's that for the strangest thing you're likely to see all day? I'm not suggesting that you seriously use column</span></span>
+<span id="cb27-428"><a href="#cb27-428" aria-hidden="true" tabindex="-1"></a><span class="co">separators the way I just did, but this example shows that you can do some unusual things with PyPedal, and perhaps</span></span>
+<span id="cb27-429"><a href="#cb27-429" aria-hidden="true" tabindex="-1"></a><span class="co">you'll come up with something very useful because of that flexibility. If nothing else, you now have a greater</span></span>
+<span id="cb27-430"><a href="#cb27-430" aria-hidden="true" tabindex="-1"></a><span class="co">appreciation of what you can do with a dynamic language and questionable processing of user inputs. Remember, never</span></span>
+<span id="cb27-431"><a href="#cb27-431" aria-hidden="true" tabindex="-1"></a><span class="co">trust any data a user gives you. They're a shifty lot, users.</span></span>
+<span id="cb27-432"><a href="#cb27-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-433"><a href="#cb27-433" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> Text Streams</span></span>
+<span id="cb27-434"><a href="#cb27-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-435"><a href="#cb27-435" aria-hidden="true" tabindex="-1"></a><span class="co">`NewPedigree::tostream()` returns a text stream from an instance of a `NewPedigree` object. The text stream contains an</span></span>
+<span id="cb27-436"><a href="#cb27-436" aria-hidden="true" tabindex="-1"></a><span class="co">ASD-formatted pedigree as a string in which individual IDs are separated by commas and successive records are separated</span></span>
+<span id="cb27-437"><a href="#cb27-437" aria-hidden="true" tabindex="-1"></a><span class="co">by newlines.</span></span>
+<span id="cb27-438"><a href="#cb27-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-441"><a href="#cb27-441" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-442"><a href="#cb27-442" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-443"><a href="#cb27-443" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-444"><a href="#cb27-444" aria-hidden="true" tabindex="-1"></a><span class="co">&gt;&gt;&gt; pedstream = 'a1,s1,d1</span><span class="ch">\n</span><span class="co">a2,s2,d2</span><span class="ch">\n</span><span class="co">a3,a1,a2</span><span class="ch">\n</span><span class="co">'</span></span>
+<span id="cb27-445"><a href="#cb27-445" aria-hidden="true" tabindex="-1"></a><span class="co">&gt;&gt;&gt; test = pyp_newclasses.loadPedigree(options,pedsource='textstream',pedstream=pedstream)</span></span>
+<span id="cb27-446"><a href="#cb27-446" aria-hidden="true" tabindex="-1"></a><span class="co">&gt;&gt;&gt; pedstream2 = test.tostream()</span></span>
+<span id="cb27-447"><a href="#cb27-447" aria-hidden="true" tabindex="-1"></a><span class="co">&gt;&gt;&gt; print pedstream2</span></span>
+<span id="cb27-448"><a href="#cb27-448" aria-hidden="true" tabindex="-1"></a><span class="co">'d1,0,0</span><span class="ch">\n</span><span class="co">d2,0,0</span><span class="ch">\n</span><span class="co">s1,0,0</span><span class="ch">\n</span><span class="co">s2,0,0</span><span class="ch">\n</span><span class="co">a2,s2,d2</span><span class="ch">\n</span><span class="co">a1,s1,d1</span><span class="ch">\n</span><span class="co">a3,a1,a2</span><span class="ch">\n</span><span class="co">'</span></span>
+<span id="cb27-449"><a href="#cb27-449" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-450"><a href="#cb27-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-451"><a href="#cb27-451" aria-hidden="true" tabindex="-1"></a><span class="co">Note that in this example the input and output text streams differ because the input stream did not include pedigree</span></span>
+<span id="cb27-452"><a href="#cb27-452" aria-hidden="true" tabindex="-1"></a><span class="co">entries for all animals in the pedigree (for example, sire `s1`). Recall that PyPedal adds missing entries for parents</span></span>
+<span id="cb27-453"><a href="#cb27-453" aria-hidden="true" tabindex="-1"></a><span class="co">when the pedigree is loaded.</span></span>
+<span id="cb27-454"><a href="#cb27-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-455"><a href="#cb27-455" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> Databases</span></span>
+<span id="cb27-456"><a href="#cb27-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-457"><a href="#cb27-457" aria-hidden="true" tabindex="-1"></a><span class="co">PyPedal is able to load pedigrees from, and save them to, three databases: MySQL, Postgres, and SQLite. PyPedal uses the</span></span>
+<span id="cb27-458"><a href="#cb27-458" aria-hidden="true" tabindex="-1"></a><span class="co">pyDAL database abstraction library (https://github.com/web2py/pydal) to talk to these databases. Additional databases</span></span>
+<span id="cb27-459"><a href="#cb27-459" aria-hidden="true" tabindex="-1"></a><span class="co">are supported by pyDAL and require only minor changes to the connection strings in the `connectToDatabase` function in</span></span>
+<span id="cb27-460"><a href="#cb27-460" aria-hidden="true" tabindex="-1"></a><span class="co">the `pyp_db` module in order to work with PyPedal as well.</span></span>
+<span id="cb27-461"><a href="#cb27-461" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-462"><a href="#cb27-462" aria-hidden="true" tabindex="-1"></a><span class="co">A list of the database-related keywords may be found in Table @tbl-database-parameters.</span></span>
+<span id="cb27-463"><a href="#cb27-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-464"><a href="#cb27-464" aria-hidden="true" tabindex="-1"></a><span class="co">::: {#tbl-database-parameters}</span></span>
+<span id="cb27-465"><a href="#cb27-465" aria-hidden="true" tabindex="-1"></a><span class="co">| Parameter       | Default     | Description                                                                         |</span></span>
+<span id="cb27-466"><a href="#cb27-466" aria-hidden="true" tabindex="-1"></a><span class="co">|:----------------|:------------|:------------------------------------------------------------------------------------|</span></span>
+<span id="cb27-467"><a href="#cb27-467" aria-hidden="true" tabindex="-1"></a><span class="co">| database_debug  | False       | Toggle debugging messages in the database module on and off.                        |</span></span>
+<span id="cb27-468"><a href="#cb27-468" aria-hidden="true" tabindex="-1"></a><span class="co">| database_host   | 'localhost' | The server on which the database is running.                                        |</span></span>
+<span id="cb27-469"><a href="#cb27-469" aria-hidden="true" tabindex="-1"></a><span class="co">| database_name   | 'pypedal'   | The name of the database to be used.                                                |</span></span>
+<span id="cb27-470"><a href="#cb27-470" aria-hidden="true" tabindex="-1"></a><span class="co">| database_passwd | 'anonymous' | The password needed to connect to your database.                                    |</span></span>
+<span id="cb27-471"><a href="#cb27-471" aria-hidden="true" tabindex="-1"></a><span class="co">| database_port   | ''          | The port on which your databse is listening for connections.                        |</span></span>
+<span id="cb27-472"><a href="#cb27-472" aria-hidden="true" tabindex="-1"></a><span class="co">| database_table  | 'filetag'   | The name of the database table to which the current pedigree will be written.       |</span></span>
+<span id="cb27-473"><a href="#cb27-473" aria-hidden="true" tabindex="-1"></a><span class="co">| database_type   | 'sqlite'    | The type of database you are using ('mysql'|'postgres'|'sqlite').                   |</span></span>
+<span id="cb27-474"><a href="#cb27-474" aria-hidden="true" tabindex="-1"></a><span class="co">| database_user   | 'anonymous' | The name of a user with access rights to your database.                             |</span></span>
+<span id="cb27-475"><a href="#cb27-475" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-476"><a href="#cb27-476" aria-hidden="true" tabindex="-1"></a><span class="co">Database access parameters and their default values.</span></span>
+<span id="cb27-477"><a href="#cb27-477" aria-hidden="true" tabindex="-1"></a><span class="co">:::</span></span>
+<span id="cb27-478"><a href="#cb27-478" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-479"><a href="#cb27-479" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> Input from Databases</span></span>
+<span id="cb27-480"><a href="#cb27-480" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-481"><a href="#cb27-481" aria-hidden="true" tabindex="-1"></a><span class="co">PyPedal can load `ASDx`-formatted pedigrees from an SQLite database using `pedsource='db'`. The pedigree will be loaded</span></span>
+<span id="cb27-482"><a href="#cb27-482" aria-hidden="true" tabindex="-1"></a><span class="co">from the database and table specified in the `database_name` and `dbtable_name` variables. Consider the following</span></span>
+<span id="cb27-483"><a href="#cb27-483" aria-hidden="true" tabindex="-1"></a><span class="co">example:</span></span>
+<span id="cb27-484"><a href="#cb27-484" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-487"><a href="#cb27-487" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-488"><a href="#cb27-488" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-489"><a href="#cb27-489" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-490"><a href="#cb27-490" aria-hidden="true" tabindex="-1"></a><span class="co">test = pyp_newclasses.loadPedigree(options,pedsource='db')</span></span>
+<span id="cb27-491"><a href="#cb27-491" aria-hidden="true" tabindex="-1"></a><span class="co">test.metadata.printme()</span></span>
+<span id="cb27-492"><a href="#cb27-492" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-493"><a href="#cb27-493" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-494"><a href="#cb27-494" aria-hidden="true" tabindex="-1"></a><span class="co">This produces the output:</span></span>
+<span id="cb27-495"><a href="#cb27-495" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-498"><a href="#cb27-498" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-499"><a href="#cb27-499" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-500"><a href="#cb27-500" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-501"><a href="#cb27-501" aria-hidden="true" tabindex="-1"></a><span class="co">Metadata for  DB Stream ()</span></span>
+<span id="cb27-502"><a href="#cb27-502" aria-hidden="true" tabindex="-1"></a><span class="co">    Records:                7</span></span>
+<span id="cb27-503"><a href="#cb27-503" aria-hidden="true" tabindex="-1"></a><span class="co">    Unique Sires:           3</span></span>
+<span id="cb27-504"><a href="#cb27-504" aria-hidden="true" tabindex="-1"></a><span class="co">    Unique Dams:            3</span></span>
+<span id="cb27-505"><a href="#cb27-505" aria-hidden="true" tabindex="-1"></a><span class="co">    Unique Gens:            1</span></span>
+<span id="cb27-506"><a href="#cb27-506" aria-hidden="true" tabindex="-1"></a><span class="co">    Unique Years:           1</span></span>
+<span id="cb27-507"><a href="#cb27-507" aria-hidden="true" tabindex="-1"></a><span class="co">    Unique Founders:        4</span></span>
+<span id="cb27-508"><a href="#cb27-508" aria-hidden="true" tabindex="-1"></a><span class="co">    Unique Herds:           1</span></span>
+<span id="cb27-509"><a href="#cb27-509" aria-hidden="true" tabindex="-1"></a><span class="co">    Pedigree Code:          ASDx</span></span>
+<span id="cb27-510"><a href="#cb27-510" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-511"><a href="#cb27-511" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-512"><a href="#cb27-512" aria-hidden="true" tabindex="-1"></a><span class="co">Note that user-supplied values of the pedigree format string will be over-written by the `load()` method and don't</span></span>
+<span id="cb27-513"><a href="#cb27-513" aria-hidden="true" tabindex="-1"></a><span class="co">affect database processing. Database importation is hard-coded to accept only pedigrees in that format.</span></span>
+<span id="cb27-514"><a href="#cb27-514" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-515"><a href="#cb27-515" aria-hidden="true" tabindex="-1"></a><span class="co">It's possible to load pedigrees from a databse with a format different than that exected by PyPedal, but it requires</span></span>
+<span id="cb27-516"><a href="#cb27-516" aria-hidden="true" tabindex="-1"></a><span class="co">that you make changes to the `NewPedigree` class's `load()` method. Consider the database-loading code that's located</span></span>
+<span id="cb27-517"><a href="#cb27-517" aria-hidden="true" tabindex="-1"></a><span class="co">at about line 826 of `pyp_newclasses.py`:</span></span>
+<span id="cb27-518"><a href="#cb27-518" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-521"><a href="#cb27-521" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-522"><a href="#cb27-522" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-523"><a href="#cb27-523" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-524"><a href="#cb27-524" aria-hidden="true" tabindex="-1"></a><span class="co">elif pedsource == 'db':</span></span>
+<span id="cb27-525"><a href="#cb27-525" aria-hidden="true" tabindex="-1"></a><span class="co">    self.kw['pedformat'] = 'ASDx'</span></span>
+<span id="cb27-526"><a href="#cb27-526" aria-hidden="true" tabindex="-1"></a><span class="co">    self.kw['sepchar'] = ','</span></span>
+<span id="cb27-527"><a href="#cb27-527" aria-hidden="true" tabindex="-1"></a><span class="co">...</span></span>
+<span id="cb27-528"><a href="#cb27-528" aria-hidden="true" tabindex="-1"></a><span class="co">    try:</span></span>
+<span id="cb27-529"><a href="#cb27-529" aria-hidden="true" tabindex="-1"></a><span class="co">        # Connect to the database</span></span>
+<span id="cb27-530"><a href="#cb27-530" aria-hidden="true" tabindex="-1"></a><span class="co">        if pyp_db.does_table_exist(self):</span></span>
+<span id="cb27-531"><a href="#cb27-531" aria-hidden="true" tabindex="-1"></a><span class="co">          conn = pyp_db.connect_to_database(self)</span></span>
+<span id="cb27-532"><a href="#cb27-532" aria-hidden="true" tabindex="-1"></a><span class="co">            if conn:</span></span>
+<span id="cb27-533"><a href="#cb27-533" aria-hidden="true" tabindex="-1"></a><span class="co">                sql = 'SELECT * FROM %s' % ( self.kw['database_table'] )</span></span>
+<span id="cb27-534"><a href="#cb27-534" aria-hidden="true" tabindex="-1"></a><span class="co">                dbstream = conn.GetAll(sql)</span></span>
+<span id="cb27-535"><a href="#cb27-535" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-536"><a href="#cb27-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-537"><a href="#cb27-537" aria-hidden="true" tabindex="-1"></a><span class="co">In order to load data from your own database you must change the pedigree format string to match the pedigree you want</span></span>
+<span id="cb27-538"><a href="#cb27-538" aria-hidden="true" tabindex="-1"></a><span class="co">to load (see Table tbl-pedigree-format-codes for a list of pedigree format codes). You then need to change the SQL</span></span>
+<span id="cb27-539"><a href="#cb27-539" aria-hidden="true" tabindex="-1"></a><span class="co">statement to match the column names in your database and the order of fields in your pedigree format string. The animal,</span></span>
+<span id="cb27-540"><a href="#cb27-540" aria-hidden="true" tabindex="-1"></a><span class="co">sire, and dam IDs, respectively, should always be the first three columns in your records. The query results are stored</span></span>
+<span id="cb27-541"><a href="#cb27-541" aria-hidden="true" tabindex="-1"></a><span class="co">as a list of tuples in `dbstream` and will be unpacked in the `preprocess()` method.</span></span>
+<span id="cb27-542"><a href="#cb27-542" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-543"><a href="#cb27-543" aria-hidden="true" tabindex="-1"></a><span class="co">Please note that I'll try and answer questions about the way in which PyPedal handles loading pedigrees from databases,</span></span>
+<span id="cb27-544"><a href="#cb27-544" aria-hidden="true" tabindex="-1"></a><span class="co">I cannot answer detailed questions about databases to which I don't have access. You should carefully test your custom</span></span>
+<span id="cb27-545"><a href="#cb27-545" aria-hidden="true" tabindex="-1"></a><span class="co">queries in SQL to ensure they're working correctly before adding them to PyPedal. Also, please check your pedigree</span></span>
+<span id="cb27-546"><a href="#cb27-546" aria-hidden="true" tabindex="-1"></a><span class="co">format string to make sure it matches your query.</span></span>
+<span id="cb27-547"><a href="#cb27-547" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-548"><a href="#cb27-548" aria-hidden="true" tabindex="-1"></a><span class="al">###</span><span class="co"> Output to Databases</span></span>
+<span id="cb27-549"><a href="#cb27-549" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-550"><a href="#cb27-550" aria-hidden="true" tabindex="-1"></a><span class="co">PyPedal can write `NewPedigree` pedigrees to ASDx-formatted SQLite tables using the `NewPedigree::savedb()` method. The</span></span>
+<span id="cb27-551"><a href="#cb27-551" aria-hidden="true" tabindex="-1"></a><span class="co">following program will result in the creation of a table named `test_save` in the database `test_pypedal_save`.</span></span>
+<span id="cb27-552"><a href="#cb27-552" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-555"><a href="#cb27-555" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-556"><a href="#cb27-556" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-557"><a href="#cb27-557" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-558"><a href="#cb27-558" aria-hidden="true" tabindex="-1"></a><span class="co">test.kw['database_name'] = 'test_pypedal_save'</span></span>
+<span id="cb27-559"><a href="#cb27-559" aria-hidden="true" tabindex="-1"></a><span class="co">test.kw['dbtable_name'] = 'test_save'</span></span>
+<span id="cb27-560"><a href="#cb27-560" aria-hidden="true" tabindex="-1"></a><span class="co">test.savedb()</span></span>
+<span id="cb27-561"><a href="#cb27-561" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-562"><a href="#cb27-562" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-563"><a href="#cb27-563" aria-hidden="true" tabindex="-1"></a><span class="co">The pedigree is saved to the database and table specified in the `database_name` and `dbtable_name` variables. If the</span></span>
+<span id="cb27-564"><a href="#cb27-564" aria-hidden="true" tabindex="-1"></a><span class="co">specified table already exists then the records from the current pedigree will be added to the table. If you want to</span></span>
+<span id="cb27-565"><a href="#cb27-565" aria-hidden="true" tabindex="-1"></a><span class="co">overwrite the existing database then you need to pass `drop=True` in the call to `savedb()`:</span></span>
+<span id="cb27-566"><a href="#cb27-566" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-569"><a href="#cb27-569" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-570"><a href="#cb27-570" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-571"><a href="#cb27-571" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-572"><a href="#cb27-572" aria-hidden="true" tabindex="-1"></a><span class="co">test.savedb(drop=True)</span></span>
+<span id="cb27-573"><a href="#cb27-573" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-574"><a href="#cb27-574" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-575"><a href="#cb27-575" aria-hidden="true" tabindex="-1"></a><span class="co">While this may strike some users as unexpected behavior it is based on the idea that you should never lose data</span></span>
+<span id="cb27-576"><a href="#cb27-576" aria-hidden="true" tabindex="-1"></a><span class="co">unexpectedly. If you use only the defaults you'll never lose data. However, if you try and save a renumbered pedigree</span></span>
+<span id="cb27-577"><a href="#cb27-577" aria-hidden="true" tabindex="-1"></a><span class="co">on top of another renumbered pedigree you'll run into problems because animal IDs are used as primary keys, and you'll</span></span>
+<span id="cb27-578"><a href="#cb27-578" aria-hidden="true" tabindex="-1"></a><span class="co">have constraint violations.</span></span>
+<span id="cb27-579"><a href="#cb27-579" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-580"><a href="#cb27-580" aria-hidden="true" tabindex="-1"></a><span class="co">It's possible to save pedigrees to a databse with a format different than that exected by PyPedal, but it's a little</span></span>
+<span id="cb27-581"><a href="#cb27-581" aria-hidden="true" tabindex="-1"></a><span class="co">harder than changeing pedigree input. Changing the output table requires that you change the `NewPedigree` class's</span></span>
+<span id="cb27-582"><a href="#cb27-582" aria-hidden="true" tabindex="-1"></a><span class="co">`savedb` method. Consider the code that begins on or about line 1412 of `pyp_newclasses.py` in `savedb`:</span></span>
+<span id="cb27-583"><a href="#cb27-583" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-586"><a href="#cb27-586" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-587"><a href="#cb27-587" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-588"><a href="#cb27-588" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-589"><a href="#cb27-589" aria-hidden="true" tabindex="-1"></a><span class="co">sql = 'create table %s ( </span><span class="op">\</span></span>
+<span id="cb27-590"><a href="#cb27-590" aria-hidden="true" tabindex="-1"></a><span class="co">    animalName   varchar(128) primary key, </span><span class="op">\</span></span>
+<span id="cb27-591"><a href="#cb27-591" aria-hidden="true" tabindex="-1"></a><span class="co">    sireName     varchar(128), </span><span class="op">\</span></span>
+<span id="cb27-592"><a href="#cb27-592" aria-hidden="true" tabindex="-1"></a><span class="co">    damName      varchar(128), </span><span class="op">\</span></span>
+<span id="cb27-593"><a href="#cb27-593" aria-hidden="true" tabindex="-1"></a><span class="co">    sex          char(1) </span><span class="op">\</span></span>
+<span id="cb27-594"><a href="#cb27-594" aria-hidden="true" tabindex="-1"></a><span class="co">    );' % ( self.kw['database_table'] )</span></span>
+<span id="cb27-595"><a href="#cb27-595" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-596"><a href="#cb27-596" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-597"><a href="#cb27-597" aria-hidden="true" tabindex="-1"></a><span class="co">You need to rewrite this statement to add or remove columns; the SQL for a table that includes all fields in a</span></span>
+<span id="cb27-598"><a href="#cb27-598" aria-hidden="true" tabindex="-1"></a><span class="co">`NewAnimal` object may be found in the `create_pedigree_table` function of the `pyp_db` module. Note that not</span></span>
+<span id="cb27-599"><a href="#cb27-599" aria-hidden="true" tabindex="-1"></a><span class="co">every field in a `NewAnimal` object has a corresponding pedigree format code. Consult Table tbl-pedigree-format-codes}</span></span>
+<span id="cb27-600"><a href="#cb27-600" aria-hidden="true" tabindex="-1"></a><span class="co">for appropriate codes.</span></span>
+<span id="cb27-601"><a href="#cb27-601" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-602"><a href="#cb27-602" aria-hidden="true" tabindex="-1"></a><span class="co">Once you've updated the SQL used to create your custom pedigree table you'll also need to change the code which prepares</span></span>
+<span id="cb27-603"><a href="#cb27-603" aria-hidden="true" tabindex="-1"></a><span class="co">the input for writing to the database. This code is found on or about about line 1443 in `savedb`:</span></span>
+<span id="cb27-604"><a href="#cb27-604" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-607"><a href="#cb27-607" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-608"><a href="#cb27-608" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-609"><a href="#cb27-609" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-610"><a href="#cb27-610" aria-hidden="true" tabindex="-1"></a><span class="co">sql = "INSERT INTO %s ( animalName, sireName, damName, sex ) VALUES ('%s', '%s', '%s', '%s')" % ( self.kw['database_table'], an, si, da, p.sex )</span></span>
+<span id="cb27-611"><a href="#cb27-611" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-612"><a href="#cb27-612" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-613"><a href="#cb27-613" aria-hidden="true" tabindex="-1"></a><span class="co">Note that you'll need to make appropriate casts yourself. For example, you'll want to cast things that are stored as</span></span>
+<span id="cb27-614"><a href="#cb27-614" aria-hidden="true" tabindex="-1"></a><span class="co">integers or reals to make sure that you don't violate a column constraint. You must enclose strings in single-quotation</span></span>
+<span id="cb27-615"><a href="#cb27-615" aria-hidden="true" tabindex="-1"></a><span class="co">marks ('') yourself.</span></span>
+<span id="cb27-616"><a href="#cb27-616" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-617"><a href="#cb27-617" aria-hidden="true" tabindex="-1"></a><span class="co">By default PyPedal saves pedigrees in `ASD` format. If you want to save your pedigree in `asd` format then you'll need</span></span>
+<span id="cb27-618"><a href="#cb27-618" aria-hidden="true" tabindex="-1"></a><span class="co">to change the code on or about line 1436 from:</span></span>
+<span id="cb27-619"><a href="#cb27-619" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-622"><a href="#cb27-622" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-623"><a href="#cb27-623" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-624"><a href="#cb27-624" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-625"><a href="#cb27-625" aria-hidden="true" tabindex="-1"></a><span class="co">an = p.name</span></span>
+<span id="cb27-626"><a href="#cb27-626" aria-hidden="true" tabindex="-1"></a><span class="co">si = p.sireName</span></span>
+<span id="cb27-627"><a href="#cb27-627" aria-hidden="true" tabindex="-1"></a><span class="co">da = p.damName</span></span>
+<span id="cb27-628"><a href="#cb27-628" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-629"><a href="#cb27-629" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-630"><a href="#cb27-630" aria-hidden="true" tabindex="-1"></a><span class="co">to:</span></span>
+<span id="cb27-631"><a href="#cb27-631" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-634"><a href="#cb27-634" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-635"><a href="#cb27-635" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false      # Don't evaluate this chunk</span></span>
+<span id="cb27-636"><a href="#cb27-636" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true       # Do show this chunk in the final rendered document</span></span>
+<span id="cb27-637"><a href="#cb27-637" aria-hidden="true" tabindex="-1"></a><span class="co">an = p.animalID</span></span>
+<span id="cb27-638"><a href="#cb27-638" aria-hidden="true" tabindex="-1"></a><span class="co">si = p.sireID</span></span>
+<span id="cb27-639"><a href="#cb27-639" aria-hidden="true" tabindex="-1"></a><span class="co">da = p.damID</span></span>
+<span id="cb27-640"><a href="#cb27-640" aria-hidden="true" tabindex="-1"></a><span class="co">```</span></span>
+<span id="cb27-641"><a href="#cb27-641" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-642"><a href="#cb27-642" aria-hidden="true" tabindex="-1"></a><span class="co">It's better to add a new method supporting your output format to `NewAnimal` rather than changing the `savedb` method.</span></span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>All content licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> <br> © John B. Cole.</p>
+</div>   
+    <div class="nav-footer-center">
+<p><a href="https://github.com/wintermind/pypedal3">GitHub</a></p>
+</div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

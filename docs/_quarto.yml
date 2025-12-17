@@ -14,7 +14,7 @@ book:
   author: "John B. Cole"
   description: "..."
   keyword: PyPedal, Python, pedigrees
-  date: "12/04/2025"
+  date: "12/16/2025"
   downloads: [pdf]
   sidebar:
     style: "floating"
@@ -31,6 +31,7 @@ book:
     - index.qmd
     - introduction.qmd
     - getting_started.qmd
+    - input-output.qmd
     - methodology.qmd
     - references.qmd
 

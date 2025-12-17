@@ -1,20 +1,21 @@
 ###############################################################################
 # NAME: pyp_reports.py
-# VERSION: 3.0.0 (21AUGUST2024)
+# VERSION: 3.0.0 (16DECEMBER2025)
 # AUTHOR: John B. Cole (john.b.cole@gmail.com)
 # LICENSE: LGPL v2.1 (see LICENSE file)
 ###############################################################################
 # FUNCTIONS:
-#   meanMetricBy()
-#   pdfMeanMetricBy()
-#   pdfPedigreeMetadata()
-#   pdf3GenPed()
-#   _pdfInitialize()
-#   _pdfDrawPageFrame()
-#   _pdfCreateTitlePage()
+#   mean_metric_by()
+#   pdf_mean_metric_by()
+#   pdf_pedigree_metadata()
+#   pdf_3_gen_ped()
+#   _pdf_initialize()
+#   _pdf_draw_page_frame()
+#   _pdf_create_title_page()
 ###############################################################################
 
-## @package pyp_reports
+##
+# @package pyp_reports
 # pyp_reports contains a set of procedures for creating fancy documents (pedigrees, etc.).
 ##
 
@@ -32,7 +33,7 @@ BYVAR_TO_COLUMN = {'by': 'birthyear',
 
 
 ##
-# meanMetricBy() returns a dictionary of means keyed by levels of the 'byvar' that
+# mean_metric_by() returns a dictionary of means keyed by levels of the 'byvar' that
 # can be used to draw graphs or prepare reports of summary statistics.
 # @param pedobj A PyPedal pedigree object.
 # @param metric The variable to summarize on a BY variable.
@@ -40,9 +41,9 @@ BYVAR_TO_COLUMN = {'by': 'birthyear',
 # @param createpdf Flag indicating whether or not a PDF version of the report should be created.
 # @param conn Handle to a database connection, or False.
 # @retval A dictionary containing means for the metric variable keyed to levels of the byvar.
-def meanMetricBy(pedobj, metric='fa', byvar='by', createpdf=False, conn=False):
+def mean_metric_by(pedobj, metric='fa', byvar='by', createpdf=False, conn=False):
     """
-    meanMetricBy() returns a dictionary of means keyed by levels of the 'byvar' that
+    mean_metric_by() returns a dictionary of means keyed by levels of the 'byvar' that
     can be used to draw graphs or prepare reports of summary statistics.
     """
     # If the user doesn't pass us a db_dict then try and connect to the database
@@ -63,8 +64,10 @@ def meanMetricBy(pedobj, metric='fa', byvar='by', createpdf=False, conn=False):
 
         if pyp_db.doesTableExist(pedobj, conn=conn):
             sql = 'SELECT %s, AVG(%s) FROM %s GROUP BY %s ORDER BY %s' % (BYVAR_TO_COLUMN[byvar],
-                METRIC_TO_COLUMN[metric], pedobj.kw['database_table'], BYVAR_TO_COLUMN[byvar],
-                BYVAR_TO_COLUMN[byvar])
+                                                                          METRIC_TO_COLUMN[metric],
+                                                                          pedobj.kw['database_table'],
+                                                                          BYVAR_TO_COLUMN[byvar],
+                                                                          BYVAR_TO_COLUMN[byvar])
             # print('pyp_reports/meanMetricBy() SQL: ', sql)
             cursor = conn.Execute(sql)
             while not cursor.EOF:
@@ -81,7 +84,7 @@ def meanMetricBy(pedobj, metric='fa', byvar='by', createpdf=False, conn=False):
             try:
                 mmbPdfTitle = '%s_mean_metric_%s_%s' % \
                     (pedobj.kw['default_report'], metric, byvar)
-                _mmbPdf = pdfMeanMetricBy(pedobj, result_dict, 1, mmbPdfTitle)
+                _mmbPdf = pdf_mean_metric_by(pedobj, result_dict, 1, mmbPdfTitle)
                 if _mmbPdf:
                     logging.info('pyp_reports/pdfMeanMetricBy() succeeded.')
                 else:
@@ -94,7 +97,7 @@ def meanMetricBy(pedobj, metric='fa', byvar='by', createpdf=False, conn=False):
 
 
 ##
-# pdfMeanMetricBy() returns a dictionary of means keyed by levels of the 'byvar' that
+# pdf_mean_metric_by() returns a dictionary of means keyed by levels of the 'byvar' that
 # can be used to draw graphs or prepare reports of summary statistics.
 # @param pedobj A PyPedal pedigree object.
 # @param results A dictionary containing means for the metric variable keyed to levels of the byvar.
@@ -103,9 +106,9 @@ def meanMetricBy(pedobj, metric='fa', byvar='by', createpdf=False, conn=False):
 # @param reportauthor Author/preparer of report.
 # @param reportfile Optional name of file to which the report should be written.
 # @retval 1 on success, 0 on failure
-def pdfMeanMetricBy(pedobj, results, titlepage=0, reporttitle='', reportauthor='', reportfile=''):
+def pdf_mean_metric_by(pedobj, results, titlepage=0, reporttitle='', reportauthor='', reportfile=''):
     """
-    pdfMeanMetricBy() returns a dictionary of means keyed by levels of the 'byvar' that
+    pdf_mean_metric_by() returns a dictionary of means keyed by levels of the 'byvar' that
     can be used to draw graphs or prepare reports of summary statistics.
     """
     try:
@@ -123,15 +126,15 @@ def pdfMeanMetricBy(pedobj, results, titlepage=0, reporttitle='', reportauthor='
             print('Writing meanMetricBy report to %s' % _pdfOutfile)
         logging.info('Writing meanMetricBy report to %s', _pdfOutfile)
 
-        _pdfSettings = _pdfInitialize(pedobj)
+        _pdfSettings = _pdf_initialize(pedobj)
         canv = canvas.Canvas(_pdfOutfile, invariant=1)
         canv.setPageCompression(1)
 
         if titlepage:
             if reporttitle == '':
                 reporttitle = 'meanMetricBy Report for Pedigree\n%s' % (pedobj.kw['pedname'])
-            _pdfCreateTitlePage(canv, _pdfSettings, reporttitle, reportauthor)
-        _pdfDrawPageFrame(canv, _pdfSettings)
+            _pdf_create_title_page(canv, _pdfSettings, reporttitle, reportauthor)
+        _pdf_draw_page_frame(canv, _pdfSettings)
 
         canv.setFont("Times-Bold", 12)
         tx = canv.beginText( _pdfSettings['_pdfCalcs']['_left_margin'],
@@ -148,7 +151,7 @@ def pdfMeanMetricBy(pedobj, results, titlepage=0, reporttitle='', reportauthor='
                 0.5 * _pdfSettings['_pdfCalcs']['_unit']:
                 canv.drawText(tx)
                 canv.showPage()
-                _pdfDrawPageFrame(canv, _pdfSettings)
+                _pdf_draw_page_frame(canv, _pdfSettings)
                 canv.setFont('Times-Roman', 12)
                 tx = canv.beginText(_pdfSettings['_pdfCalcs']['_left_margin'],
                                     _pdfSettings['_pdfCalcs']['_top_margin']-0.5*_pdfSettings['_pdfCalcs']['_unit'])
@@ -162,7 +165,7 @@ def pdfMeanMetricBy(pedobj, results, titlepage=0, reporttitle='', reportauthor='
 
 
 ##
-# pdfPedigreeMetadata() produces a report, in PDF format, of the metadata from
+# pdf_pedigree_metadata() produces a report, in PDF format, of the metadata from
 # the input pedigree.  It is intended for use as a template for custom printed
 # reports.
 # @param pedobj A PyPedal pedigree object.
@@ -171,9 +174,9 @@ def pdfMeanMetricBy(pedobj, results, titlepage=0, reporttitle='', reportauthor='
 # @param reportauthor Author/preparer of report.
 # @param reportfile Optional name of file to which the report should be written.
 # @retval A 1 on success, 0 otherwise.
-def pdfPedigreeMetadata(pedobj, titlepage=0, reporttitle='', reportauthor='', reportfile=''):
+def pdf_pedigree_metadata(pedobj, titlepage=0, reporttitle='', reportauthor='', reportfile=''):
     """
-    pdfPedigreeMetadata() produces a report, in PDF format, of the metadata from
+    pdf_pedigree_metadata() produces a report, in PDF format, of the metadata from
     the input pedigree.  It is intended for use as a template for custom printed
     reports.
     """
@@ -193,7 +196,7 @@ def pdfPedigreeMetadata(pedobj, titlepage=0, reporttitle='', reportauthor='', re
 
     # The _pdfSettings dictionary contains several settings, such as page size,
     # page height and width, and margins, that are used several times.
-    _pdfSettings = _pdfInitialize(pedobj)
+    _pdfSettings = _pdf_initialize(pedobj)
 
     # The actual report is written to an instance of a canvas object, which is
     # stored in a file whose name is _pdfOutfile.  We have to create this canvas
@@ -205,12 +208,12 @@ def pdfPedigreeMetadata(pedobj, titlepage=0, reporttitle='', reportauthor='', re
     if titlepage:
         if reporttitle == '':
             reporttitle = 'Metadata for Pedigree\n%s' % pedobj.kw['pedname']
-        _pdfCreateTitlePage(canv, _pdfSettings, reporttitle, reportauthor)
+        _pdf_create_title_page(canv, _pdfSettings, reporttitle, reportauthor)
 
     # Start a new page of output.  Split the metadata output returned by the
     # stringme() method on linebreak characters and write each of the resulting
     # tokens to the canvas.
-    _pdfDrawPageFrame(canv, _pdfSettings)
+    _pdf_draw_page_frame(canv, _pdfSettings)
     canv.setFont("Times-Bold", 12)
     tx = canv.beginText( _pdfSettings['_pdfCalcs']['_left_margin'],
         _pdfSettings['_pdfCalcs']['_top_margin'] - 0.5 * _pdfSettings['_pdfCalcs']['_unit'] )
@@ -222,7 +225,7 @@ def pdfPedigreeMetadata(pedobj, titlepage=0, reporttitle='', reportauthor='', re
         if tx.getY() < _pdfSettings['_pdfCalcs']['_bottom_margin'] + 0.5 * _pdfSettings['_pdfCalcs']['_unit']:
             canv.drawText(tx)
             canv.showPage()
-            _pdfDrawPageFrame(canv, _pdfSettings)
+            _pdf_draw_page_frame(canv, _pdfSettings)
             canv.setFont('Times-Roman', 12)
             tx = canv.beginText(_pdfSettings['_pdfCalcs']['_left_margin'],
                                 _pdfSettings['_pdfCalcs']['_top_margin']-0.5*_pdfSettings['_pdfCalcs']['_unit'])
@@ -248,7 +251,7 @@ def pdfPedigreeMetadata(pedobj, titlepage=0, reporttitle='', reportauthor='', re
 
 
 ##
-# pdf3GenPed() draws a three-generation pedigree for animal 'animalID'.
+# pdf_3_gen_ped() draws a three-generation pedigree for animal 'animalID'.
 # @param animalID An animal ID or list of animal IDs.
 # @param pedobj A PyPedal pedigree object.
 # @param titlepage Show (1) or hide (0) the title page.
@@ -256,9 +259,9 @@ def pdfPedigreeMetadata(pedobj, titlepage=0, reporttitle='', reportauthor='', re
 # @param reportauthor Author/preparer of report.
 # @param reportfile Optional name of file to which the report should be written.
 # @retval 1 on success, 0 on failure
-def pdf3GenPed(animalID, pedobj, titlepage=0, reporttitle='', reportauthor='', reportfile=''):
+def pdf_3_gen_ped(animalID, pedobj, titlepage=0, reporttitle='', reportauthor='', reportfile=''):
     """
-    pdf3GenPed() draws a three-generation pedigree for animal 'animalID'.
+    pdf_3_gen_ped() draws a three-generation pedigree for animal 'animalID'.
     """
 
     try:
@@ -280,7 +283,7 @@ def pdf3GenPed(animalID, pedobj, titlepage=0, reporttitle='', reportauthor='', r
         print('Writing 3GenPed to %s' % _pdfOutfile)
     logging.info('Writing 3GenPed to %s', _pdfOutfile )
 
-    _pdfSettings = _pdfInitialize(pedobj)
+    _pdfSettings = _pdf_initialize(pedobj)
     # print _pdfSettings
     canv = canvas.Canvas(_pdfOutfile, invariant=1)
     canv.setPageCompression(1)
@@ -288,8 +291,8 @@ def pdf3GenPed(animalID, pedobj, titlepage=0, reporttitle='', reportauthor='', r
     if titlepage:
         if reporttitle == '':
             reporttitle = 'Three-generation Pedigrees'
-        _pdfCreateTitlePage(canv, _pdfSettings, reporttitle, reportauthor)
-        _pdfDrawPageFrame(canv, _pdfSettings)
+        _pdf_create_title_page(canv, _pdfSettings, reporttitle, reportauthor)
+        _pdf_draw_page_frame(canv, _pdfSettings)
 
     # This is where the actual content is written to a text object
     # that will be displayed on a canvas.
@@ -300,7 +303,7 @@ def pdf3GenPed(animalID, pedobj, titlepage=0, reporttitle='', reportauthor='', r
             canv.setFont("Times-Bold", 12)
             tx = canv.beginText(_pdfSettings['_pdfCalcs']['_left_margin'],
                                 _pdfSettings['_pdfCalcs']['_top_margin']-0.5*_pdfSettings['_pdfCalcs']['_unit'])
-            _pdfDrawPageFrame(canv, _pdfSettings)
+            _pdf_draw_page_frame(canv, _pdfSettings)
             # We need to know the animal's renumbered ID. If the pedigree
             # we are using was based on animal names rather than integral
             # IDs we need to map the name back to the correct renumbered
@@ -310,11 +313,9 @@ def pdf3GenPed(animalID, pedobj, titlepage=0, reporttitle='', reportauthor='', r
                 _anid = pedobj.backmap[pedobj.idmap[pedobj.namemap[_anid]]]
             else:
                 _anidx = pedobj.idmap[_anid] - 1
-            # Oh, sure, it's ugly and inelegant and not easily extensible,
-            # but it gets the job done. There are 15 possible animals
-            # in a three-generation pedigree, and with the data structures
-            # I'm using it's easiest to just populate the dictionary by
-            # hand.
+            # Oh, sure, it's ugly and inelegant and not easily extensible, but it gets the job done. There are 15
+            # possible animals in a three-generation pedigree, and with the data structures I'm using it's easiest to
+            # just populate the dictionary by hand.
             _places = {}
             _places['a'] = pedobj.idmap[_anid]
             # Go down the sire side of the pedigree
@@ -457,18 +458,19 @@ def pdf3GenPed(animalID, pedobj, titlepage=0, reporttitle='', reportauthor='', r
 ###############################################################################
 
 ##
-# _pdfInitialize() returns a dictionary of metadata that is used for report
+# _pdf_initialize() returns a dictionary of metadata that is used for report
 # generation.
 # @param pedobj A PyPedal pedigree object.
 # @retval A dictionary of metadata that is used for report generation.
-def _pdfInitialize(pedobj):
+def _pdf_initialize(pedobj):
     """
-    _pdfInitialize() returns a dictionary of metadata that is used for report
+    _pdf_initialize() returns a dictionary of metadata that is used for report
     generation.
     """
-    _pdfSettings = {}
-    _pdfSettings['_pdfTitle'] = pedobj.kw['pedname']
-    _pdfSettings['_pdfPageinfo'] = pedobj.kw['filetag']
+    _pdfSettings = {
+        '_pdfTitle': pedobj.kw['pedname'],
+        '_pdfPageinfo': pedobj.kw['filetag'],
+    }
     # Calculate margins, etc.
     _pdfCalcs = {}
     if pedobj.kw['default_unit'] == 'inch':
@@ -500,14 +502,14 @@ def _pdfInitialize(pedobj):
 
 
 ##
-# _pdfDrawPageFrame() nicely frames page contents and includes the
+# _pdf_draw_page_frame() nicely frames page contents and includes the
 # document title in a header and the page number in a footer.
 # @param canv An instance of a ReportLab Canvas object.
 # @param _pdfSettings An options dictionary created by _pdfInitialize().
 # @retval None
-def _pdfDrawPageFrame(canv, _pdfSettings):
+def _pdf_draw_page_frame(canv, _pdfSettings):
     """
-    _pdfDrawPageFrame() nicely frames page contents and includes the
+    _pdf_draw_page_frame() nicely frames page contents and includes the
     document title in a header and the page number in a footer.
     """
     # Write the report title in the top, left-hand corner of the page.
@@ -545,18 +547,18 @@ def _pdfDrawPageFrame(canv, _pdfSettings):
 
 
 ##
-# _pdfCreateTitlePage() adds a title page to a ReportLab canvas object.
+# _pdf_create_title_page() adds a title page to a ReportLab canvas object.
 # @param canv An instance of a ReportLab Canvas object.
 # @param _pdfSettings An options dictionary created by _pdfInitialize().
 # @param reporttitle Title of report; if '', _pdfTitle is used.
 # @param reportauthor Author/preparer of report.
 # @retval None
-def _pdfCreateTitlePage(canv, _pdfSettings, reporttitle='', reportauthor=''):
+def _pdf_create_title_page(canv, _pdfSettings, reporttitle='', reportauthor=''):
     """
-    _pdfCreateTitlePage() adds a title page to a ReportLab canvas object.
+    _pdf_create_title_page() adds a title page to a ReportLab canvas object.
     """
     import textwrap
-    _pdfDrawPageFrame(canv, _pdfSettings)
+    _pdf_draw_page_frame(canv, _pdfSettings)
     # _title_y is the y-coordinate at which a given line of the title should be
     # printed.  It is defined here because both the title and the author renderers
     # need to see it.

@@ -18,6 +18,27 @@ PyPedal 3 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+''' 12/16/2025  Fixed pyp_newclasses/NewPedigree::load() to match changes to pyp_db function names.
+### 12/16/2025  Somebody's going to ask me if PyPedal can ingest JSON one of these days. My personal feelings aside, I
+    guess I should look into it.
+--- 12/16/2025  pyp_graphics/new_draw_pedigree() does not honor the "showall" flag.
+''' 12/16/2025  pyp_jbc/new_draw_colored_pedigree() should now honor the "showall" flag.
+??? 12/16/2025  Some of the graph property names used in pyp_jbc/new_draw_colored_pedigree() may have changed, e.g.,
+    'name' to 'graph_name'.
+--- 12/16/2025  pyp_jbc/new_draw_colored_pedigree() does not honor the "showall" flag.
+''' 12/16/2025  General cleanup in pyp_jbc.py.
+''' 12/16/2025  Fixed everything in pyp_reports to use the new function names; fixed some indentation issues; updated
+    some dictionary initializations.
+*** 12/16/2025  pyp_reports/_pdfCreateTitlePage() was renamed to pyp_reports/_pdf_create_title_page().
+*** 12/16/2025  pyp_reports/_pdfDrawPageFrame() was renamed to pyp_reports/_pdf_draw_page_frame().
+*** 12/16/2025  pyp_reports/_pdfInitialize() was renamed to pyp_reports/_pdf_initialize().
+*** 12/16/2025  pyp_reports/pdf3GenPed() was renamed to pyp_reports/pdf_3_gen_ped().
+*** 12/16/2025  pyp_reports/pdfPedigreeMetadata() was renamed to pyp_reports/pdf_pedigree_metadata().
+*** 12/16/2025  pyp_reports/pdfMeanMetricBy() was renamed to pyp_reports/pdf_mean_metric_by().
+*** 12/16/2025  pyp_reports/meanMetricBy() was renamed to pyp_reports/mean_metric_by().
+??? 12/16/2025  In pyp_metrics/a_effective_founders_Lacy(), should "p[row, col] = a[fs[col]-1, ds[row]-1]" actually be
+    "p[row, col] = a[fs[col-1], ds[row-1]]"?
+### 12/05/2025  I need to pull out all the debugging statements I used to find and fix the renumber problems.
 ''' 12/05/2025  I somehow deleted the README.md file but I was able to recover it from Github.
 *** 12/05/2025  When I changed the function call signature for pyp_utils/renumber() it caused
     pyp_newclasses/NewPedigree::renumber() to break. Instead of putting the updated pedigree (list of NewAnimals)

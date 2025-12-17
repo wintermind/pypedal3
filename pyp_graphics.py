@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 ###############################################################################
 # NAME: pyp_graphics.py
 # VERSION: 3.0.0 (22AUGUST2024)
@@ -40,7 +37,8 @@
 #     URL: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/390208
 ###############################################################################
 
-## @package pyp_graphics
+##
+# @package pyp_graphics
 # pyp_graphics contains routines for working with graphics in PyPedal, such as
 # creating directed graphs from pedigrees using PyDot and visualizing relationship
 # matrices using Rick Muller's spy and pcolor routines

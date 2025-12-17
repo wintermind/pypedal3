@@ -1,7 +1,7 @@
 ###############################################################################
 # NAME: pyp_jbc.py
-# VERSION: 2.0.0 (29SEPTEMBER2010)
-# AUTHOR: John B. Cole, PhD (john.cole@ars.usda.gov)
+# VERSION: 2.0.0 (16DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
 # LICENSE: LGPL`
 ###############################################################################
 # FUNCTIONS:
@@ -11,14 +11,14 @@
 #     new_draw_colored_pedigree()
 ###############################################################################
 
-## @package pyp_jbc
+##
+# @package pyp_jbc
 # pyp_template provides a skeleton on which user-defined modules may be built.
 ##
 
 import logging, math, numpy
-from PyPedal import  pyp_graphics
 from PyPedal import pyp_network
-from PyPedal import pyp_utils
+
 
 ##
 # get_color_32() Converts a float value to one of a continuous range of colors
@@ -30,17 +30,16 @@ from PyPedal import pyp_utils
 # @retval An RGB triplet.
 def get_color_32(a, cmin, cmax):
     """
-    Convert a float value to one of a continuous range of colors.
-    Rewritten to use recipe 9.10 from the O'Reilly Python Cookbook.
-    Returns 32-bit colors rather than 16-bit colors.
+    Convert a float value to one of a continuous range of colors. Rewritten to use recipe 9.10 from the O'Reilly Python
+    Cookbook. Returns 32-bit colors rather than 16-bit colors.
     """
     try:
-        a = float( a - cmin ) / ( cmax - cmin )
+        a = float(a - cmin) / (cmax - cmin)
     except ZeroDivisionError:
         a = 0.5 # cmax == cmin
-    blue = min((max((4*(0.75-a),0.)),1.))
-    red = min((max((4*(a-0.25),0.)),1.))
-    green = min((max((4*math.fabs(a-0.5)-1.,0)),1.))
+    blue = min((max((4*(0.75-a), 0.)), 1.))
+    red = min((max((4*(a-0.25), 0.)), 1.))
+    green = min((max((4*math.fabs(a-0.5)-1., 0)), 1.))
     _r = '%2x' % int(255*red)
     if _r[0] == ' ':
         _r = '0%s' % _r[1]
@@ -50,8 +49,9 @@ def get_color_32(a, cmin, cmax):
     _b = '%2x' % int(255*blue)
     if _b[0] == ' ':
         _b = '0%s' % _b[1]
-    _triple = '#%s%s%s' % (_r,_g,_b)
+    _triple = '#%s%s%s' % (_r, _g, _b)
     return _triple
+
 
 ##
 # color_pedigree() forms a graph object from a pedigree object and determines the
@@ -75,22 +75,23 @@ def color_pedigree(pedobj, metric='descendants', places=2, drawer='new', **kw):
         # Walk the pedigree and compute proportion of animals in the pedigree that are
         # descended from each animal.
         for _p in pedobj.pedigree:
-            _dcount = pyp_network.find_descendants(_pedgraph,_p.animalID,[])
+            _dcount = pyp_network.find_descendants(_pedgraph, _p.animalID, [])
             if len(_dcount) < 1:
                 _dprop[_p.animalID] = 0.0
             else:
                 _dprop[_p.animalID] = round(float(len(_dcount)) / float(pedobj.metadata.num_records), places)
-        del(_pedgraph)
+        del _pedgraph
     elif metric == 'sons':
         for _p in pedobj.pedigree:
             _dprop[_p.animalID] = float(len(_p.sons))
-        #print _dprop
+        #print(_dprop)
     else:
       return 0
     if drawer == 'new':
         new_draw_colored_pedigree(pedobj, _dprop, **kw)
     else:
         draw_colored_pedigree(pedobj, _dprop, **kw)
+
 
 ##
 # draw_colored_pedigree() uses the pydot bindings to the graphviz library to produce a
@@ -116,21 +117,22 @@ def color_pedigree(pedobj, metric='descendants', places=2, drawer='new', **kw):
 # @param ghatch Shade a node if the value of its userField attribute is equal to ghatch.
 # @param gprog Program to use to layout graph ('dot'|'neato').
 # @retval A 1 for success and a 0 for failure.
-def draw_colored_pedigree(pedobj, shading, gfilename='pedigree', gtitle='My_Pedigree', gformat='jpg', gsize='f', gdot='1', gorient='l', gdirec='', gname=0, gfontsize=10, garrow=1, gtitloc='b', gtitjust='c', ghatch='hatch', gprog='dot'):
+def draw_colored_pedigree(pedobj, shading, gfilename='pedigree', gtitle='My_Pedigree', gformat='jpg', gsize='f',
+                          gdot='1', gorient='l', gdirec='', gname=0, gfontsize=10, garrow=1, gtitloc='b', gtitjust='c',
+                          ghatch='hatch', gprog='dot'):
     """
-    draw_colored_pedigree() uses the pydot bindings to the graphviz library to produce a
-    directed graph of your pedigree with paths of inheritance as edges and animals as
-    nodes.  If there is more than one generation in the pedigree as determind by the "gen"
-    attributes of the animals in the pedigree, draw_pedigree() will use subgraphs to try
-    and group animals in the same generation together in the drawing.  Nodes will be
-    colored based on the number of outgoing connections (number of offspring).
+    draw_colored_pedigree() uses the pydot bindings to the graphviz library to produce a directed graph of your pedigree
+    with paths of inheritance as edges and animals as nodes. If there is more than one generation in the pedigree as
+    determind by the "gen" attributes of the animals in the pedigree, draw_pedigree() will use subgraphs to try and
+    group animals in the same generation together in the drawing. Nodes will be colored based on the number of outgoing
+    connections (number of offspring).
     """
     from .pyp_utils import string_to_table_name
     _gtitle = string_to_table_name(gtitle)
 
-    if gtitloc not in ['t','b']:
+    if gtitloc not in ['t', 'b']:
         gtitloc = 'b'
-    if gtitjust not in ['c','l','r']:
+    if gtitjust not in ['c', 'l', 'r']:
         gtitjust = 'c'
 
     print('[DEBUG]: Entered draw_colored_pedigree()')
@@ -142,12 +144,13 @@ def draw_colored_pedigree(pedobj, shading, gfilename='pedigree', gtitle='My_Pedi
     # "rank=same" option in dot to get nicer output.
     gens = pedobj.metadata.unique_gen_list
     # Set some properties for the graph.
-    g = pydot.Dot(label=gtitle, labelloc=gtitloc, labeljust=gtitjust, graph_name=_gtitle, type='graph', strict=False, suppress_disconnected=True, simplify=True)
+    g = pydot.Dot(label=gtitle, labelloc=gtitloc, labeljust=gtitjust, graph_name=_gtitle, type='graph', strict=False,
+                  suppress_disconnected=True, simplify=True)
 
     # Make sure that gfontsize has a valid value.
     try:
         gfontsize = int(gfontsize)
-    except:
+    except ValueError:
         gfontsize = 10
     if gfontsize < 10:
         gfontsize = 10
@@ -199,7 +202,7 @@ def draw_colored_pedigree(pedobj, shading, gfilename='pedigree', gtitle='My_Pedi
                 _an_node.set_shape('ellipse')
             else:
                 pass
-            #print _m.userField, ghatch, ( _m.userField == ghatch )
+            # print(_m.userField, ghatch, (_m.userField == ghatch))
             if _m.userField == ghatch:
                 _an_node.set_style('filled,peripheries=2')
             else:
@@ -300,28 +303,29 @@ def draw_colored_pedigree(pedobj, shading, gfilename='pedigree', gtitle='My_Pedi
                 _sg_list = ''
                 for _a in _sg_anims:
                     if len(_sg_list) == 0:
-                        _sg_list = 'same,%s' % (_a)
+                        _sg_list = 'same,%s' % _a
                     else:
-                        _sg_list = '%s,%s' % (_sg_list,_a)
+                        _sg_list = '%s,%s' % (_sg_list, _a)
             sg.set_rank(_sg_list)
             g.add_subgraph(sg)
     # For large graphs it is nice to write out the .dot file so that it does not have to be recreated
     # whenever draw_pedigree is called.  Especially when I am debugging.  :-)
     if gdot:
-        dfn = '%s.dot' % (gfilename)
+        dfn = '%s.dot' % gfilename
 #             try:
         g.write(dfn)
 #             except:
 #                 pass
     # Write the graph to an output file.
-    outfile = '%s.%s' % (gfilename,gformat)
-    if gprog not in ['dot','neato','none']:
+    outfile = '%s.%s' % (gfilename, gformat)
+    if gprog not in ['dot', 'neato', 'none']:
         gprog = 'dot'
     if gprog != 'none':
-        g.write(outfile,prog=gprog,format=gformat)
+        g.write(outfile, prog=gprog, format=gformat)
     return 1
 #     except:
 #         return 0
+
 
 ##
 # new_draw_colored_pedigree() uses the pyygraphviz to produce a directed graph of your
@@ -346,10 +350,9 @@ def draw_colored_pedigree(pedobj, shading, gfilename='pedigree', gtitle='My_Pedi
 # @param gprog Specify which program should be used to position and render the graph.
 # @param ghatch Shade a node if the value of its userField attribute is equal to ghatch.
 # @retval A 1 for success and a 0 for failure.
-def new_draw_colored_pedigree(pedobj, shading, gfilename='pedigree', \
-    gtitle='', gformat='jpg', gsize='f', gdot=1, gorient='p', gdirec='', \
-    gname=0, garrow=1, gtitloc='b', gtitjust='c', gshowall=1, gprog='dot', \
-    ghatch='hatch'):
+def new_draw_colored_pedigree(pedobj, shading, gfilename='pedigree', gtitle='', gformat='jpg', gsize='f', gdot=True,
+                              gorient='p', gdirec='', gname=False, garrow=True, gtitloc='b', gtitjust='c', gshowall=True,
+                              gprog='dot', ghatch='hatch'):
     """
     draw_pedigree() uses the pydot bindings to the graphviz library -- if they
     are available on your system -- to produce a directed graph of your pedigree
@@ -365,27 +368,27 @@ def new_draw_colored_pedigree(pedobj, shading, gfilename='pedigree', \
         if pedobj.kw['messages'] == 'verbose':
             print('[ERROR]: pyp_graphics/new_draw_pedigree() was unable to import the pygraphviz module!')
         logging.error('pyp_graphics/new_draw_pedigree() was unable to import the pygraphviz module!')
-        return 0
-
-    # Maps the 0/1 flags taken by the function and maps them to Python
-    # True/False for settine edge and node attributes.
-    _tf = {0:False, 1:True}
+        return False
 
     from .pyp_utils import string_to_table_name
     _gtitle = string_to_table_name(gtitle)
 
-    if gtitloc not in ['t','b']:
+    if gtitloc not in ['t', 'b']:
         gtitloc = 'b'
-    if gtitjust not in ['c','l','r']:
+    if gtitjust not in ['c', 'l', 'r']:
         gtitjust = 'c'
 
     if not pedobj.kw['pedigree_is_renumbered']:
         if pedobj.kw['messages'] != 'quiet':
-            print('[GRAPH]: The pedigree that you passed to pyp_graphics/draw_pedigree() is not renumbered. Because of this, there may be errors in the rendered pedigree. In order to insure that the pedigree drawing is accurate, you should renumber the pedigree before calling draw_pedigree().')
-        logging.error('The pedigree that you passed to pyp_graphics/draw_pedigree() is not renumbered. Because of this, there may be errors in the rendered pedigree. In order to insure that the pedigree drawing is accurate, you should renumber the pedigree before calling draw_pedigree().')
+            print('[GRAPH]: The pedigree that you passed to pyp_graphics/draw_pedigree() is not renumbered. Because of '
+                  'this, there may be errors in the rendered pedigree. In order to insure that the pedigree drawing is '
+                  'accurate, you should renumber the pedigree before calling draw_pedigree().')
+        logging.error('The pedigree that you passed to pyp_graphics/draw_pedigree() is not renumbered. Because of '
+                      'this, there may be errors in the rendered pedigree. In order to insure that the pedigree '
+                      'drawing is accurate, you should renumber the pedigree before calling draw_pedigree().')
 
     # Create an empty pygraphviz graph using the Agraph class.
-    g = pygraphviz.AGraph(directed=True,strict=False)
+    g = pygraphviz.AGraph(directed=True, strict=False)
 
     # I'm not sure if I need to have this here or not.
     g.graph_attr['type'] = 'graph'
@@ -402,6 +405,13 @@ def new_draw_colored_pedigree(pedobj, shading, gfilename='pedigree', \
         g.graph_attr['label'] = gtitle
         g.graph_attr['labelloc'] = gtitloc
         g.graph_attr['labeljust'] = gtitjust
+
+    # If gshowall is true, then render all animals even if they're disconnected from the rest of the pedigree. If it's
+    # false, suppress them.
+    if gshowall:
+        g.graph_attr['suppress_disconnected'] = False
+    else:
+        g.graph_attr['suppress_disconnected'] = True
 
     # Set the page paper size and writeable area.
     g.graph_attr['page'] = '8.5,11'
@@ -445,18 +455,17 @@ def new_draw_colored_pedigree(pedobj, shading, gfilename='pedigree', \
         n.attr['fontname'] = 'Helvetica'
         n.attr['fontsize'] = str(pedobj.kw['default_fontsize'])
         n.attr['height'] = '0.35'
-        #print '[DEBUG]: sex = ', _m.sex
+        # print('[DEBUG]: sex = ', _m.sex)
         if _m.sex == 'M' or _m.sex == 'm':
             n.attr['shape'] = 'box'
         elif _m.sex == 'F' or _m.sex == 'f':
             n.attr['shape'] = 'ellipse'
         else:
             n.attr['shape'] = 'octagon'
-            #pass
 
         # Color the nodes
         if _m.userField == ghatch:
-            n.attr['style'] = 'filled,peripheries=2'
+            n.attr['style'] = 'filled, peripheries=2'
         else:
             n.attr['style'] = 'filled'
             _color = get_color_32(shading[_m.animalID], colormin, colormax)
@@ -473,44 +482,42 @@ def new_draw_colored_pedigree(pedobj, shading, gfilename='pedigree', \
                 # Check some outputs -- should I be using the animalID or the
                 # originalID to assign edges? Nodes are based on the animalID,
                 # so edges should also be in order to maintain consistency.
-                #_sire_edge = pedobj.pedigree[int(_m.sireID)-1].originalID
+                # _sire_edge = pedobj.pedigree[int(_m.sireID)-1].originalID
                 _sire_edge = pedobj.pedigree[int(_m.sireID)-1].animalID
-            g.add_edge(_sire_edge,_node_name)
-            if not _tf[garrow]:
-                e = g.get_edge(_sire_edge,_anim_node)
+            g.add_edge(_sire_edge, _node_name)
+            if not garrow:
+                e = g.get_edge(_sire_edge, _node_name)
                 e.attr['dir'] = 'none'
         if _m.damID != pedobj.kw['missing_parent']:
             if gname:
                 _dam_edge = pedobj.pedigree[int(_m.damID)-1].name
             else:
                 _dam_edge = pedobj.pedigree[int(_m.damID)-1].animalID
-            g.add_edge(_dam_edge,_node_name)
-            if not _tf[garrow]:
-                e = g.get_edge(_dam_edge,_anim_node)
+            g.add_edge(_dam_edge, _node_name)
+            if not garrow:
+                e = g.get_edge(_dam_edge, _node_name)
                 e.attr['dir'] = 'none'
 
     # For large graphs it is nice to write out the .dot file so that it does
     # not have to be recreated whenever new_draw_pedigree is called.
     # Especially when I am debugging.
     if gdot:
-        dfn = '%s.dot' % (gfilename)
+        dfn = '%s.dot' % gfilename
         try:
             g.write(dfn)
         except:
             if pedobj.kw['messages'] == 'verbose':
-                print('[ERROR]: pyp_graphics/new_draw_pedigree() was unable to write the dotfile %s.' % (dfn))
-            logging.error('pyp_graphics/new_draw_pedigree() was unable to draw the dotfile %s.', (dfn))
-
+                print('[ERROR]: pyp_graphics/new_draw_pedigree() was unable to write the dotfile %s.' % dfn)
+            logging.error('pyp_graphics/new_draw_pedigree() was unable to draw the dotfile %s.', dfn)
 
     # Write the color map to a file.
-    #try:
-    mapfile = '%s_color_map.txt' % (gfilename)
-    mf = file(mapfile,'w')
+    mapfile = '%s_color_map.txt' % gfilename
+    mf = open(mapfile, 'w')
     mf.write('# Color map data\n')
     mf.write('# Data are metric (number of sons/descendants/etc.) followed\n')
     mf.write('# by color in RGB.\n')
     for k,v in color_map.items():
-        line = '%s\t%s\n' % (k,v)
+        line = '%s\t%s\n' % (k, v)
         mf.write(line)
     mf.close()
     #except:
@@ -522,9 +529,9 @@ def new_draw_colored_pedigree(pedobj, shading, gfilename='pedigree', \
 
     # Write the graph to an output file.
     #try:
-    outfile = '%s.%s' % (gfilename,gformat)
-    g.draw(outfile,prog=gprog)
-    return 1
+    outfile = '%s.%s' % (gfilename, gformat)
+    g.draw(outfile, prog=gprog)
+    return True
     #except:
         #outfile = '%s.%s' % (gfilename,gformat)
         #if pedobj.kw['messages'] == 'verbose':

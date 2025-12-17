@@ -85,7 +85,7 @@ provided, the name is changed to the renumbered ID when the pedigree is renumber
 
 ::: {#tbl-methodology-id-mapping}
 |             | Key       | Value     | Key  | Value | Key           | Value         |
-|-------------|-----------|-----------|------|-------|---------------|---------------|
+|:------------|:----------|:----------|:-----|:------|:--------------|:--------------|
 | idmap       | animal ID | animal ID | name | name  | original ID   | renumbered ID |
 | backmap     | animal ID | animal ID | name | name  | renumbered ID | original ID   |
 | namemap     | name      | animal ID | name | name  | name          | original ID   |

@@ -1,0 +1,588 @@
+---
+title: "Input and Output"
+---
+
+::: {.callout-note appearance="simple"}
+The only legitimate use of a computer is to play games. --- Eugene Jarvis
+:::
+
+Getting data into and out of programs, while extremely important to end-users, is often challenging. PyPedal can load
+pedigrees from --- and save them to --- many different sources. A list of supported input and output formats is shown in
+Table @tbl-input-output-methods.
+
+::: {#tbl-input-output-methods}
+| Direction   | Source     | Description                                                                              |
+|:------------|:-----------|:-----------------------------------------------------------------------------------------|
+| Input       | db         | Load an ASDx-formatted data from an SQLite database                                      |
+|             | fromgraph  | Load a pedigree from an instance of an XDiGraph object (not a file)                      |
+|             | gedcomfile | Load a pedigree from a GEDCOM 5.5 file                                                   |
+|             | graphfile  | Load a pedigree from an adjacency list using the `read_adjlist()` function from NetworkX |
+|             | simulate   | Simulate a pedigree rathen that loading it from a file                                   |
+|             | textstream | Load a pedigree from a string containing animal records                                  |
+| Output      | save       | Save a pedigree with user-specified filenames, pedigree format codes, and separators     |
+|             | savedb     | Save a pedigree to a database table                                                      |
+|             | savegedcom | Save a pedigree to a GEDCOM 5.5 file                                                     |
+|             | savegedcom | Save a pedigree to a GENES 1.20 file (DBASE III format)                                  |
+|             | savegraph  | Save a pedigree to a file as an adjacency list                                           |
+
+PyPedal input and output methods.
+:::
+
+It has evolved over time that the input methods are implemented as cases of `pedsource` in the `NewPedigree::load()`
+method, while output methods are implemented as individual methods of `NewPedigree`. While it is quite straightforward
+to add new methods for pedigree output, it is trickier to add new input sources. The greater difficulty in adding new
+input sources is largely due to the mysterious workings of the `NewPedigree::preprocess()` method, which walks through
+input line-by-line to load the pedigree and perform a number of integrity checks. Once the data are loaded into a
+`NewPedigree` object it's easy to output them because there's no need to check the integrity of the pedigree and
+relationships among the records in the pedigree. If you want to implement a new input source the sanity-saving way to
+go is to get the data into a list that you can pass to `preprocess()`; `preprocess()` can then walk the list as it
+would walk through the lines of an input file.
+
+Database operations are discussed in their own section at the end of this chapter.
+
+## Input
+The process of data input has been made as simple as is reasonably possible, but it is ultimately the responsibility of
+the user to prepare their data. Most people will load their data from a simple text file, with one pedigree entry per
+line. A number of data integrity checks are performed when a pedigree is loaded. First, the pedigree format string
+is checked for validity and compared to a line of data to make sure that the specfied number of columns of data exist.
+Once that check is passed, individual records are loaded and checked one at a time. As individual records are validated
+they're added to the pedigree. Duplicate records are eliminated, parents that appear in the pedigree but do not have
+their own record in the input data are added to the pedigree, and sexes are checked (animals cannot appear as both males
+and females). If animal IDs are strings they're hashed to get numeric IDs for use in reordering and renumbering.
+
+If you used an earlier version of PyPedal you may have added a pedigree format string to your pedigree file. You don't
+need to include that string in the current version of PyPedal, and if `NewPedigree::preprocess()` sees one while reading
+a pedigree file it will ignore it. You may include comment lines in your file as well; they will also be ignored.
+
+### Graph Objects
+
+Pedigrees can be represented as a type of mathematical object called a directed graph (digraph; not to be confused with
+visualizations of data). The `NetworkX` module provides Python tools for working with digraphs, and PyPedal provides a
+convenient way for loading a pedigree from an instance of an `XDiGraph` object.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+example = pyp_newclasses.loadPedigree(optionsfile='new_networkx.ini')
+ng = pyp_network.ped_to_graph(example)
+options = {}
+options['pedfile'] = 'dummy'
+options['pedformat'] = 'asd'
+example2 = pyp_newclasses.loadPedigree(options,pedsource='graph',pedgraph=ng)
+example2.metadata.printme()
+```
+
+You can see from the printout of the metadata from the new pedigree, `example2`, that the graph `ng` was successfully
+converted to a `NewPedigree` object.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+Metadata for  Testing fromgraph() (dummy)
+Records:                13
+Unique Sires:           3
+Unique Dams:            4
+Unique Gens:            1
+Unique Years:           1
+Unique Founders:        5
+Unique Herds:           1
+Pedigree Code:          asd
+\end{verbatim}
+'''
+
+### GEDCOM Files
+
+A thorough description of support for GEDCOM files may be found in the Appendix.
+
+### GENES Files
+
+A thorough description of support for GENES files may be found in the Appendix.
+
+### Text Files
+
+Most users will load their pedigrees from simple text files. As an example, consider a large dog pedigree, an excerpt of
+which is presented below.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+# dogID,fatherID,motherID,gender,born
+64 66 67 2 1979
+63 64 65 1 1982
+62 191 195 2 1982
+61 64 65 2 1982
+...
+```
+
+This pedigree can be loaded using this short program:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+\begin{verbatim}
+options = {
+    'pedfile': 'dog.ped',
+    'pedname': 'A Large Dog Pedigree',
+    'pedformat': 'asdgb',
+}
+if __name__ == '__main__':
+    test = pyp_newclasses.loadPedigree(options)
+```
+
+There are examples of loading pedigrees from text files throughout this manual.
+
+### Text Streams
+
+There are some use cases, such as web services, for which it may be desirable to load pedigrees from strings rather tham
+from files. This is done by passing the `pedsource` keyword to `pyp_newclasses.load_pedigree()` with a value of
+`textstream`, along with a string named `pedstream':
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+options = {}
+options['pedfile'] = ''
+options['messages'] = 'verbose'
+options['pedformat'] = 'ASD'
+
+if __name__ == "__main__":
+    pedstream = 'a1,s1,d1\na2,s2,d2\na3,a1,a2\n'
+    test = pyp_newclasses.loadPedigree(options, pedsource='textstream', pedstream=pedstream)
+```
+
+Only ASD-formatted pedigrees can be loaded this way, individual IDs are separated with commas, and successive records
+are separated by newlines. These restrictions are hard-coded into the `NewPedigree::load()` method. All records must
+contain a newline, including the last record in the string! You must also set the `pedfile` option to some value, even
+if that value is just an empty string, as in the example above.
+
+The expected use case is that the pedigree would be retrieved from a database, and the result set from the SQL query
+converted into a string. There's an upper bound on the size of pedigree that can be loaded from a stream based on the
+physical memory available on your platform, and extremely large pedigrees should be loaded from a text file.
+
+## Output
+
+### GEDCOM Files
+
+A thorough description of GEDCOM file output may be found in the Appendix.
+
+### GENES Files
+
+A thorough description of GENES file output may be found in the Appendix.
+
+### Graph Objects
+
+`NewPedigree::savegraph()` saves a pedigree to a file as an adjacency list, which is a commonly-used format for
+describing digraphs. If the pedigree has already been converted to a digraph, pass it using the `pedgraph` argument;
+otherwise, the method will call the appropriate converter:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+test.savegraph(pedoutfile='test.adj')
+```
+
+The file `test.adj` has the following contents:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+# sqlite.py
+# GMT Tue Mar  4 20:38:52 2008
+# Text Stream
+1 5
+2 6
+3 5
+4 6
+5 7
+6 7
+7
+```
+
+This example shows there can be a considerable loss of information when going from a PyPedal pedigree to some other way
+of representing the pedigree, such as a graph.
+
+### Text Files
+
+The `NewPedigree::save()` method writes a PyPedal pedigree to a user-specified file based on a pedigree format string
+and optional column separator provided by the user. By default, the pedformat is `asd` and the sepchar is ` `. Any
+attribute of a `NewAnimal` object can be written to an output file.
+
+`NewPedigree::save()` tries to never overwrite your data. If you don't pass a filename argument a file whose name is
+derived from, but not the same as, the original pedigree filename will be used. The string `_saved` will be appended to
+the filename in order to distinguish it from the original pedigree file.
+
+There are a few points that you need to be aware of when using `NewPedigree::save()`. First, you may use any column
+separator you choose **except** the empty string (`sepchar=''`); if you try and do that the sepchar will be changed to
+the global default (currently ` `), and a message written to the log. This means there's no way for you to run all the
+columns in your pedigree file together such that they cannot easily be separated. Sorry. You can use anoy other string
+you like to separate your columns (spaces, columns, and tabs have been tested). It **is** possible to write an
+incomplete pedigree file, that is, a file which does not include animal, sire, and dam information. PyPedal checks the
+pedformat to see if it contains either `asd` or `ASD` and warns you if it doesn't, but it'll still write the file you
+tell it to. The burden is on you, the user, to make sure your output file contains all the information you want it to.
+Finally, you can write whatever attribute you like to whichever column you like in the output file. For the sake of your
+sanity I strongly recommend that you always place the animal, sire, and dam IDs in the first three columns, but you're
+an adult and may do what you like.
+
+Maybe a couple of examples will help clear that up. Here's the simplest case, taking defaults:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+test.save('test_save_asd.ped')
+```
+
+gets you the result:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+# test_save_asd.ped created by PyPedal at Tue Sep 28 16:39:36 2010
+# Current pedigree metadata:
+#       pedigree file: test_save_asd.ped
+#       pedigree name: Untitled
+#       pedigree format: asd
+#       NOTE: Animal, sire, and dam IDs are RENUMBERED IDs, not original IDs!
+# Original pedigree metadata:
+#       pedigree file: ../simulated_pedigree.ped
+#       pedigree name: Untitled
+#       pedigree format: asdxg
+1 0 0
+2 0 0
+3 0 0
+4 0 0
+5 0 0
+...
+21 19 10
+22 9 12
+23 1 10
+24 1 21
+25 13 8
+```
+
+Note the friendly header to tell you what you've got and where it came from. The note about renumbered IDs is
+particularly important -- if the `pedigree_is_renumbered` flag is set then you will get this message to alert you that
+comparing this file against your original source file may give confusing results. They're not really conflicting, but if
+you compare renumbered with original IDs then you may assume there's some kind of problem when really there is not.
+Original and renumbered pedigrees are mathematically equivalent assuming there were no errors in the original file that
+were corrected by PyPedal. Isn't that reassuring? From here on out I will not show the header, and will include only the
+first five rows of data in the file for the sake of brevity (like I've ever let that stop me before). You can get the
+same thing as a CSV using the sepchar argument:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+test.save('test_save_asd_csv.ped', sepchar=',')
+```
+
+which produces:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+1,0,0
+2,0,0
+3,0,0
+4,0,0
+5,0,0
+...
+```
+
+Sometimes you want to go all the way and dump everything into a file. This is like one of those pizzas with every
+variety of cured meat known to food science piled up on top. Here you go:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+test.save('test_save_combo_all.ped', pedformat='asdgxbfrnylepASDLhHu')
+```
+
+which gives you what you asked for, even if many of the values aren't particularly interesting:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+1 0 0 0 m 01011900 0.0 Unknown_Breed 7 1900 0 -999 -999.0 7 Unknown_Name Unknown_Name ['1900000000000000071__1', '1900000000000000071__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd
+2 0 0 0 m 01011900 0.0 Unknown_Breed 6 1900 0 -999 -999.0 6 Unknown_Name Unknown_Name ['1900000000000000061__1', '1900000000000000061__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd
+3 0 0 0 m 01011900 0.0 Unknown_Breed 5 1900 0 -999 -999.0 5 Unknown_Name Unknown_Name ['1900000000000000051__1', '1900000000000000051__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd
+4 0 0 0 f 01011900 0.0 Unknown_Breed 3 1900 0 -999 -999.0 3 Unknown_Name Unknown_Name ['1900000000000000031__1', '1900000000000000031__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd
+5 0 0 0 f 01011900 0.0 Unknown_Breed 2 1900 0 -999 -999.0 2 Unknown_Name Unknown_Name ['1900000000000000021__1', '1900000000000000021__2'] 57361b5fd9993f00437fbe4c4675feca Unknown_Herd
+...
+```
+
+Okay, I get it. You're like the Nigel Tufnel of Missouri -- you want to see something that goes to 11. I pondered this
+for a while. You've read this far and deserve to be rewarded. So I tried to think of the most awesomest thing that I
+could think of. So here you go, LSU fans, straight from Death Valley by way of Beltsville, MD:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+test.save('test_save_peterson.ped', pedformat='asd', sepchar='...Kneel before Zod!...'
+```
+
+Maybe Patrick Peterson is really into genealogy -- you never know -- stop looking at me like that! This is a perfectly
+cromulent example of the extremes to which the sepchar argument can be pushed:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+1...Kneel before Zod!...0...Kneel before Zod!...0
+2...Kneel before Zod!...0...Kneel before Zod!...0
+3...Kneel before Zod!...0...Kneel before Zod!...0
+4...Kneel before Zod!...0...Kneel before Zod!...0
+5...Kneel before Zod!...0...Kneel before Zod!...0
+...
+```
+
+You're thinking, "My eyes! Why would he do that?!" The same reason Zod gave us a little Heisman pose in the end zone
+after returning a West Virginia kickoff for 6 -- because I can. (This kind of writing is probably going to get me in
+trouble one day, but the boss is out of town and there's no one here to rein-in my behavior!) Wait, though. It gets
+better. PyPedal can get all Ourboros on this unholy creation:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+# But, wait, can this actually work?
+options2 = options
+options2['pedfile'] = 'test_save_peterson.ped'
+options2['sepchar'] = '...Kneel before Zod!...'
+options2['pedformat'] = 'asd'
+test2 = pyp_newclasses.loadPedigree(options2)
+```
+
+When you run this bit of code you see that it poses no problem at all for PyPedal. Perhaps political dissidents can
+communicate secretly by doing strange things with `sepchar`, although it's more likely that PhD students will find a
+clever way to abuse MS students with it, instead.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+[INFO]: Logfile untitled_pedigree.log instantiated.
+[INFO]: Preprocessing test_save_peterson.ped
+[INFO]: Opening pedigree file test_save_peterson.ped
+        [INFO]: Renumbering pedigree at Wed Sep 29 13:42:05 2010
+                [INFO]: Reordering pedigree at Wed Sep 29 13:42:05 2010
+                [INFO]: Renumbering at Wed Sep 29 13:42:05 2010
+                [INFO]: Updating ID map at Wed Sep 29 13:42:05 2010
+        [INFO]: Assigning offspring at Wed Sep 29 13:42:05 2010
+[INFO]: Creating pedigree metadata object
+        [INFO]:  Instantiating a new PedigreeMetadata() object...
+        [INFO]:  Naming the Pedigree()...
+        [INFO]:  Assigning a filename...
+        [INFO]:  Attaching a pedigree...
+        [INFO]:  Setting the pedcode...
+        [INFO]:  Counting the number of animals in the pedigree...
+        [INFO]:  Counting and finding unique sires...
+        [INFO]:  Counting and finding unique dams...
+        [INFO]:  Setting renumbered flag...
+        [INFO]:  Counting and finding unique generations...
+        [INFO]:  Counting and finding unique birthyears...
+        [INFO]:  Counting and finding unique founders...
+        [INFO]:  Counting and finding unique herds...
+        [INFO]:  Detaching pedigree...
+Metadata for Untitled (test_save_peterson.ped)
+        Records:                25
+        Unique Sires:           7
+        Unique Dams:            7
+        Unique Gens:            1
+        Unique Years:           1
+        Unique Founders:        6
+        Unique Herds:           1
+        Pedigree Code:          asd
+```
+
+How's that for the strangest thing you're likely to see all day? I'm not suggesting that you seriously use column
+separators the way I just did, but this example shows that you can do some unusual things with PyPedal, and perhaps
+you'll come up with something very useful because of that flexibility. If nothing else, you now have a greater
+appreciation of what you can do with a dynamic language and questionable processing of user inputs. Remember, never
+trust any data a user gives you. They're a shifty lot, users.
+
+### Text Streams
+
+`NewPedigree::tostream()` returns a text stream from an instance of a `NewPedigree` object. The text stream contains an
+ASD-formatted pedigree as a string in which individual IDs are separated by commas and successive records are separated
+by newlines.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+>>> pedstream = 'a1,s1,d1\na2,s2,d2\na3,a1,a2\n'
+>>> test = pyp_newclasses.loadPedigree(options,pedsource='textstream',pedstream=pedstream)
+>>> pedstream2 = test.tostream()
+>>> print pedstream2
+'d1,0,0\nd2,0,0\ns1,0,0\ns2,0,0\na2,s2,d2\na1,s1,d1\na3,a1,a2\n'
+```
+
+Note that in this example the input and output text streams differ because the input stream did not include pedigree
+entries for all animals in the pedigree (for example, sire `s1`). Recall that PyPedal adds missing entries for parents
+when the pedigree is loaded.
+
+### Databases
+
+PyPedal is able to load pedigrees from, and save them to, three databases: MySQL, Postgres, and SQLite. PyPedal uses the
+pyDAL database abstraction library (https://github.com/web2py/pydal) to talk to these databases. Additional databases
+are supported by pyDAL and require only minor changes to the connection strings in the `connectToDatabase` function in
+the `pyp_db` module in order to work with PyPedal as well.
+
+A list of the database-related keywords may be found in Table @tbl-database-parameters.
+
+::: {#tbl-database-parameters}
+| Parameter       | Default     | Description                                                                         |
+|:----------------|:------------|:------------------------------------------------------------------------------------|
+| database_debug  | False       | Toggle debugging messages in the database module on and off.                        |
+| database_host   | 'localhost' | The server on which the database is running.                                        |
+| database_name   | 'pypedal'   | The name of the database to be used.                                                |
+| database_passwd | 'anonymous' | The password needed to connect to your database.                                    |
+| database_port   | ''          | The port on which your databse is listening for connections.                        |
+| database_table  | 'filetag'   | The name of the database table to which the current pedigree will be written.       |
+| database_type   | 'sqlite'    | The type of database you are using ('mysql'|'postgres'|'sqlite').                   |
+| database_user   | 'anonymous' | The name of a user with access rights to your database.                             |
+
+Database access parameters and their default values.
+:::
+
+### Input from Databases
+
+PyPedal can load `ASDx`-formatted pedigrees from an SQLite database using `pedsource='db'`. The pedigree will be loaded
+from the database and table specified in the `database_name` and `dbtable_name` variables. Consider the following
+example:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+test = pyp_newclasses.loadPedigree(options,pedsource='db')
+test.metadata.printme()
+```
+
+This produces the output:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+Metadata for  DB Stream ()
+    Records:                7
+    Unique Sires:           3
+    Unique Dams:            3
+    Unique Gens:            1
+    Unique Years:           1
+    Unique Founders:        4
+    Unique Herds:           1
+    Pedigree Code:          ASDx
+```
+
+Note that user-supplied values of the pedigree format string will be over-written by the `load()` method and don't
+affect database processing. Database importation is hard-coded to accept only pedigrees in that format.
+
+It's possible to load pedigrees from a databse with a format different than that exected by PyPedal, but it requires
+that you make changes to the `NewPedigree` class's `load()` method. Consider the database-loading code that's located
+at about line 826 of `pyp_newclasses.py`:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+elif pedsource == 'db':
+    self.kw['pedformat'] = 'ASDx'
+    self.kw['sepchar'] = ','
+...
+    try:
+        # Connect to the database
+        if pyp_db.does_table_exist(self):
+          conn = pyp_db.connect_to_database(self)
+            if conn:
+                sql = 'SELECT * FROM %s' % ( self.kw['database_table'] )
+                dbstream = conn.GetAll(sql)
+```
+
+In order to load data from your own database you must change the pedigree format string to match the pedigree you want
+to load (see Table tbl-pedigree-format-codes for a list of pedigree format codes). You then need to change the SQL
+statement to match the column names in your database and the order of fields in your pedigree format string. The animal,
+sire, and dam IDs, respectively, should always be the first three columns in your records. The query results are stored
+as a list of tuples in `dbstream` and will be unpacked in the `preprocess()` method.
+
+Please note that I'll try and answer questions about the way in which PyPedal handles loading pedigrees from databases,
+I cannot answer detailed questions about databases to which I don't have access. You should carefully test your custom
+queries in SQL to ensure they're working correctly before adding them to PyPedal. Also, please check your pedigree
+format string to make sure it matches your query.
+
+### Output to Databases
+
+PyPedal can write `NewPedigree` pedigrees to ASDx-formatted SQLite tables using the `NewPedigree::savedb()` method. The
+following program will result in the creation of a table named `test_save` in the database `test_pypedal_save`.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+test.kw['database_name'] = 'test_pypedal_save'
+test.kw['dbtable_name'] = 'test_save'
+test.savedb()
+```
+
+The pedigree is saved to the database and table specified in the `database_name` and `dbtable_name` variables. If the
+specified table already exists then the records from the current pedigree will be added to the table. If you want to
+overwrite the existing database then you need to pass `drop=True` in the call to `savedb()`:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+test.savedb(drop=True)
+```
+
+While this may strike some users as unexpected behavior it is based on the idea that you should never lose data
+unexpectedly. If you use only the defaults you'll never lose data. However, if you try and save a renumbered pedigree
+on top of another renumbered pedigree you'll run into problems because animal IDs are used as primary keys, and you'll
+have constraint violations.
+
+It's possible to save pedigrees to a databse with a format different than that exected by PyPedal, but it's a little
+harder than changeing pedigree input. Changing the output table requires that you change the `NewPedigree` class's
+`savedb` method. Consider the code that begins on or about line 1412 of `pyp_newclasses.py` in `savedb`:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+sql = 'create table %s ( \
+    animalName   varchar(128) primary key, \
+    sireName     varchar(128), \
+    damName      varchar(128), \
+    sex          char(1) \
+    );' % ( self.kw['database_table'] )
+```
+
+You need to rewrite this statement to add or remove columns; the SQL for a table that includes all fields in a
+`NewAnimal` object may be found in the `create_pedigree_table` function of the `pyp_db` module. Note that not
+every field in a `NewAnimal` object has a corresponding pedigree format code. Consult Table tbl-pedigree-format-codes}
+for appropriate codes.
+
+Once you've updated the SQL used to create your custom pedigree table you'll also need to change the code which prepares
+the input for writing to the database. This code is found on or about about line 1443 in `savedb`:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+sql = "INSERT INTO %s ( animalName, sireName, damName, sex ) VALUES ('%s', '%s', '%s', '%s')" % ( self.kw['database_table'], an, si, da, p.sex )
+```
+
+Note that you'll need to make appropriate casts yourself. For example, you'll want to cast things that are stored as
+integers or reals to make sure that you don't violate a column constraint. You must enclose strings in single-quotation
+marks ('') yourself.
+
+By default PyPedal saves pedigrees in `ASD` format. If you want to save your pedigree in `asd` format then you'll need
+to change the code on or about line 1436 from:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+an = p.name
+si = p.sireName
+da = p.damName
+```
+
+to:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+an = p.animalID
+si = p.sireID
+da = p.damID
+```
+
+It's better to add a new method supporting your output format to `NewAnimal` rather than changing the `savedb` method.

@@ -14,8 +14,10 @@
 #   table_drop_rows()
 ###############################################################################
 
-## @package pyp_db
+##
+# @package pyp_db
 # pyp_db contains a set of procedures used to create, modify, and query pedigrees stored in relational databases.
+##
 
 import logging
 import math

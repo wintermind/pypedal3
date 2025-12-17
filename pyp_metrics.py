@@ -38,7 +38,8 @@ from PyPedal import pyp_nrm
 from PyPedal import pyp_utils
 import random
 
-## @package pyp_metrics
+##
+# @package pyp_metrics
 # pyp_metrics contains a set of procedures for calculating metrics on PyPedal
 # pedigree objects.  These metrics include coefficients of inbreeding and
 # relationship as well as effective founder number, effective population size,

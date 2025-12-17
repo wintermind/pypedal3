@@ -1,3 +1,10 @@
+###############################################################################
+# NAME: getting_started.qmd
+# VERSION: 3.0.0 (16DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
+###############################################################################
+
 ---
 title: "Getting Started"
 ---

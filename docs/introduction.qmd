@@ -64,4 +64,4 @@ PyPedal has been used to perform calculations on pedigrees as large as 600,000 a
 research [@Cole2004a; @Cole2007a].
 
 ## Where to get information and code
-PyPedal and its documentation are available from the [PyPedal 3 Github repository](https://github.com/wintermind/pypedal3).
+Code and documentation are available from the [PyPedal 3 Github repository](https://github.com/wintermind/pypedal3).
