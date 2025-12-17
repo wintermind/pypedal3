@@ -32,6 +32,8 @@ book:
     - introduction.qmd
     - getting_started.qmd
     - input-output.qmd
+    - calculations.qmd
+    - objects.qmd
     - methodology.qmd
     - references.qmd
 

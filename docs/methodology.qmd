@@ -1,15 +1,25 @@
+::: {.content-hidden}
+###############################################################################
+# NAME: methodology.qmd
+# VERSION: 3.0.0 (17DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
+###############################################################################
+:::
+
 ---
 title: "Methodology"
+number-sections: true
 ---
 
-::: {.callout-note appearance="simple"}
+::: {.callout-tip appearance="simple" icon="false"}
 To iterate is human, to recurse divine. --- L. Peter Deutsch
 :::
 
 In this chapter, a high-level overview of PyPedal is provided, giving the reader the definitions of the key components
 of the system. This section defines the concepts used by the remaining sections.
 
-## Reordering and Renumbering
+## Reordering and Renumbering {#sec-methodology-reordering-and-renumbering}
 
 Many computations on pedigrees require that the pedigree be renumbered such that animal IDs are consecutive from 1 to
 $n$, where $n$ is the total number of animals in the pedigree. By default, all pedigrees are renumbered at load time.
@@ -38,8 +48,8 @@ if parents have IDs larger than that of one or more of their offspring, the pedi
 `fast_reorder()`. If your pedigree file contains birth years, or you know that parents always have smaller IDs than
 their offspring, then `fast_reorder()` will correctly reorder your pedigree in linear time. Founders are not guaranteed
 to be grouped at the beginning of the pedigree when `fast_reorder()` is used; if you're going to calculate coefficients
-of partial inbreeding (Section @sec-methodology-partial-inbreeding) then you should instead use `reorder()` to reorder
-your pedigree.
+of partial inbreeding (@sec-methodology-partial-inbreeding) then you should instead use `reorder()` to reorder your
+pedigree.
 
 The performance difference between the two reordering routines is not very noticeable on pedigrees of a few hundred to
 a few thousand animals, but is quite dramatic for very large pedigrees. If your pedigree file is already reordered then

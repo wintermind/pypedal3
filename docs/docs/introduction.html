@@ -8,7 +8,7 @@
 
 <meta name="description" content="…">
 
-<title>2&nbsp; Introduction – PyPedal --- Python Software for Pedigree Analysis</title>
+<title>Introduction – PyPedal --- Python Software for Pedigree Analysis</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -237,8 +237,20 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./calculations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Working with Pedigrees</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./objects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Using PyPedal Objects</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./methodology.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Methodology</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Methodology</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -258,7 +270,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Introduction</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Introduction</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
 </div>
 
 
@@ -275,10 +287,10 @@ window.Quarto = {
 </header>
 
 
-<div class="callout callout-style-simple callout-note">
+<div class="callout callout-style-simple callout-tip no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
 <p>Any sufficiently disguised bug is indistinguishable from a feature. — Rich Kulawiec</p>
@@ -834,73 +846,83 @@ Suwanlee, S., R. Baumung, J. Sölkner, and I. Curik. 2007. <span>“Evaluation o
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Introduction"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>Any sufficiently disguised bug is indistinguishable from a feature. --- Rich Kulawiec</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">## What is PyPedal?</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>This chapter introduces PyPedal, a Python-language tool for working with pedigrees.</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>PyPedal (**Py**thon **Ped**igree An**al**ysis) is a tool for analyzing pedigree files. It calculates several</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>quantitative measures of genetic diversity from pedigrees, including average coefficients of inbreeding and</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>relationship, effective founder numbers, and effective ancestor numbers. Checks are performed catch common mistakes in</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>pedigree files, such as parents with more recent birthdates or smaller ID numbers than their offspring and animals</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>appearing as both sires and dams in the pedigree. Tools for pedigree visualization and report generation are also</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>provided. PyPedal only makes use of information on pedigree structure, not individual genotypes. Genotypes can be</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>assigned to founders for use in gene-dropping simulations to calculate the effective number of founder genomes.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>::: {.content-hidden}</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>###############################################################################</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu"># NAME: introduction.qmd</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu"># VERSION: 3.0.0 (17DECEMBER2025)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># AUTHOR: John B. Cole (john.b.cole@gmail.com)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu"># LICENSE: LGPL v2.1 (see LICENSE file)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>###############################################################################</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>title: "Introduction"</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>number-sections: true</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip appearance="simple" icon="false"}</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>Any sufficiently disguised bug is indistinguishable from a feature. --- Rich Kulawiec</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## What is PyPedal?</span></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>PyPedal is a <span class="co">[</span><span class="ot">Python</span><span class="co">](http://www.python.org/)</span> language module that may be called by programs or used interactively. You</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>must have Python 3.11 (or later) installed in order to use PyPedal. The NumPy module must also be installed in order</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>for you to use PyPedal. In addition, there are several third-party packages used by PyPedal, which are discussed in the</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>chapter on installing PyPedal.</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>This manual is the official documentation for PyPedal. It includes a tutorial and is the most authoritative source of</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>information about PyPedal with the exception of the source code. The tutorial material will walk you through a series</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>of manipulations of a simple pedigree. All users of PyPedal are encouraged to follow the tutorial with a working</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>installation.</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>This chapter introduces PyPedal, a Python-language tool for working with pedigrees.</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>PyPedal (**Py**thon **Ped**igree An**al**ysis) is a tool for analyzing pedigree files. It calculates several</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>quantitative measures of genetic diversity from pedigrees, including average coefficients of inbreeding and</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>relationship, effective founder numbers, and effective ancestor numbers. Checks are performed catch common mistakes in</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>pedigree files, such as parents with more recent birthdates or smaller ID numbers than their offspring and animals</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>appearing as both sires and dams in the pedigree. Tools for pedigree visualization and report generation are also</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>provided. PyPedal only makes use of information on pedigree structure, not individual genotypes. Genotypes can be</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>assigned to founders for use in gene-dropping simulations to calculate the effective number of founder genomes.</span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="fu">## Features</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>Key features of PyPedal include:</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Reading pedigree files in user-defined formats;</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Checking pedigree integrity (duplicate IDs, parents younger than offspring, etc.);</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Generating summary information such as frequency of appearance in the pedigree file;</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Reordering and renumbering of pedigree files;</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of the numerator relationship matrix ($A$) from a pedigree file using the tabular method;</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Inbreeding and relationship calculations for large pedigrees (pedigrees up to 600,000 animals have been processed with PyPedal);</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of coefficients of inbreeding using the Meuwissen and Luo <span class="co">[</span><span class="ot">-@ref585</span><span class="co">]</span> and modified Meuwissen and Luo (Quaas, 1995, unpublished) algorithms;</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of average total and individual coefficients of inbreeding and relationship;</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Calculation of coefficients of partial inbreeding using an iterative tabular method <span class="co">[</span><span class="ot">@LacyAW1996; @GulisijaGWT2006</span><span class="co">]</span>;</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Calculation of coefficients of ancestral inbreeding using the methods of Ballou <span class="co">[</span><span class="ot">-@Ballou1997</span><span class="co">]</span> or Suwanlee et al. <span class="co">[</span><span class="ot">-@SuwanleeBSC2007</span><span class="co">]</span>;</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Decomposition of $A$ into $T$ and $D$ such that $A=TDT'$;</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of the direct inverse of $A$ (not accounting for inbreeding) using the method of Henderson <span class="co">[</span><span class="ot">-@ref143</span><span class="co">]</span>;</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of the direct inverse of $A$ (accounting for inbreeding) using the method of Quaas <span class="co">[</span><span class="ot">-@ref235</span><span class="co">]</span>;</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Storage of $A$ and its inverse between user sessions as persistent Python objects using the <span class="in">`pickle`</span> module to avoid unnecessary calculations;</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Calculation of theoretical and actual effective population sizes;</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of effective founder number using the exact algorithm of Lacy <span class="co">[</span><span class="ot">-@ref640</span><span class="co">]</span>;</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of effective founder number using the approximate algorithm of Boichard et al. <span class="co">[</span><span class="ot">-@ref352</span><span class="co">]</span>;</span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of effective ancestor number using the algorithms of Boichard et al. <span class="co">[</span><span class="ot">-@ref352</span><span class="co">]</span>;</span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Selection of subpedigrees containing all ancestors of an animal;</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Identification of the common relatives of two animals;</span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Calculation of the inbreeding of offspring from a prospective mating;</span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Output to ASCII text files, including matrices, coefficients of inbreeding and relationship, and summary information;</span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Importation and exportation of GEDCOM 5.5 files;</span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Importation and exportation of GENES 1.20 (dBase III) files;</span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Loading pedigrees from, and saving them to, MySQL, Postgres, and SQLite databases;</span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Simulation of pedigrees using an algorithm derived from that used in Matvec 1.1a;</span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Set operations on pedigrees (unions and intersections);</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>PyPedal has been used to perform calculations on pedigrees as large as 600,000 animals and has been used in scientific</span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>research <span class="co">[</span><span class="ot">@Cole2004a; @Cole2007a</span><span class="co">]</span>.</span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where to get information and code</span></span>
-<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>Code and documentation are available from the <span class="co">[</span><span class="ot">PyPedal 3 Github repository</span><span class="co">](https://github.com/wintermind/pypedal3)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>PyPedal is a <span class="co">[</span><span class="ot">Python</span><span class="co">](http://www.python.org/)</span> language module that may be called by programs or used interactively. You</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>must have Python 3.11 (or later) installed in order to use PyPedal. The NumPy module must also be installed in order</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>for you to use PyPedal. In addition, there are several third-party packages used by PyPedal, which are discussed in the</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>chapter on installing PyPedal.</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>This manual is the official documentation for PyPedal. It includes a tutorial and is the most authoritative source of</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>information about PyPedal with the exception of the source code. The tutorial material will walk you through a series</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>of manipulations of a simple pedigree. All users of PyPedal are encouraged to follow the tutorial with a working</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>installation.</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## Features</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>Key features of PyPedal include:</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Reading pedigree files in user-defined formats;</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Checking pedigree integrity (duplicate IDs, parents younger than offspring, etc.);</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Generating summary information such as frequency of appearance in the pedigree file;</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Reordering and renumbering of pedigree files;</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of the numerator relationship matrix ($A$) from a pedigree file using the tabular method;</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Inbreeding and relationship calculations for large pedigrees (pedigrees up to 600,000 animals have been processed with PyPedal);</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of coefficients of inbreeding using the Meuwissen and Luo <span class="co">[</span><span class="ot">-@ref585</span><span class="co">]</span> and modified Meuwissen and Luo (Quaas, 1995, unpublished) algorithms;</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of average total and individual coefficients of inbreeding and relationship;</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Calculation of coefficients of partial inbreeding using an iterative tabular method <span class="co">[</span><span class="ot">@LacyAW1996; @GulisijaGWT2006</span><span class="co">]</span>;</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Calculation of coefficients of ancestral inbreeding using the methods of Ballou <span class="co">[</span><span class="ot">-@Ballou1997</span><span class="co">]</span> or Suwanlee et al. <span class="co">[</span><span class="ot">-@SuwanleeBSC2007</span><span class="co">]</span>;</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Decomposition of $A$ into $T$ and $D$ such that $A=TDT'$;</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of the direct inverse of $A$ (not accounting for inbreeding) using the method of Henderson <span class="co">[</span><span class="ot">-@ref143</span><span class="co">]</span>;</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of the direct inverse of $A$ (accounting for inbreeding) using the method of Quaas <span class="co">[</span><span class="ot">-@ref235</span><span class="co">]</span>;</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Storage of $A$ and its inverse between user sessions as persistent Python objects using the <span class="in">`pickle`</span> module to avoid unnecessary calculations;</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Calculation of theoretical and actual effective population sizes;</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of effective founder number using the exact algorithm of Lacy <span class="co">[</span><span class="ot">-@ref640</span><span class="co">]</span>;</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of effective founder number using the approximate algorithm of Boichard et al. <span class="co">[</span><span class="ot">-@ref352</span><span class="co">]</span>;</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Computation of effective ancestor number using the algorithms of Boichard et al. <span class="co">[</span><span class="ot">-@ref352</span><span class="co">]</span>;</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Selection of subpedigrees containing all ancestors of an animal;</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Identification of the common relatives of two animals;</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Calculation of the inbreeding of offspring from a prospective mating;</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Output to ASCII text files, including matrices, coefficients of inbreeding and relationship, and summary information;</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Importation and exportation of GEDCOM 5.5 files;</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Importation and exportation of GENES 1.20 (dBase III) files;</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Loading pedigrees from, and saving them to, MySQL, Postgres, and SQLite databases;</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Simulation of pedigrees using an algorithm derived from that used in Matvec 1.1a;</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Set operations on pedigrees (unions and intersections);</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>PyPedal has been used to perform calculations on pedigrees as large as 600,000 animals and has been used in scientific</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>research <span class="co">[</span><span class="ot">@Cole2004a; @Cole2007a</span><span class="co">]</span>.</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where to get information and code</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>Code and documentation are available from the <span class="co">[</span><span class="ot">PyPedal 3 Github repository</span><span class="co">](https://github.com/wintermind/pypedal3)</span>.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

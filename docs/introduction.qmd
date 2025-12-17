@@ -1,8 +1,18 @@
+::: {.content-hidden}
+###############################################################################
+# NAME: introduction.qmd
+# VERSION: 3.0.0 (17DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
+###############################################################################
+:::
+
 ---
 title: "Introduction"
+number-sections: true
 ---
 
-::: {.callout-note appearance="simple"}
+::: {.callout-tip appearance="simple" icon="false"}
 Any sufficiently disguised bug is indistinguishable from a feature. --- Rich Kulawiec
 :::
 

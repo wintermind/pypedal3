@@ -1,0 +1,630 @@
+::: {.content-hidden}
+###############################################################################
+# NAME: calculations.qmd
+# VERSION: 3.0.0 (17DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
+###############################################################################
+:::
+
+---
+title: "Working with Pedigrees"
+number-sections: true
+---
+
+::: {.callout-tip appearance="simple" icon="false"}
+Are you quite sure that all those bells and whistles, all those wonderful facilities of your so called powerful
+programming languages, belong to the solution set rather than the problem set? --- Edsger Dijkstra
+:::
+
+## Overview {#sec-computing-overview}
+In @sec-inputoutput you learned how to get your pedigree data loaded into PyPedal. This chapter will show you
+what you can do with the pedigree once it's loaded. The examples in this chapter assume that you're working with a
+reordered and renumbered pedigree (see @sec-methodology-reordering-and-renumbering for additional details).
+
+In order to get the most out of your pedigrees you need to understand the basic structure of a PyPedal pedigree, which
+consists of two components: the pedigree itself, which is composed of a list of `NewAnimal` objects, and metadata,
+which is information about the pedigree itself. Some calculations are performed on the animal records directly, while
+others use the metadata, or some combination of the two. The fundamental goal of PyPedal is to provide the user with
+tools for asking questions about their pedigrees.
+
+The following discussion will use the following pedigree taken from Boichard et al. [-@ref352]:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+# pedformat: asdg
+1 0 0 1
+2 0 0 1
+3 0 0 1
+4 0 0 1
+5 1 2 2
+6 3 4 2
+7 5 6 3
+8 5 6 3
+9 5 6 3
+10 5 6 3
+11 5 6 3
+12 5 6 3
+13 5 6 3
+14 5 6 3
+```
+
+Many of the subsequent code snippets are taken from the `new_methods.py` example program.
+
+## Inbreeding and Relationships {#sec-computing-inbreeding}
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+inbr = pyp_nrm.inbreeding(example)
+print('inbr: ')
+>>> inbr:  {
+    'fx': {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0, 6: 0.0, 7: 0.0,
+        8: 0.0, 9: 0.0, 10: 0.0, 11: 0.0, 12: 0.0, 13: 0.0, 14: 0.0},
+    'metadata': {
+        'nonzero': {'f_max': 0.0, 'f_avg': 0.0, 'f_rng': 0.0,
+            'f_sum': 0.0, 'f_min': 0.0, 'f_count': 0},
+        'all': {'f_max': 0.0, 'f_avg': 0.0, 'f_rng': 0.0, 'f_sum': 0.0,
+            'f_min': 0.0, 'f_count': 14}
+        }
+    }
+```
+
+The dictionary returned by `inbreeding()` contains two dictionaries: `fx` contains coefficients of inbreeding keyed to
+animal IDs, and `metadata` contains summary information about the coefficients of inbreeding in the pedigree. `metadata`
+also contains two dictionaries: `nonzero` contains summary statistics only for animals with non-zero coefficients of
+inbreeding, while `all` contains statistics for all animals.
+
+Relationship metadata, similar to the inbreeding metadata described above but for coefficients of relationship, are
+available but not calculated by default.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+inbr, reln = pyp_nrm.inbreeding(example,rels=1)
+print('reln: ', reln)
+>>> reln:  {'r_nonzero_count': 10, 'r_nonzero_avg': 0.40000000000000002,
+    'r_min': 0.25, 'r_sum': 4.0, 'r_avg': 0.19047619047619047, 'r_max': 0.5,
+    'r_count': 21, 'r_rng': 0.25}
+```
+
+The dictionary of relationship metadata returned by `inbreeding()` also contains statistics for zero and non-zero
+coefficients of relationship. In the example presented above the pedigree contains...
+
+Relationship metadata are not guaranteed to be correct when `method = 'vanraden'` is used. That's because
+`inbreeding_vanraden()` uses a speed-up when there are full-sibs in the pedigree to avoid repeating calculations.
+The metadata should be reasonably accurate for pedigrees with few or no full-sibs. The summary statistics will not be
+very accurate in the case of pedigrees that contain many full-sibs.
+
+The relationship metadata don't include individual pairwise relationships. In order to associate those with your
+pedigree you must create a `NewAMatrix` object, form the numerator relationship matrix (NRM), and attach it to the
+pedigree:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+options = {}
+...
+example = pyp_newclasses.loadPedigree(options)
+example.nrm = pyp_newclasses.NewAMatrix(example.kw)
+example.nrm.form_a_matrix(example.pedigree)
+```
+
+If you know when you load a pedigree file that you want to calculate and store the NRM you can save a little typing by
+setting the `form_nrm` option:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+options = {}
+options['form_nrm'] = 1
+...
+example = pyp_newclasses.loadPedigree(options)
+```
+
+If you want to inspect the NRM you can use `example.nrm.printme()` to print the matrix to the screen, which is probably
+not a particularly good idea for large pedigrees.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+[[ 1.   0.   0.   0.   0.5  0.   0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25]
+ [ 0.   1.   0.   0.   0.5  0.   0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25]
+ [ 0.   0.   1.   0.   0.   0.5  0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25]
+ [ 0.   0.   0.   1.   0.   0.5  0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25]
+ [ 0.5  0.5  0.   0.   1.   0.   0.5  0.5  0.5  0.5  0.5  0.5  0.5  0.5 ]
+ [ 0.   0.   0.5  0.5  0.   1.   0.5  0.5  0.5  0.5  0.5  0.5  0.5  0.5 ]
+ [ 0.25 0.25 0.25 0.25 0.5  0.5  1.   0.5  0.5  0.5  0.5  0.5  0.5  0.5 ]
+ [ 0.25 0.25 0.25 0.25 0.5  0.5  0.5  1.   0.5  0.5  0.5  0.5  0.5  0.5 ]
+ [ 0.25 0.25 0.25 0.25 0.5  0.5  0.5  0.5  1.   0.5  0.5  0.5  0.5  0.5 ]
+ [ 0.25 0.25 0.25 0.25 0.5  0.5  0.5  0.5  0.5  1.   0.5  0.5  0.5  0.5 ]
+ [ 0.25 0.25 0.25 0.25 0.5  0.5  0.5  0.5  0.5  0.5  1.   0.5  0.5  0.5 ]
+ [ 0.25 0.25 0.25 0.25 0.5  0.5  0.5  0.5  0.5  0.5  0.5  1.   0.5  0.5 ]
+ [ 0.25 0.25 0.25 0.25 0.5  0.5  0.5  0.5  0.5  0.5  0.5  0.5  1.   0.5 ]
+ [ 0.25 0.25 0.25 0.25 0.5  0.5  0.5  0.5  0.5  0.5  0.5  0.5  0.5  1.  ]]
+```
+
+If you want to get the pairwise relationship between two animals you need to use their renumbered IDs and subtract 1
+(because the array is zero-indexed). For example, if you wanted the coefficient of relationship between animals `2` and
+`5` (an individual and its sire) you would use the indices `1` and `4`:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+print(example.nrm.nrm[1][4])
+>>> 0.5
+```
+
+The NRM is symmetric, which means that `nrm[1][4]` and `nrm{[4][1]` are identical.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+print(example.nrm.nrm[1][4])
+>>> 0.5
+print(example.nrm.nrm[5][1])
+>>> 0.5
+```
+
+You can also easily save the NRM to a file for future reference:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+example.nrm.save('Amatrix.txt')
+```
+
+You can verify that the contents of `Amatrix.txt` are:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+1.0  0.0  0.0  0.0  0.5 0.0 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25
+0.0  1.0  0.0  0.0  0.5 0.0 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25
+0.0  0.0  1.0  0.0  0.0 0.5 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25
+0.0  0.0  0.0  1.0  0.0 0.5 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25
+0.5  0.5  0.0  0.0  1.0 0.0 0.5  0.5  0.5  0.5  0.5  0.5  0.5  0.5
+0.0  0.0  0.5  0.5  0.0 1.0 0.5  0.5  0.5  0.5  0.5  0.5  0.5  0.5
+0.25 0.25 0.25 0.25 0.5 0.5 1.0  0.5  0.5  0.5  0.5  0.5  0.5  0.5
+0.25 0.25 0.25 0.25 0.5 0.5 0.5  1.0  0.5  0.5  0.5  0.5  0.5  0.5
+0.25 0.25 0.25 0.25 0.5 0.5 0.5  0.5  1.0  0.5  0.5  0.5  0.5  0.5
+0.25 0.25 0.25 0.25 0.5 0.5 0.5  0.5  0.5  1.0  0.5  0.5  0.5  0.5
+0.25 0.25 0.25 0.25 0.5 0.5 0.5  0.5  0.5  0.5  1.0  0.5  0.5  0.5
+0.25 0.25 0.25 0.25 0.5 0.5 0.5  0.5  0.5  0.5  0.5  1.0  0.5  0.5
+0.25 0.25 0.25 0.25 0.5 0.5 0.5  0.5  0.5  0.5  0.5  0.5  1.0  0.5
+0.25 0.25 0.25 0.25 0.5 0.5 0.5  0.5  0.5  0.5  0.5  0.5  0.5  1.0
+```
+
+Information on the endianness and precision of the data in the array are lost, so this is not a good way to archive data
+or move data between machines with different endianness. The data are always written in C (row-major) order. For better
+performance you can set the `nrm_format` option to `binary`, which will use a binary file format instead of text.
+
+Finally, if you're going to work on the exact same pedigree later you can load `Amatrix.txt` and avoid having to
+recalculate the NRM entirely:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+example.nrm2 = pyp_newclasses.NewAMatrix(example.kw)
+example.nrm2.load('Amatrix.txt')
+example.nrm2.printme()
+```
+
+Since we've loaded `Amatrix.txt` into a second NRM (`nrm2`) attached to our pedigree it's straightforward, if tedious,
+to verify that the two NRM contain the same values.
+
+## Matings {#sec-computing-matings}
+
+There are many questions you might wish to ask that involve matings, such as, "What's the minimum-inbreeding mating
+among this set of individuals?". Several routines in `pyp_metrics`...
+
+Suppose you're considering a mating between animals `5` (index 4) and `14` (index 13), which is a sire-daughter mating.
+How would you go about this? You simply call `pyp_metrics.mating_coi()`:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+print '\tCalling mating_coi() at %s' % ( pyp_nice_time() )
+f = pyp_metrics.mating_coi(example.pedigree[4].animalID,
+    example.pedigree[13].animalID,example,1)
+print(f)
+```
+
+which produces the output:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+Calling mating_coi() at Wed Mar  5 11:31:30 2008
+0.25
+```
+
+We don't need PyPedal to tell us the coefficient of inbreeding of such a simple mating, but the calculations can be
+complex for more complicated cases. While you can do all of the necessary computations "by hand",
+`pyp_metrics.mating_coi()` takes care of that for you by adding a new dummy animal to the pedigree with the proposed
+parents, calculating the coefficient of inbreeding of that mating, deleting the dummy animal from the pedigree, and
+returning the coefficient of inbreeding.
+
+PyPedal takes things one step further, allowing you to work with groups of proposed matings at one time using
+`pyp_metrics.mating_coi_group()`. Internally it works much like `pyp_metrics.mating_coi()`, although instead of passing
+a pair of parents you pass a list of proposed matings. The matings are of the form `<parent1>_<parent2>`. Here's an
+example in which we're going to consider the following three matings: `1` with `5`, `1` with `14`, and `5` with `14`.
+Note how the matings are formed and appended to the `matings` list in a single step.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+matings = []
+matings.append('%s_%s'%(example.pedigree[0].animalID, example.pedigree[4].animalID))
+matings.append('%s_%s'%(example.pedigree[0].animalID, example.pedigree[13].animalID))
+matings.append('%s_%s'%(example.pedigree[4].animalID, example.pedigree[13].animalID))
+fgrp = pyp_metrics.mating_coi_group(matings,example)
+print('fgrp: ', fgrp['matings'])
+```
+
+That code produces a list of the proposed matings with associated coefficients of inbreeding. In addition to the
+`matings` dictionary, the `fgrp` dictionary also contains a dictionary named `metadata` which contains summary
+statistics about the proposed matings.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+fgrp:  {'1_5': 0.25, '5_14': 0.25, '1_14': 0.125}
+```
+
+## Relatives {#sec-computing-relatives}
+
+PyPedal provides many tools for extracting information about relatives from a pedigree. Examples include: obtaining
+lists of the ancestors of an animal, getting lists of ancestors shared in common by a pair of animals, listing the
+descendants of an individual, calculating the additive genetic relationship between a given pair of animals, and the
+creation of "subpedigrees" containing only specified animals.
+
+It's easy to obtain a list of an animal's relatives using `pyp_metrics.related_animals()`:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+list_a = pyp_metrics.related_animals(example.pedigree[6].animalID,example)
+list_b = pyp_metrics.related_animals(example.pedigree[13].animalID,example)
+```
+
+produces a list of each animal's relatives:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+[5, 1, 2]
+[14, 5, 1, 2, 6, 3, 4]
+```
+
+`pyp_metrics.common_ancestors()` is used to get a list of the common ancestors of two animals, say animals `5` and
+`14` (remember that this pedigree is renumbered, and Python lists are indexed from 0, so we need to offset the animal
+IDs by 1 to get the correct animal IDs).
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+list_r = pyp_metrics.common_ancestors(example.pedigree[4].animalID,example.pedigree[13].ani
+malID,example)
+print(list_r)
+\end{verbatim}
+Results are returned as lists:
+\begin{verbatim}
+[1, 2, 5]
+```
+
+If you've already obtained ancestor lists for a given pair of animals in which you're interested you can also obtain a
+list of common ancestors using Python sets, which avoids performing more calculations than needed:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+>>> set_a = set(list_a)
+>>> set_b = set(list_b)
+>>> set_c = set_a.intersection(set_b)
+>>> set_c
+set([1, 2, 5])
+>>> list_c = list(set_c)
+>>> list_c
+[1, 2, 5]
+```
+
+A list of descendants can be obtained by calling `pyp_metrics.descendants()`, which returns a dictionary:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+>>> pyp_metrics.descendants(5,example,{})
+{7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14}
+```
+
+However, it's improtant to note that you won't get the answer you expect unless you have either set the option
+`set_offspring = 1` or called `pyp_utils.set_offspring()` after loading the pedigree. There's also a convenience
+function, `pyp_metrics.founder_descendants()`, for handling the special case of obtaining descendants of all the
+founders in the pedigree:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+>>> pyp_metrics.founder_descendants(example)
+{1: {5: 5, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14},
+ 2: {5: 5, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14},
+ 3: {6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14},
+ 4: {6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12, 13: 13, 14: 14}}
+```
+
+## Decomposition and Direct Inverses of Numerator Relationship Matrices {#sec-computing-decomposition}
+PyPedal provides routines in the `pyp_nrm` module for decomposing and forming direct inverses of numerator relationship
+matrices (NRM). The NRM, $A$, may be written as $A=TDT'$, where $T$ is a lower triangular matrix and $D$ is a diagonal
+matrix [@ref143; @ref1060]. $T$ traces the flow of genes from one generation to another, while $D$ provides variances and
+covariances of Mendelian sampling. Mrode [-@ref224] presents a more detailed discussion of this decomposition. The
+examples in this section all use the pedigree presented in Table 2.1 of that work, which is contained in the file
+`examples/new_decompose.ped`:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+# Pedigree from Table 2.1 of
+# Mrode (1996)
+1 0 0
+2 0 0
+3 1 2
+4 1 0
+5 4 3
+6 5 2
+```
+
+The results presented below may be obtained by running the `new_decompose.py` example program. The
+`pyp_nrm.a_decompose()` function takes as its argument a pedigree object and returns the matrices $T$ and $D$. The code
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+print('Calling a_decompose()')
+print('=====================')
+D, T  = pyp_nrm.a_decompose(example)
+print('D: ', D)
+print()
+print('T: ', T)
+```
+
+produces identical answers to those presented by Mrode [-@ref224] (note that outputs may have been reformatted slightly
+to improve readability).
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+Calling a_decompose()
+=====================
+D:  [[ 1.       0.       0.       0.       0.       0.     ]
+ [ 0.       1.       0.       0.       0.       0.     ]
+ [ 0.       0.       0.5      0.       0.       0.     ]
+ [ 0.       0.       0.       0.75     0.       0.     ]
+ [ 0.       0.       0.       0.       0.5      0.     ]
+ [ 0.       0.       0.       0.       0.       0.46875]]
+
+T:  [[ 1.     0.     0.     0.     0.     0.   ]
+ [ 0.     1.     0.     0.     0.     0.   ]
+ [ 0.5    0.5    1.     0.     0.     0.   ]
+ [ 0.5    0.     0.     1.     0.     0.   ]
+ [ 0.5    0.25   0.5    0.5    1.     0.   ]
+ [ 0.25   0.625  0.25   0.25   0.5    1.   ]]
+```
+
+It's not generally feasible to directly compute the inverse, $A^{-1}$, of large NRM. However, it is possible to
+formulate simple rules for computing the inverse directly from. Henderson [-@ref143] presented a simple procedure for
+calculating $A^{-1}$ without accounting for inbreeding taking advantage of the fact that $A^{-1}=(T^{-1})'D^{-1}T^{-1}$,
+which is implemented as `pyp_nrm.form_d_nof()`:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+print('Calling a_inverse_dnf()')
+print('=======================')
+Ainv = pyp_nrm.a_inverse_dnf(example)
+print('Ainv: ', Ainv)
+```
+
+produces $A^{-1}$ without accounting for inbreeding in the pedigree:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+Calling a_inverse_dnf()
+=======================
+Ainv:  [[ 1.83333333  0.5        -1.         -0.66666667  0.          0.        ]
+ [ 0.5         2.         -1.          0.          0.5        -1.        ]
+ [-1.         -1.          2.5         0.5        -1.          0.        ]
+ [-0.66666667  0.          0.5         1.83333333 -1.          0.        ]
+ [ 0.          0.5        -1.         -1.          2.5        -1.        ]
+ [ 0.         -1.          0.          0.         -1.          2.        ]]
+```
+
+Quaas [-@ref235] built on Henderson's earlier work by providing an algorithm for the computation of $A^{-1}$ accounting
+for inbreeding, which is implemented as the function `pyp_nrm.a_inverse_df()`.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+print('Calling a_inverse_df()')
+print('======================')
+Ainv = pyp_nrm.a_inverse_df(example)
+print('Ainv: ', Ainv)
+```
+
+You'll note the numbers in this matrix are slightly different from those in the previous example. Those differences are
+due to the inbreeding in the pedigree, which was not accounted for by `a_inverse_dnf()`.
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+Calling a_inverse_df()
+======================
+Ainv:  [[ 1.83333333  0.5        -1.         -0.66666667  0.          0.        ]
+ [ 0.5         2.03333333 -1.          0.          0.53333333 -1.06666667]
+ [-1.         -1.          2.5         0.5        -1.          0.        ]
+ [-0.66666667  0.          0.5         1.83333333 -1.          0.        ]
+ [ 0.          0.53333333 -1.         -1.          2.53333333 -1.06666667]
+ [ 0.         -1.06666667  0.          0.         -1.06666667  2.13333333]]
+```
+
+The correctness of the results from `a_inverse_df()` can be verified by using some linear algebra to compute $A^{-1}$
+ directly:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+print('Calculating Ainv from D and T')
+print('=============================')
+l = example.metadata.num_records
+Tinv = numpy.linalg.inv(T)
+print('Tinv: ', Tinv)
+Tpinv = numpy.linalg.inv(T.T)
+print('Tpinv: ', Tpinv)
+Dinv = numpy.linalg.inv(D)
+print('Dinv: ', Dinv)
+Ainvhalf = numpy.dot(Tpinv,Dinv)
+Ainv = numpy.dot(Ainvhalf,Tinv)
+print('Ainv: ', Ainv)
+```
+
+The output includes several intermediate matrices that have been verified against Mrode's book [@ref224].
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+Calculating Ainv from D and T
+=============================
+Tinv:  [[ 1.   0.   0.   0.   0.   0. ]
+ [ 0.   1.   0.   0.   0.   0. ]
+ [-0.5 -0.5  1.   0.   0.   0. ]
+ [-0.5  0.   0.   1.   0.   0. ]
+ [ 0.   0.  -0.5 -0.5  1.   0. ]
+ [ 0.  -0.5  0.   0.  -0.5  1. ]]
+
+Tpinv:  [[ 1.   0.  -0.5 -0.5  0.   0. ]
+ [ 0.   1.  -0.5  0.   0.  -0.5]
+ [ 0.   0.   1.   0.  -0.5  0. ]
+ [ 0.   0.   0.   1.  -0.5  0. ]
+ [ 0.   0.   0.   0.   1.  -0.5]
+ [ 0.   0.   0.   0.   0.   1. ]]
+
+Dinv:  [[ 1.          0.          0.          0.          0.          0.        ]
+ [ 0.          1.          0.          0.          0.          0.        ]
+ [ 0.          0.          2.          0.          0.          0.        ]
+ [ 0.          0.          0.          1.33333333  0.          0.        ]
+ [ 0.          0.          0.          0.          2.          0.        ]
+ [ 0.          0.          0.          0.          0.          2.13333333]]
+
+Ainv:  [[ 1.83333333  0.5        -1.         -0.66666667  0.          0.        ]
+ [ 0.5         2.03333333 -1.          0.          0.53333333 -1.06666667]
+ [-1.         -1.          2.5         0.5        -1.          0.        ]
+ [-0.66666667  0.          0.5         1.83333333 -1.          0.        ]
+ [ 0.          0.53333333 -1.         -1.          2.53333333 -1.06666667]
+ [ 0.         -1.06666667  0.          0.         -1.06666667  2.13333333]]
+```
+
+The function `pyp_nrm.form_d_nof()` is provided as a convenience function. The form of $D$ is the same when calculating
+$A^{-1}$ regardless of the form $T$ takes (i.e., accounts for inbreeding or not). The code
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+print('Calling form_d_nof()')
+print('====================')
+D  = pyp_nrm.form_d_nof(example)
+print('D: ', D)
+```
+
+produces the result
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+Calling form_d_nof()
+====================
+D:  [[ 1.    0.    0.    0.      0.    0.   ]
+       [ 0.    1.    0.    0.      0.    0.   ]
+       [ 0.    0.    0.5  0.      0.    0.   ]
+       [ 0.    0.    0.    0.75  0.    0.   ]
+       [ 0.    0.    0.    0.      0.5   0.  ]
+       [ 0.    0.    0.    0.      0.    0.5 ]]
+```
+
+which may be verified against the values of $D$ presented above.
+
+## Pedigrees as Sets {#sec-pedigrees-as-sets}
+
+PyPedal has new tools for working with pedigrees by treating them as mathematical sets of animals. This makes it easy
+to do things like merge pedigrees, or remove a subset of animals from a pedigree. Formally, we can think of a pedigree,
+$P$, as a set of $n$ animals denoted $a_1, a_2, \ldots, a_n$. Two animals, $a_i$ and $a_j$, are related iff
+$a_i, a_j \in P$. Two pedigrees, $P$ and $Q$, may then be merged by taking the union of the two sets, $R = P \cup Q$,
+using the `NewPedigree::union()` method or `pyp_utils.list_union()` functions. Similarly, a subset of animals, $Q$, can
+be "subtracted" from a larger pedigree, $P$, as $R = P - Q = P - (P \cap Q)$.[^1]
+
+[^1]: Stated here without proof is the assertion that if you begin a null pedigree, that is, $P = \varnothing$, all
+    possible pedigrees can be constructed using only unions ($\cap$) and intersections ($\cap$) of $P$ with individual
+    animals.
+
+A pair of pedigrees also can be merged using the `NewPedigree::__add__()` method, which provides an "addition" operator
+for `NewPedigree` instances, as shown in the following code:
+
+```{python}
+#| eval: false      # Don't evaluate this chunk
+#| echo: true       # Do show this chunk in the final rendered document
+#| code-fold: show  # Show the code block instead of hiding it
+options = {}
+options['pedname'] = 'Fake Pedigree 1'
+options['renumber'] = 1
+options['pedfile'] = 'merge1.ped'
+options['pedformat'] = 'asd'
+merge1 = pyp_newclasses.loadPedigree(options)
+
+options2 = {}
+options2['pedname'] = 'Fake Pedigree 2'
+options2['renumber'] = 1
+options2['pedfile'] = 'merge2.ped'
+options2['pedformat'] = 'asd'
+merge2 = pyp_newclasses.loadPedigree(options2)
+
+merge3 = merge1 + merge2
+```
+
+The `NewPedigree::__sub__()` method also provide a "subtraction" operator for subtracting the animals in one pedigree
+from another, as described above.
+
+Note that the `pyp_utils.list_union()` method takes advantage of the fact that $A \cap B \cap \ldots \cap Y \cap Z$
+can be factorized as $(A \cap (B \cap (\ldots \cap (Y \cap Z))))$.

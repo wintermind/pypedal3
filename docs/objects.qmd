@@ -1,0 +1,110 @@
+::: {.content-hidden}
+###############################################################################
+# NAME: objects.qmd
+# VERSION: 3.0.0 (17DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
+###############################################################################
+:::
+
+---
+title: "Using PyPedal Objects"
+number-sections: true
+---
+
+::: {.callout-tip appearance="simple" icon="false"}
+In every chaotic behaviour, there lies a pattern. --- Jean Jacques Rousseau
+:::
+
+In this chapter, a detailed explanation of each PyPedal class is presented, including attributes and methods.
+
+## Animal Objects {#sec-objects-animal-objects}
+
+Three types of animal object are provided in PyPedal (@sec-objects-animal-objects-new-animal). Users will typically work
+with instances of `NewAnimal` objects, while `LightAnimal` (@sec-objects-animal-objects-light-animal) and `SimAnimal`
+(@sec-objects-animal-objects-sim-animal) objects are of interest primarily to developers. Detailed descriptions of each
+class and its methods may be found in the API Reference for the `pyp_newclasses` module (@sec-functions-pyp-newclasses).
+
+### The NewAnimal Class {#sec-objects-animal-objects-new-animal}
+
+::: {#tbl-objects-animal-objects-new-animal-attributes}
+| \            | Defaults for integer\ | Defaults for string\ | \                                                      |
+| Attribute    | IDs (`asd`)           | IDs (`ASD`)          | Description                                            |
+|:-------------|:----------------------|:---------------------|:-------------------------------------------------------|
+| age          | -999                  | -999                 | The animal's age based on the global                   |
+|              |                       |                      | `BASE_DEMOGRAPHIC_YEAR` defined in `pyp_demog`. If the |
+|              |                       |                      | `by` is unknown, the inferred generation is used. If   |
+|              |                       |                      | the inferred generation is unknown, the age is set to  |
+|              |                       |                      | -999.                                                  |
+| alive        | `0`                   | `0`                  | Flag indicating if an animal is alive: `0` = dead,     |
+|              |                       |                      | `1` = alive.                                           |
+| alleles      | `['', '']`            | `['', '']`           | Alleles used for gene dropping.                        |
+| ancestor     | `0`                   | `0`                  | Flag indicating if an animal has offspring: `0` = has  |
+|              |                       |                      | no offspring, `1` = has offspring. The flags are set   |
+|              |                       |                      | by calling `pyp_utils.set_ancestor_flag()`.            |
+| animalID     | animal ID             | animal ID $\mapsto$  | Animal's ID. Animal IDs change when a pedigree is      |
+|              |                       | `integer`            | renumbered. IDs must be provided for all animals in a  |
+|              |                       |                      | pedigree file. When strings are used for animal IDs    |
+|              |                       |                      | with the `ASD` pedigree format code they're converted  |
+|              |                       |                      | to numeric IDs with the `string_to_int()` method.      |
+| bd           | `missing_bdate`       | `missing_bdate`      | The animal's birthdate in `MMDDYY` format.             |
+| breed        | `missing_breed`       | `missing_breed`      | The animal's breed as a string.                        |
+| by           | `missing_byear`       | `missing_byear`      | The animal's birthyear in `YYYY` format.               |
+| damID        | dam ID                | dam ID $\mapsto$     | Dam's ID. When strings are provided for IDs with the   |
+|              |                       | `integer`            | `ASD` pedigree format code they're converted to        |
+|              |                       |                      | numeric IDs with the `string_to_int()` method.         |
+| damName      | dam ID                | dam ID               | The name of the animal's dam.                          |
+| daus         | `{}`                  | `{}`                 | Dictionary containing all daughters of an animal. The  |
+|              |                       |                      | keys and values are the animal IDs for each offspring. |
+|              |                       |                      | When the pedigree is renumbered, keys are updated to   |
+|              |                       |                      | match the renumbered IDs for each offspring.           |
+| fa           | `0.0`                 | `0.0`                | The animal's coefficient of inbreeding.                |
+| founder      | `n`                   | `y`                  | Character indicating whether or not the animal is a    |
+|              |                       |                      | founder (had unknown parents): `n` = not a founder     |
+|              |                       |                      | (one or both parents known), `y` = founder (both       |
+|              |                       |                      | parents unknown).                                      |
+| gen          | `-999`                | `-999`               | Generation to which the animal belongs.                |
+| gencoeff     | `-999.0`              | `-999.0`             | Pattie's [-@Pattie1965] generation coefficient.        |
+| herd         | `missing_herd`        | `missing_herd`       | The ID of the herd to which the animal belongs.        |
+|              | $\mapsto$ `integer`   | $\mapsto$            |                                                        |
+|              |                       | \emph{integer}       |                                                        |
+| igen         | `-999`                | `-999`               | Generation inferred by `pyp_utils.set_generation()`.   |
+| name         | animal ID             | animal ID            | The animal's name.                                     |
+| originalHerd | herd                  | herd                 | The original herd ID to which an animal belonged before|
+|              |                       |                      | the herd was converted from a string to an integer;    |
+|              |                       |                      | most useful with the `H` pedigree format code.         |
+| originalID   | animalID              | animal ID $\mapsto$  | Original ID assigned to an animal. It will not change  |
+|              |                       | `integer`            | when the pedigree is renumbered.                       |
+| paddedID     | `animalID` $\mapsto$  | `animalID` $\mapsto$ | The animal ID padded to fifteen digits, with the       |
+|              | `integer`             | `integer`            | birthyear (or 1950 if the birth year is unknown)       |
+|              |                       |                      | prepended. The order of elements is: birthyear,        |
+|              |                       |                      | animalID, count of zeros, zeros. Used to create the    |
+|              |                       |                      | alleles for gene dropping.                             |
+| pedcomp      | `-999.9`              | `-999.9`             | Pedigree completeness as described in                  |
+|              |                       |                      | @sec-methodology-pedigre-completeness}.                |
+| renumberedID | `-999`                | `-999`               | ID assigned to an animal when the pedigree is          |
+|              |                       |                      | renumbered. The default value indicates the pedigree   |
+|              |                       |                      | hasn't been renumbered using PyPedal.                  |
+| sex          | `u`                   | `u`                  | The sex of the animal: `m` = male, `f` = female, `u`   |
+|              |                       |                      | = unknown/not provided.                                |
+| sireID       | sire ID               | sire ID $\mapsto$    | Sire's ID. When strings are provided for animal IDs    |
+|              |                       | `integer`            | using the `ASD` pedigree format code they're converted |
+|              |                       |                      | to numeric IDs with the `string_to_int()` method.      |
+| sireName     | sireID                | sireID               | The name of the animal's sire.                         |
+| sons         | `{}`                  | {}                   | Dictionary containing all known sons of an animal.     |
+|              |                       |                      | The keys and values are the animal IDs for each        |
+|              |                       |                      | offspring. When the pedigree is renumbered, keys are   |
+|              |                       |                      | updated to correspond to the renumbered IDs for each   |
+|              |                       |                      | animal.                                                |
+| unks         | `{}`                  | {}                   | Dictionary containing all offspring of an animal with  |
+|              |                       |                      | unknown sex. The keys and values are the animal IDs    |
+|              |                       |                      | for each offspring. When the pedigree is renumbered,   |
+|              |                       |                      | keys are updated to correspond to the renumbered IDs   |
+|              |                       |                      | for each animal.                                       |
+
+Attributes of `NewAnimal` objects..
+:::
+
+`NewAnimal` objects have the seven methods listed in @tbl-objects-animal-objects-new-animal-methods. The methods focus
+on returning information about an instance of an object; calculations are left to functions in, e.g., the `pyp_metrics`
+`pyp_nrm` modules.

@@ -1,8 +1,18 @@
+::: {.content-hidden}
+###############################################################################
+# NAME: input-output.qmd
+# VERSION: 3.0.0 (17DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
+###############################################################################
+:::
+
 ---
 title: "Input and Output"
+number-sections: true
 ---
 
-::: {.callout-note appearance="simple"}
+::: {.callout-tip appearance="simple" icon="false"}
 The only legitimate use of a computer is to play games. --- Eugene Jarvis
 :::
 
