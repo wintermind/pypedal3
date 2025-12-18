@@ -2,7 +2,7 @@
 	name = "PyPedal"
 	version = "3.0.0"
 	authors = [
-		{ name="John B. Cole", email="john.b.cole@gmail.com" },
+		{name="John B. Cole", email="john.b.cole@gmail.com"},
 	]
 	description = "Python tools for pedigree analysis"
 	readme = "README.md"
