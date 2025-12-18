@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2025-12-16">
 <meta name="description" content="…">
 
-<title>PyPedal — Python Software for Pedigree Analysis</title>
+<title>Preface</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -58,7 +58,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -79,7 +99,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-68c8bffd90dad8f2b55c52d7b6410dc0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d0f2a56f10a1a9eb518452f01d2a17ec.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-8110641f4658941efd1964dc637a31e9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -208,7 +228,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">PyPedal — Python Software for Pedigree Analysis</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Preface</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
 </div>
 
 <div>
@@ -244,13 +264,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="acknowledgments" class="level2" data-number="0.1">
 <h2 data-number="0.1" class="anchored" data-anchor-id="acknowledgments"><span class="header-section-number">0.1</span> Acknowledgments</h2>
-<p>PyPedal was initially written to support the author’s dissertation research while at <a href="http://www.lsu.edu/">Louisiana State University</a>. The initial development was supported in part by a grant from The Seeing Eye, Inc. (Morristown, NJ). The author wishes to thank Paul VanRaden for many helpful suggestions for improving the ability of PyPedal to handle computations in large pedigrees. Additional feedback in the form of bug reports, feature requests, and discussion of computing strategies was provided by Dan Cieslak, Bradley J. Heins (University of Minnesota), Edward H. Hagen (Institute for Theoretical Biology, Humboldt-Universität zu Berlin), Kathy Hanford (University of Nebraska), Thomas Kelly (Department of Animal and Poultry Science, University of Guelph), Thomas von Hassell, Gianluca Saba, and Ken Severin (University of Alaska – Fairbanks). Gregor Gorjanc wrote a blog entry describing <a href="http://ggorjan.blogspot.com/2007/04/installing-pypedal-under-debian.html">how to install PyPedal on Debian Linux</a>. Fernando Perez posted a LaTeX preamble to the NumPy listserver that dramatically improved the PDF version of this manual.</p>
+<p>PyPedal was initially written to support the author’s doctoral dissertation research while at <a href="http://www.lsu.edu/">Louisiana State University</a>. The initial development was supported in part by a grant from The Seeing Eye, Inc. (Morristown, NJ). The author wishes to thank Paul VanRaden for many helpful suggestions for improving the ability of PyPedal to handle computations in large pedigrees. Additional feedback in the form of bug reports, feature requests, and discussion of computing strategies was provided by Dan Cieslak, Bradley J. Heins (University of Minnesota), Edward H. Hagen (Institute for Theoretical Biology, Humboldt-Universität zu Berlin), Kathy Hanford (University of Nebraska), Thomas Kelly (Department of Animal and Poultry Science, University of Guelph), Thomas von Hassell, Gianluca Saba, and Ken Severin (University of Alaska – Fairbanks). Gregor Gorjanc wrote a blog entry describing <a href="http://ggorjan.blogspot.com/2007/04/installing-pypedal-under-debian.html">How to install PyPedal on Debian Linux</a>. Fernando Perez posted a LaTeX preamble to the NumPy listserver that dramatically improved the PDF version of this manual.</p>
 <p>The Newfoundland pedigree was taken from the <a href="http://www.newfoundlanddog-database.net/en/">NewFoundland Dog database</a> and is used with permission.</p>
-<p>The pedigree of European royalty used in the GEDCOM discussion, <a href="http://www.genealogyforum.com/gedcom/gedcom1/ged3.htm">ged3.ged</a>, was taken from the <a href="http://www.genealogyforum.com/">Genealogy Forum website</a>. It is believed to be in the public domain, and is used with the knowledge of the website administrators.</p>
+<p>The pedigree of European royalty used in the GEDCOM discussion, <a href="https://web.archive.org/web/20160522052650/http://www.genealogyforum.com/gedcom/gedcom1/ged3.htm">ged3.ged</a>, was taken from the Internet Archive backup of the original page on <a href="http://www.genealogyforum.com/">Genealogy Forum website</a>. It’s believed to be in the public domain, and is used with the knowledge of the website administrators.</p>
+</section>
+<section id="publications" class="level2" data-number="0.2">
+<h2 data-number="0.2" class="anchored" data-anchor-id="publications"><span class="header-section-number">0.2</span> Publications</h2>
+<p>PyPedal has been used to support peer-reviewed published research, including <span class="citation" data-cites="Cole2004a Cole2007a Cole2022a">(<a href="references.html#ref-Cole2004a" role="doc-biblioref">Cole, Franke, and Leighton 2004</a>; <a href="references.html#ref-Cole2007a" role="doc-biblioref">Cole 2007</a>; <a href="references.html#ref-Cole2022a" role="doc-biblioref">Al-Khudhair et al. 2022</a>)</span>. There’s also a popular-press article describing PyPedal <span class="citation" data-cites="Cole2008a">(<a href="references.html#ref-Cole2008a" role="doc-biblioref">Cole 2008</a>)</span>.</p>
+</section>
+<section id="generative-ai-and-ai-assisted-technologies" class="level2" data-number="0.3">
+<h2 data-number="0.3" class="anchored" data-anchor-id="generative-ai-and-ai-assisted-technologies"><span class="header-section-number">0.3</span> Generative AI and AI-Assisted Technologies</h2>
+<p>No generative AI or other AI tools were used in the creation of PyPedal, its documentation, or any other related materials. PyPedal is entirely the result of human effort, however flawed.</p>
 
 
 <!-- -->
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-Cole2022a" class="csl-entry" role="listitem">
+Al-Khudhair, A. S., D. J. Null, J. B. Cole, C. W. Wolfe, D. J. Steffen, and P. M. VanRaden. 2022. <span>“Inheritance of a Mutation Causing Neuropathy with Splayed Forelimbs in <span>J</span>ersey Cattle.”</span> <em>Journal of Dairy Science</em> 105: 1338–45. <a href="https://doi.org/10.3168/jds.2021-20600">https://doi.org/10.3168/jds.2021-20600</a>.
+</div>
+<div id="ref-Cole2007a" class="csl-entry" role="listitem">
+Cole, J. B. 2007. <span>“<span>P</span>y<span>P</span>edal: A Computer Program for Pedigree Analysis.”</span> <em>Computers and Electronics in Agriculture</em> 57: 107–13.
+</div>
+<div id="ref-Cole2008a" class="csl-entry" role="listitem">
+———. 2008. <span>“Using Python to Study Pedigrees with Py<span>P</span>edal.”</span> <em>Python Magazine</em> 3: 12–20. <a href="https://www.johnbcole.com/publications/PyMag3_13.pdf">https://www.johnbcole.com/publications/PyMag3_13.pdf</a>.
+</div>
+<div id="ref-Cole2004a" class="csl-entry" role="listitem">
+Cole, J. B., D. E. Franke, and E. A. Leighton. 2004. <span>“Population Structure of a Colony of Dog Guides.”</span> <em>Journal of Animal Science</em> 82: 2906–12.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
@@ -714,29 +756,47 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Preface"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">## Acknowledgments</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>PyPedal was initially written to support the author's dissertation research while at [Louisiana State</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>University](http://www.lsu.edu/). The initial development was supported in part by a grant from The Seeing Eye, Inc.</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>(Morristown, NJ). The author wishes to thank Paul VanRaden for many helpful suggestions for improving the ability of</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>PyPedal to handle computations in large pedigrees. Additional feedback in the form of bug reports, feature requests,</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>and discussion of computing strategies was provided by Dan Cieslak, Bradley J. Heins (University of Minnesota), Edward</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>H. Hagen (Institute for Theoretical Biology, Humboldt-Universität zu Berlin), Kathy Hanford (University of Nebraska),</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>Thomas Kelly (Department of Animal and Poultry Science, University of Guelph), Thomas von Hassell, Gianluca Saba, and</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>Ken Severin (University of Alaska -- Fairbanks). Gregor Gorjanc wrote a blog entry describing [how to install PyPedal</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>on Debian Linux](http://ggorjan.blogspot.com/2007/04/installing-pypedal-under-debian.html). Fernando Perez posted a</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>LaTeX preamble to the NumPy listserver that dramatically improved the PDF version of this manual.</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>The Newfoundland pedigree was taken from the <span class="co">[</span><span class="ot">NewFoundland Dog database</span><span class="co">](http://www.newfoundlanddog-database.net/en/)</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>and is used with permission.</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>The pedigree of European royalty used in the GEDCOM discussion,</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">ged3.ged</span><span class="co">](http://www.genealogyforum.com/gedcom/gedcom1/ged3.htm)</span>, was taken from the [Genealogy Forum</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>website](http://www.genealogyforum.com/). It is believed to be in the public domain, and is used with the knowledge of</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>the website administrators.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>::: {.content-hidden}</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>###############################################################################</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu"># NAME: index.qmd</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu"># VERSION: 3.0.0 (17DECEMBER2025)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># AUTHOR: John B. Cole (john.b.cole@gmail.com)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu"># LICENSE: LGPL v2.1 (see LICENSE file)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>###############################################################################</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>title: "Preface"</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Acknowledgments</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>PyPedal was initially written to support the author's doctoral dissertation research while at [Louisiana State</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>University](http://www.lsu.edu/). The initial development was supported in part by a grant from The Seeing Eye, Inc.</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>(Morristown, NJ). The author wishes to thank Paul VanRaden for many helpful suggestions for improving the ability of</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>PyPedal to handle computations in large pedigrees. Additional feedback in the form of bug reports, feature requests,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>and discussion of computing strategies was provided by Dan Cieslak, Bradley J. Heins (University of Minnesota), Edward</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>H. Hagen (Institute for Theoretical Biology, Humboldt-Universität zu Berlin), Kathy Hanford (University of Nebraska),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>Thomas Kelly (Department of Animal and Poultry Science, University of Guelph), Thomas von Hassell, Gianluca Saba, and</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>Ken Severin (University of Alaska -- Fairbanks). Gregor Gorjanc wrote a blog entry describing [How to install PyPedal</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>on Debian Linux](http://ggorjan.blogspot.com/2007/04/installing-pypedal-under-debian.html). Fernando Perez posted a</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>LaTeX preamble to the NumPy listserver that dramatically improved the PDF version of this manual.</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>The Newfoundland pedigree was taken from the <span class="co">[</span><span class="ot">NewFoundland Dog database</span><span class="co">](http://www.newfoundlanddog-database.net/en/)</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>and is used with permission.</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>The pedigree of European royalty used in the GEDCOM discussion,</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">ged3.ged</span><span class="co">](https://web.archive.org/web/20160522052650/http://www.genealogyforum.com/gedcom/gedcom1/ged3.htm)</span>, was taken</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>from the Internet Archive backup of the original page on <span class="co">[</span><span class="ot">Genealogy Forum website</span><span class="co">](http://www.genealogyforum.com/)</span>. It's believed to be in the public domain, and is used with the knowledge of the website administrators.</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Publications</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>PyPedal has been used to support peer-reviewed published research, including <span class="co">[</span><span class="ot">@Cole2004a; @Cole2007a; @Cole2022a</span><span class="co">]</span>. There's</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>also a popular-press article describing PyPedal <span class="co">[</span><span class="ot">@Cole2008a</span><span class="co">]</span>.</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## Generative AI and AI-Assisted Technologies</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>No generative AI or other AI tools were used in the creation of PyPedal, its documentation, or any other related materials.</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>PyPedal is entirely the result of human effort, however flawed.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

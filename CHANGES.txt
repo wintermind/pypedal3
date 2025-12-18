@@ -18,6 +18,9 @@ PyPedal 3 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+--- 12/17/2025  The structure of the development tree checked into Github is too far down the tree...the Installation
+    scripts are missing so you can't actually use "python -m pip install ." to get a working installation. I have no
+    idea what git incantations are necessary to fix this.
 ''' 12/16/2025  Fixed pyp_newclasses/NewPedigree::load() to match changes to pyp_db function names.
 ### 12/16/2025  Somebody's going to ask me if PyPedal can ingest JSON one of these days. My personal feelings aside, I
     guess I should look into it.

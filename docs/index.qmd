@@ -1,16 +1,25 @@
+::: {.content-hidden}
+###############################################################################
+# NAME: index.qmd
+# VERSION: 3.0.0 (17DECEMBER2025)
+# AUTHOR: John B. Cole (john.b.cole@gmail.com)
+# LICENSE: LGPL v2.1 (see LICENSE file)
+###############################################################################
+:::
+
 ---
 title: "Preface"
 ---
 
 ## Acknowledgments
-PyPedal was initially written to support the author's dissertation research while at [Louisiana State
+PyPedal was initially written to support the author's doctoral dissertation research while at [Louisiana State
 University](http://www.lsu.edu/). The initial development was supported in part by a grant from The Seeing Eye, Inc.
 (Morristown, NJ). The author wishes to thank Paul VanRaden for many helpful suggestions for improving the ability of
 PyPedal to handle computations in large pedigrees. Additional feedback in the form of bug reports, feature requests,
 and discussion of computing strategies was provided by Dan Cieslak, Bradley J. Heins (University of Minnesota), Edward
 H. Hagen (Institute for Theoretical Biology, Humboldt-Universität zu Berlin), Kathy Hanford (University of Nebraska),
 Thomas Kelly (Department of Animal and Poultry Science, University of Guelph), Thomas von Hassell, Gianluca Saba, and
-Ken Severin (University of Alaska -- Fairbanks). Gregor Gorjanc wrote a blog entry describing [how to install PyPedal
+Ken Severin (University of Alaska -- Fairbanks). Gregor Gorjanc wrote a blog entry describing [How to install PyPedal
 on Debian Linux](http://ggorjan.blogspot.com/2007/04/installing-pypedal-under-debian.html). Fernando Perez posted a
 LaTeX preamble to the NumPy listserver that dramatically improved the PDF version of this manual.
 
@@ -18,6 +27,15 @@ The Newfoundland pedigree was taken from the [NewFoundland Dog database](http://
 and is used with permission.
 
 The pedigree of European royalty used in the GEDCOM discussion,
-[ged3.ged](http://www.genealogyforum.com/gedcom/gedcom1/ged3.htm), was taken from the [Genealogy Forum
-website](http://www.genealogyforum.com/). It is believed to be in the public domain, and is used with the knowledge of
-the website administrators.
+[ged3.ged](https://web.archive.org/web/20160522052650/http://www.genealogyforum.com/gedcom/gedcom1/ged3.htm), was taken
+from the Internet Archive backup of the original page on [Genealogy Forum website](http://www.genealogyforum.com/). It's believed to be in the public domain, and is used with the knowledge of the website administrators.
+
+## Publications
+
+PyPedal has been used to support peer-reviewed published research, including [@Cole2004a; @Cole2007a; @Cole2022a]. There's
+also a popular-press article describing PyPedal [@Cole2008a].
+
+## Generative AI and AI-Assisted Technologies
+
+No generative AI or other AI tools were used in the creation of PyPedal, its documentation, or any other related materials.
+PyPedal is entirely the result of human effort, however flawed.
