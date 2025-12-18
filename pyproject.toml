@@ -1,0 +1,44 @@
+[project]
+	name = "PyPedal"
+	version = "3.0.0"
+	authors = [
+		{ name="John B. Cole", email="john.b.cole@gmail.com" },
+	]
+	description = "Python tools for pedigree analysis"
+	readme = "README.md"
+	requires-python = ">=3.11"
+	classifiers = [
+		"Development Status :: 5 - Production/Stable",
+    		"Environment :: Console",
+    		"Intended Audience :: Education",
+    		"Intended Audience :: Science/Research",
+    		"Operating System :: OS Independent",
+    		"Programming Language :: Python :: 3",
+    		"License :: OSI Approved :: GNU LGPL",
+    		"Topic :: Scientific/Engineering :: Information Analysis",
+    		"Topic :: Scientific/Engineering :: Mathematics",
+	]
+	keywords = [
+    		"pedigree",
+    		"genetic analysis",
+    		"population structure",
+    		"diversity",
+    		"inbreeding",
+    		"visualization",
+	]
+	dependencies = [
+    		"configobj",
+    		"Matplotlib",
+    		"NumPy",
+    		"NetworkX",
+    		"Pandas",
+    		"Pillow",
+    		"PyDot",
+    		"PyGraphviz",
+    		"ReportLab>=1.2",
+    		"SciPy",
+	]
+
+[project.urls]
+	Homepage = "https://github.com/wintermind/pypedal3"
+	Issues = "https://github.com/wintermind/pypedal3/issues"
