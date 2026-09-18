@@ -1,0 +1,29 @@
+from PyPedal import pyp_newclasses
+
+if __name__ == '__main__':
+
+	options_p = {
+		'pedfile': 'pedigrees/wde_2026_partial.ped',
+		'sepchar': ' ',
+#		'debug_messages': 1,
+		'pedformat': 'asd',
+		'renumber': 1,
+		'form_nrm': 1,
+	}
+
+	
+	options_c = {
+                'pedfile': 'pedigrees/wde_2026_complete.ped',
+                'sepchar': ' ',
+                'pedformat': 'asd',
+		'renumber': 1,
+		'form_nrm': 1,
+        }
+
+	print("Partial NRM")
+	wde_p = pyp_newclasses.load_pedigree(options_p)
+	wde_p.nrm.printme()
+
+	print("Complete NRM")
+	wde_c = pyp_newclasses.load_pedigree(options_c)
+	wde_c.nrm.printme()

@@ -18,6 +18,13 @@ PyPedal 3 CHANGELOG
 
 CHANGES in PyPedal 3.0.0 (Ridcully)
 ===================================
+*** 09/18/2026 pyp_newclasses::NewAMatrix methods were using old function call signatures for pyp_nrm/fast_a_matrix()
+    and pyp_nrm/fast_a_matrix_r(), as seen in other places on 12/05/2025.
+''' 09/18/2026 Removed a bunch of "print(vars(pedobj))" statements from pyp_nrm and pyp_utils added on 12/05/2025 for
+    debugging.
+''' 09/18/2026 Added a debug parameter to pyp_newclasses::NewAMatrix/form_a_matrix().
+### 03/04/2026  I think I decided that you don't need to be able to install from a Github checkout, that's what PIP
+    is for. I'm working on that, and there's now a pypedal@gmail.com e-mail address for the project.
 --- 12/17/2025  The structure of the development tree checked into Github is too far down the tree...the Installation
     scripts are missing so you can't actually use "python -m pip install ." to get a working installation. I have no
     idea what git incantations are necessary to fix this.
@@ -39,7 +46,7 @@ CHANGES in PyPedal 3.0.0 (Ridcully)
 *** 12/16/2025  pyp_reports/pdfPedigreeMetadata() was renamed to pyp_reports/pdf_pedigree_metadata().
 *** 12/16/2025  pyp_reports/pdfMeanMetricBy() was renamed to pyp_reports/pdf_mean_metric_by().
 *** 12/16/2025  pyp_reports/meanMetricBy() was renamed to pyp_reports/mean_metric_by().
-??? 12/16/2025  In pyp_metrics/a_effective_founders_Lacy(), should "p[row, col] = a[fs[col]-1, ds[row]-1]" actually be
+??? 12/16/2025  In pyp_metrics/a_effective_founders_lxacy(), should "p[row, col] = a[fs[col]-1, ds[row]-1]" actually be
     "p[row, col] = a[fs[col-1], ds[row-1]]"?
 ### 12/05/2025  I need to pull out all the debugging statements I used to find and fix the renumber problems.
 ''' 12/05/2025  I somehow deleted the README.md file but I was able to recover it from Github.

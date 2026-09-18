@@ -150,14 +150,13 @@ def fast_a_matrix(pedobj, save=0, method='dense', debug=0, fill=1):
 #     try: logging.info('Entered fast_a_matrix()')
 #     except: pass
 #     print '\t\t\tEntered pyp_nrm.fast_a_matrix()'
-#    print 'Entered pyp_nrm.fast_a_matrix()'
 #    print pedoobj.kw
-#    print '[DEBUG]: method = ', method
+#    print('[DEBUG]: method = ', method)
 
     if pedobj.kw['debug_messages']:
         print('-' * 120)
         print(f'[DEBUG]: pyp_nrm/fast_a_matrix(): pedobj is of type {type(pedobj)}')
-        print(vars(pedobj))
+        # print(vars(pedobj))
 
     # Check the foundercoi flag and do what it says.
     foundercoi = int(pedobj.kw['foundercoi'])
@@ -491,7 +490,7 @@ def inbreeding(pedobj, method='tabular', gens=0, rels=0, output=1, force=0, amet
     if pedobj.kw['debug_messages']:
         print('-' * 120)
         print(f'[DEBUG]: pyp_nrm/inbreeding(): pedobj is of type {type(pedobj)}')
-        print(vars(pedobj))
+        # print(vars(pedobj))
 
     fx = {}
     metadata = {}
@@ -1227,7 +1226,7 @@ def inbreeding_tabular(pedobj, gens=0, rels=0):
     if pedobj.kw['debug_messages']:
         print('-' * 120)
         print(f'[DEBUG]: pyp_nrm/inbreeding_tabular(): pedobj is of type {type(pedobj)}')
-        print(vars(pedobj))
+        # print(vars(pedobj))
 
     # If the user wants summary stats on coefficients of relationship,
     # prepare the dictionary, counters, and accumulators.

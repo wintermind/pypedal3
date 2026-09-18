@@ -1069,7 +1069,7 @@ class NewPedigree:
             if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
                 print('\t[INFO]: Forming numerator relationship matrix at %s' % (pyp_utils.pyp_nice_time()))
             self.nrm = NewAMatrix(self.kw)
-            self.nrm.form_a_matrix(self.pedigree)
+            self.nrm.form_a_matrix(self)
         if self.kw['set_offspring'] and not self.kw['renumber']:
             logging.info('Assigning offspring')
             if self.kw['messages'] == 'verbose' and self.kw['pedigree_summary']:
@@ -2046,7 +2046,8 @@ class NewPedigree:
             print('-' * 120)
             print(f'\t[DEBUG]: pyp_newclasses/renumber(): Renumbering pedigree at %s' % (pyp_utils.pyp_nice_time()))
             print(f'\t[DEBUG]: pyp_newclasses/renumber(): pedobj is of type {type(self)}')
-            print(vars(self))
+            # print(vars(self))
+
         # When I changed pyp_util/renumber() to accept and return pedobjs it broke this pedigree update.
         self.pedigree = pyp_utils.renumber(self, missingparent=self.kw['missing_parent'],
                                            animaltype=self.kw['animal_type']).pedigree
@@ -2185,7 +2186,7 @@ class NewPedigree:
             print('-' * 120)
             print(f'\t[DEBUG]: pyp_newclasses/updateidmap(): Updating ID map at %s' % (pyp_utils.pyp_nice_time()))
             print(f'\t[DEBUG]: pyp_newclasses/updateidmap(): pedobj is of type {type(self)}')
-            print(vars(self))
+            #print(vars(self))
 
         self.idmap = {}
         self.backmap = {}
@@ -3665,8 +3666,9 @@ class NewAMatrix:
     # __init__() initializes a NewAMatrix object.
     # @param self Reference to current object.
     # @param kw A dictionary of options.
+    # @param debug Show debugging messages, or not.
     # @retval An instance of a NewAMatrix() object
-    def __init__(self, kw):
+    def __init__(self, kw, debug=0):
         """
         Initialize a new numerator relationship matrix.
         """
@@ -3684,9 +3686,9 @@ class NewAMatrix:
     # form_a_matrix() calls pyp_nrm/fast_a_matrix() or pyp_nrm/fast_a_matrix_r()
     # to form a NRM from a pedigree.
     # @param self Reference to current object.
-    # @param pedigree The pedigree used to form the NRM.
+    # @param pedobj A PyPedal pedigree object.
     # @retval A NRM on success, 0 on failure.
-    def form_a_matrix(self, pedigree):
+    def form_a_matrix(self, pedobj):
         """
         form_a_matrix() calls pyp_nrm/fast_a_matrix() or pyp_nrm/fast_a_matrix_r()
         to form a NRM from a pedigree.
@@ -3700,7 +3702,7 @@ class NewAMatrix:
         # of parents.
         if self.kw['nrm_method'] == 'nrm':
             try:
-                self.nrm = pyp_nrm.fast_a_matrix(pedigree, self.kw)
+                self.nrm = pyp_nrm.fast_a_matrix(pedobj)
                 if self.kw['messages'] == 'verbose':
                     print('[INFO]: Formed A-matrix from pedigree using pyp_nrm.fast_a_matrix() at %s.' % (
                         pyp_utils.pyp_nice_time()))
@@ -3715,7 +3717,7 @@ class NewAMatrix:
         # of parents.
         else:
             try:
-                self.nrm = pyp_nrm.fast_a_matrix_r(pedigree, self.kw)
+                self.nrm = pyp_nrm.fast_a_matrix_r(pedobj)
                 if self.kw['messages'] == 'verbose':
                     print('[INFO]: Formed A-matrix from pedigree using pyp_nrm.fast_a_matrix_r() at %s.' % (
                         pyp_utils.pyp_nice_time()))

@@ -27,7 +27,7 @@ class and its methods may be found in the API Reference for the `pyp_newclasses`
 
 ### The NewAnimal Class {#sec-objects-animal-objects-new-animal}
 
-::: {#tbl-objects-animal-objects-new-animal-attributes}
+::: Attributes of the NewAnimal Class {#tbl-objects-animal-objects-new-animal-attributes}
 +--------------+-----------------------+----------------------+--------------------------------------------------------+
 |              | Defaults for integer  | Defaults for string  |                                                        |
 | Attribute    | IDs (`asd`)           | IDs (`ASD`)          | Description                                            |
@@ -131,9 +131,351 @@ class and its methods may be found in the API Reference for the `pyp_newclasses`
 |              |                       |                      | for each animal.                                       |
 +--------------+-----------------------+----------------------+--------------------------------------------------------+
 
-Attributes of `NewAnimal` objects..
+Attributes of `NewAnimal` objects.
 :::
 
 `NewAnimal` objects have the seven methods listed in @tbl-objects-animal-objects-new-animal-methods. The methods focus
 on returning information about an instance of an object; calculations are left to functions in, e.g., the `pyp_metrics`
 `pyp_nrm` modules.
+
+::: Methods of he NewAnimal Class {#tbl-objects-animal-objects-new-animal-methods}
++--------------+-------------------------------------------------------------------------------------------------------+
+| Method Name   | Method Description                                                                                   |
++:==============+:=====================================================================================================+
+| __init__      | Initializes a `NewAnimal` object and returns an instance of a `NewAnimal` object.                    |
++---------------+------------------------------------------------------------------------------------------------------+
+| printme       | Prints a summary of the data stored in a `NewAnimal` object.                                         |
++---------------+------------------------------------------------------------------------------------------------------+
+| stringme      | Returns the data stored in a `NewAnimal` object as a string.                                         |
++---------------+------------------------------------------------------------------------------------------------------+
+| dictme        | Returns the data stored in a `NewAnimal` object as a dictionary whose keys are attribute names and   |
+|               | whose values are attribute values.                                                                   |
++---------------+------------------------------------------------------------------------------------------------------+
+| trap          | Checks for common errors in `NewAnimal` objects.                                                     |
++---------------+------------------------------------------------------------------------------------------------------+
+| pad\_id       | Takes an animal ID, pads it to fifteen digits, and prepends the birthyear. The order of elements is: |
+|               | birthyear, animalID, count of zeros, zeros. The padded ID is used for reordering the pedigree with   |
+|               | the `fast_reorder` routine.                                                                          |
++---------------+------------------------------------------------------------------------------------------------------+
+| string_to_int | Takes an animal ID as a string and returns a hash. The algorithm used is taken from "Character       |
+|               | String Keys" in "Data Structures and Algorithms with Object-Oriented Design Patterns in Python" by   |
+|               | Bruno R. Preiss: http://www.brpreiss.com/books/opus7/html/page220.html#progstrnga.                   |
++---------------+------------------------------------------------------------------------------------------------------+
+
+### The LightAnimal Class {#sec-objects-animal-objects-light-animal}
+
+`LightAnimal` objects hold animal records read from a pedigree file. It implements a much simpler object than the
+`NewAnimal` object and is intended for use with the graph theoretic routines in `pyp_network`. The only attributes of
+these objects are animal ID, sire ID, dam ID, original ID, renumbered ID, birth year, and sex (Table
+@tbl-objects-animal-objects-light-animal-attributes).
+
+::: Attributes of the LightAnimal Class {#tbl-objects-animal-objects-light-animal-attributes}
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+|              | Defaults for integer  | Defaults for string  |                                                        |
+| Attribute    | IDs (`asd`)           | IDs (`ASD`)          | Description                                            |
++:=============+:=====================:+:====================:+:=======================================================+
+| animalID     | animal ID             | animal ID $\mapsto$  | Animal's ID. Animal IDs change when a pedigree is      |
+|              |                       | `integer`            | renumbered. IDs must be provided for all animals in a  |
+|              |                       |                      | pedigree file. When strings are used for animal IDs    |
+|              |                       |                      | with the `ASD` pedigree format code they're converted  |
+|              |                       |                      | to numeric IDs with the `string_to_int()` method.      |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| by           | `missing_byear`       | `missing_byear`      | The animal's birthyear in `YYYY` format.               |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| damID        | dam ID                | dam ID $\mapsto$     | Dam's ID. When strings are provided for IDs with the   |
+|              |                       | `integer`            | `ASD` pedigree format code they're converted to        |
+|              |                       |                      | numeric IDs with the `string_to_int()` method.         |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| originalID   | animalID              | animal ID $\mapsto$  | Original ID assigned to an animal. It will not change  |
+|              |                       | `integer`            | when the pedigree is renumbered.                       |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| renumberedID | `-999`                | `-999`               | ID assigned to an animal when the pedigree is          |
+|              |                       |                      | renumbered. The default value indicates the pedigree   |
+|              |                       |                      | hasn't been renumbered using PyPedal.                  |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| sex          | `u`                   | `u`                  | The sex of the animal: `m` = male, `f` = female, `u`   |
+|              |                       |                      | = unknown/not provided.                                |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| sireID       | sire ID               | sire ID $\mapsto$    | Sire's ID. When strings are provided for animal IDs    |
+|              |                       | `integer`            | using the `ASD` pedigree format code they're converted |
+|              |                       |                      | to numeric IDs with the `string_to_int()` method.      |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+
+`LightAnimal` objects have the same seven methods (Table @tbl-objects-animal-objects-light-animal-methods) as `NewAnimal`
+objects.
+
+::: Methods of the LightAnimal Class {#tbl-objects-animal-objects-light-animal-methods}
++--------------+-------------------------------------------------------------------------------------------------------+
+| Method Name   | Method Description                                                                                   |
++:=============+:======================================================================================================+
+| __init__      | Initializes a `LightAnimal` object and returns an instance of a `LightAnimal` object.                |
++---------------+------------------------------------------------------------------------------------------------------+
+| printme       | Prints a summary of the data stored in a `LightAnimal` object.                                       |
++---------------+------------------------------------------------------------------------------------------------------+
+| stringme      | Returns the data stored in a `LightAnimal` object as a string.                                       |
++---------------+------------------------------------------------------------------------------------------------------+
+| dictme        | Returns the data stored in a `LightAnimal` object as a dictionary whose keys are attribute names and |
+|               | whose values are attribute values.                                                                   |
++---------------+------------------------------------------------------------------------------------------------------+
+| trap          | Checks for common errors in `LightAnimal` objects.                                                   |
++---------------+------------------------------------------------------------------------------------------------------+
+| pad\_id       | Takes an animal ID, pads it to fifteen digits, and prepends the birthyear. The order of elements is: |
+|               | birthyear, animalID, count of zeros, zeros. The padded ID is used for reordering the pedigree with   |
+|               | the `fast_reorder` routine.                                                                          |
++---------------+------------------------------------------------------------------------------------------------------+
+| string_to_int | Takes an animal ID as a string and returns a hash. The algorithm used is taken from "Character       |
+|               | String Keys" in "Data Structures and Algorithms with Object-Oriented Design Patterns in Python" by   |
+|               | Bruno R. Preiss: http://www.brpreiss.com/books/opus7/html/page220.html#progstrnga.                   |
++---------------+------------------------------------------------------------------------------------------------------+
+
+### The SimAnimal Class {#sec-objects-animal-objects-sim-animal}
+
+The `SimAnimal` Class is used for pedigree simulation, which is described in Section
+{@sec-objects-animal-objects-sim-animal}. All simulated pedigrees have the format code `asdxg`, and those are the only
+class attributes (Table @tbl-objects-animal-objects-light-animal-attributes). This class is intended for use only by
+the pedigree simulation routines, so the lack of attributes and methods as compared to the `NewAnimal` class is a
+deliberate design decision.
+
+:::  {#tbl-objects-animal-objects-sim-animal-attributes}
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+|              | Defaults for integer  | Defaults for string  |                                                        |
+| Attribute    | IDs (`asd`)           | IDs (`ASD`)          | Description                                            |
++:=============+:=====================:+:====================:+:=======================================================+
+| animalID     | animal ID             | animal ID $\mapsto$  | Animal's ID. Animal IDs change when a pedigree is      |
+|              |                       | `integer`            | renumbered. IDs must be provided for all animals in a  |
+|              |                       |                      | pedigree file. When strings are used for animal IDs    |
+|              |                       |                      | with the `ASD` pedigree format code they're converted  |
+|              |                       |                      | to numeric IDs with the `string_to_int()` method.      |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| damID        | dam ID                | dam ID $\mapsto$     | Dam's ID. When strings are provided for IDs with the   |
+|              |                       | `integer`            | `ASD` pedigree format code they're converted to        |
+|              |                       |                      | numeric IDs with the `string_to_int()` method.         |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| gen          | `-999`                | `-999`               | Generation to which the animal belongs.                |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| sex          | `u`                   | `u`                  | The sex of the animal: `m` = male, `f` = female, `u`   |
+|              |                       |                      | = unknown/not provided.                                |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+| sireID       | sire ID               | sire ID $\mapsto$    | Sire's ID. When strings are provided for animal IDs    |
+|              |                       | `integer`            | using the `ASD` pedigree format code they're converted |
+|              |                       |                      | to numeric IDs with the `string_to_int()` method.      |
++--------------+-----------------------+----------------------+--------------------------------------------------------+
+
+`SimAnimal` objects have only three methods (Table {@tbl-objects-animal-objects-sim-animal-methods}).
+
+::: {#tbl-objects-animal-objects-sim-animal-methods}
++--------------+-------------------------------------------------------------------------------------------------------+
+| Method Name   | Method Description                                                                                   |
++:==============+:======================================================================================================+
+| __init__      | Initializes a `LightAnimal` object and returns an instance of a `LightAnimal` object.                |
++---------------+------------------------------------------------------------------------------------------------------+
+| printme       | Prints a summary of the data stored in a `LightAnimal` object.                                       |
++---------------+------------------------------------------------------------------------------------------------------+
+| stringme      | Returns the data stored in a `LightAnimal` object as a string.                                       |
++---------------+------------------------------------------------------------------------------------------------------+
+
+## The NewPedigree Class {#objects-pedigree objects}
+
+The `NewPedigre` class is the fundamental object in `PyPedal`.
+
+::: {#tbl-objects-newpedigree-attributes}
++--------------+---------------+---------------------------------------------------------------------------------------+
+| Attribute    | Default Value | Attribute Description                                                                 |
++:=============+:==============+:======================================================================================+
+| pedigree     | `[]`          | A list of `NewAnimal` objects.                                                        |
++--------------+---------------+---------------------------------------------------------------------------------------+
+| metadata     | `{}`          | A `PedigreeMetadata` object.                                                          |
++--------------+---------------+---------------------------------------------------------------------------------------+
+| idmap        | `{}`          | Dictionary for mapping original IDs to renumbered IDs ({sec-methodology-id-mapping}). |
++--------------+---------------+---------------------------------------------------------------------------------------+
+| backmap      | `{}`          | Dictionary for mapping renumbered IDs to original IDs ({sec-methodology-id-mapping}). |
++--------------+---------------+---------------------------------------------------------------------------------------+
+| namemap      | `{}`          | Dictionary for mapping names to original IDs ({sec-methodology-id-mapping}).          |
++--------------+---------------+---------------------------------------------------------------------------------------+
+| namebackmap  | `{}`          | Dictionary for mapping original IDs to names ({sec-methodology-id-mapping}).          |
++--------------+---------------+---------------------------------------------------------------------------------------+
+| starline     | `'*'*80`      | Convenience string.                                                                   |
++--------------+---------------+---------------------------------------------------------------------------------------+
+| nrm          | `None`        | An instance of a `NewAMatrix` object.                                                 |
++--------------+---------------+---------------------------------------------------------------------------------------+
+
+The methods of `NewPedigree` objects are listed in Table {@tbl-objects-newpedigree-methods}.
+
+!!!I need to put something in here about pedsources and make sure that it's in the index!!!
+
+::: {#tbl-objects-newpedigree-methods}
++----------------+-----------------------------------------------------------------------------------------------------+
+| Method Name    | Method Description                                                                                  |
++:===============+:====================================================================================================+
+| __init__       | Initializes and returns a \class{NewPedigree} object.                                               |
++----------------+-----------------------------------------------------------------------------------------------------+
+| __add__        | Implements pedigree "addition" as discussed briefly in Section \ref{sec:pedigrees-as-sets}.         |
++----------------+-----------------------------------------------------------------------------------------------------+
+| __sub__        | Implements pedigree "subtraction" as discussed briefly in Section \ref{sec:pedigrees-as-sets}.      |
++----------------+-----------------------------------------------------------------------------------------------------+
+| addanimal      | Adds a new animal of class `NewAnimal` to the pedigree. Note: This function should be used by       |
+|                | `NewPedigree` methods only, not userspace routines. Improper use of `addanimal` may result in data  |
+|                | loss or corruption. You have been warned.                                                           |
++----------------+-----------------------------------------------------------------------------------------------------+
+| delanimal      | Deletes an animal from the pedigree. Note that this method DOES not update the metadata attached to |
+|                | the pedigree and should only be used if that is not important. Note: This function should be used   |
+|                | by `NewPedigree` methods only, not userspace routines. Improper use of `delanimal` may result in    |
+|                | data loss or corruption. You have been warned.                                                      |
++----------------+-----------------------------------------------------------------------------------------------------+
+| fromanimallist | Creates a `NewPedigree` from a list of `NewAnimal` instances.                                       |
++----------------+-----------------------------------------------------------------------------------------------------+
+| fromgraph      | Creates a `NewPedigree` from an `XDiGraph` object.                                                  |
++----------------+-----------------------------------------------------------------------------------------------------+
+| fromnull       | Creates a null (empty) `NewPedigree`, which is a pedigree with no associated animal records.        |
++----------------+-----------------------------------------------------------------------------------------------------+
+| intersection   | Implements pedigree intersections as discussed briefly in Section {@sec-pedigrees-as-sets}.         |
++----------------+-----------------------------------------------------------------------------------------------------+
+| load           | Wraps several processes useful for loading and preparing a pedigree for use in an analysis,         |
+|                | including reading the animals into a list of animal objects, forming metadata, checking for common  |
+|                | errors, setting ancestor and sex flags, and renumbering the pedigree.                               |
++----------------+-----------------------------------------------------------------------------------------------------+
+| preprocess     | Processes the entries in a pedigree file, which includes reading each entry, checking it for common |
+|                | errors, and instantiating a `NewAnimal` object.                                                     |
++----------------+-----------------------------------------------------------------------------------------------------+
+| printoptions   | Prints the contents of the options dictionary, which is useful for debugging.                       |
++----------------+-----------------------------------------------------------------------------------------------------+
+| renumber       | Calls the proper reordering and renumbering routines; updates the ID map after a pedigree has been  |
+|                | renumbered so that all references are to renumbered rather than original IDs.                       |
++----------------+-----------------------------------------------------------------------------------------------------+
+| save           | Writes a `PyPedal` pedigree to a user-specified file.  The saved pedigree includes all fields       |
+|                | recognized by `PyPedal`, not just the original fields read from the input pedigree file.            |
++----------------+-----------------------------------------------------------------------------------------------------+
+| savedb         | Writes a `PyPedal` pedigree to a relational database, as described in Section                       |
+|                | {@sec-io-output-database}.                                                                          |
++----------------+-----------------------------------------------------------------------------------------------------+
+| savegedcom     | Writes a `PyPedal` pedigree to a user-specified file the format used by GEDCOM 5.5, as described in |
+|                | Appendix {@sec-gedcom}.                                                                             |
++----------------+-----------------------------------------------------------------------------------------------------+
+| savegenes      | Writes a `PyPedal` pedigree to a user-specified file the format used by GENES 1.20, as described in |
+|                | Appendix {@sec-genes}.                                                                              |
++----------------+-----------------------------------------------------------------------------------------------------+
+| savegraph      | Writes a `PyPedal` pedigree to a user-specified file as a directed graph represented as an          |
+|                | adjacency list.                                                                                     |
++----------------+-----------------------------------------------------------------------------------------------------+
+| simulate       | Simulate simulates an arbitrary pedigree of size _n_ with _g_ generations starting from _n\_s_ base |
+|                | sires and _n\_d_ base dams. This method is based on the concepts and algorithms in the              |
+|                | `Pedigree::sample` method from Matvec 1.1a (src/classes/pedigree.cpp;                               |
+|                | https://web.archive.org/web/20121114210507/http://statistics.unl.edu/faculty/steve/software/matvec/)|
+|                | although all of the code in this implementation was written from scratch.                           |
++----------------+-----------------------------------------------------------------------------------------------------+
+| tostream       | Writes a `NewPedigree` to a text-stream, as described in Section {@sec-io-output-text-streams}.     |
++----------------+-----------------------------------------------------------------------------------------------------+
+| union          | This is an alias for `NewPedigree::__add__()`.                                                      |
++----------------+-----------------------------------------------------------------------------------------------------+
+| updateidmap    | Updates the ID map after a pedigree has been renumbered so that all references are to renumbered    |
+|                | rather than original IDs.                                                                           |
++----------------+-----------------------------------------------------------------------------------------------------+
+
+See Section {@sec-pedigree-simulation} for details on pedigree simulation.
+
+## The PedigreeMetadata Class {#sec-objects-metadata-objects}
+
+The `PedigreeMetadata` class stores metadata about pedigrees. This helps improve performance in some procedures, and
+also makes it easy to access useful summary data. Metadata are collected when the pedigree is loaded and accessed by
+many `PyPedal` routines.
+
+::: {#tbl-objects-metadata-attributes}
++-------------------------------------+--------------------------------------------------------------------------------+
+| Attribute           | Default Value | Attribute Description                                                                 |
++:====================+:==============+:======================================================================================+
+| name                | pedname       | Name assigned to the pedigree.                                                     |
++---------------------+-----------+------------------------------------------------------------------------------------+
+| filename            | pedfile   | File from which the pedigree was loaded.                                           |
++---------------------------------+------------------------------------------------------------------------------------+
+| pedcode             | pedformat | Pedigree format string.                                                            |
++---------------------+-----------+------------------------------------------------------------------------------------+
+| num_records         | 0      | Number of records in the pedigree.                                                    |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| num_unique_sires    | 0      | Number of unique sires in the pedigree.                                               |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| num_unique_dams     | 0      | Number of unique dams in the pedigree.                                                |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| num_unique_founders | 0      | Number of unique founders in the pedigree.                                            |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| num_unique_gens     | 0 &    | Number of unique generations in the pedigree.                                         |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| num_unique_years    | 0      | Number of unique birth years in the pedigree.                                         |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| num_unique_herds    | 0      | Number of unique herds in the pedigree.                                               |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| unique_sire_list    | []     | List of the unique sires in the pedigree                                              |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| unique_dam_list     | []     | List of the unique dams in the pedigree.                                             |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| unique_founder_list | []     | List of the unique founders in the pedigree.                                          |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| unique_gen_list     | []     |List of the unique generations in the pedigree.                                        |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| unique_year_list    | []     | List of the unique birth years in the pedigree.                                       |
++---------------------+--------+---------------------------------------------------------------------------------------+
+| unique_herd_list    | []     | List of the unique herds in the pedigree.                                             |
++---------------------+--------+---------------------------------------------------------------------------------------+
+
+
+    \end{xtabular}
+\end{center}
+Metadata are gathered furing the pedigree loading process, but after load-time renumbering has occured (if requested). When a pedigree is renumbered after it has been loaded the unique sire, dam, and founders lists are not updated to contain the renumbere IDs. The metadata may be updated by instantiating a new \class{PedigreeMetadata} object and using it to replace the original metadata:
+\begin{verbatim}
+example.metadata = PedigreeMetadata(example.pedigree,example.kw)
+\end{verbatim}
+Alternatively, ID maps (Section \ref{sec:methodology-id-mapping}) may be used to produce expected lists of animals.
+
+The methods of \class{PedigreeMetadata} objects are listed in Table \ref{tbl:objects-metadata-methods}. The couting methods (\function{nud}, \function{nuf}, etc.) return two values each, a count and a list, and new couting methods may easily be added.
+\begin{center}
+    \tablecaption{Methods of \class{PedigreeMetadata} objects.}
+    \tablefirsthead{\hline Method & Description \\ \hline}
+    \tablehead{\hline Method & Description \\ \hline}
+    \tabletail{\hline \multicolumn{2}{l}{\small\sl continued on next page} \\ \hline}
+    \tablelasttail{\hline}
+    \label{tbl:objects-metadata-methods}
+    \begin{xtabular}{l|p{4in}}
+        \_\_init\_\_ & Initializes and returns a \class{PedigreeMetadata} object. \\
+        fileme & Writes the metada stored in the \class{PedigreeMetadata} object to disc. \\
+        nud & Returns the number of unique dams in the pedigree along with a list of the dams. \\
+        nuf & Returns the number of unique founders in the pedigree along with a list of the founders. \\
+        nug & Returns the number of unique generations in the pedigree along with a list of the generations. \\
+        nuherds & Returns the number of unique herds in the pedigree along with a list of the herds. \\
+        nus & Returns the number of unique sires in the pedigree along with a list of the sires. \\
+        nuy & Returns the number of unique birth years in the pedigree along with a list of the birth years. \\
+        printme & Prints a summary of the pedigree metadata stored in the \class{PedigreeMetadata} object. \\
+        stringme & Returns a summary of the pedigree metadata stored in the \class{PedigreeMetadata} object as a string. \\
+    \end{xtabular}
+\end{center}
+\section{The NewAMatrix Class}
+\label{sec:objects-amatrix-objects}
+\index{PyPedal objects!AMatrix objects}
+The \class{NewAMatrix} class provides an instance of a numerator relationship matrix as a NumPy array of floats with some convenience methods.  The idea here is to provide a wrapper around a NRM so that it is easier to work with.  For large pedigrees it can take a long time to compute the elements of A, so there is real value in providing an easy way to save and retrieve a NRM once it has been formed.
+\begin{center}
+    \tablecaption{Attributes of \class{NewAMatrix} objects.}
+    \tablefirsthead{\hline Attribute & Default & Description \\ \hline}
+    \tablehead{\hline Attribute & Default & Description \\ \hline}
+    \tabletail{\hline \multicolumn{3}{l}{\small\sl continued on next page} \\ \hline}
+    \tablelasttail{\hline}
+    \label{tbl:objects-amatrix-attributes}
+    \begin{xtabular}{l|l|p{4in}}
+        kw & \texttt{kw} & Keyword dictionary. \\
+        nrm & \texttt{None} & A numerator relationship matrix; exists only after the \function{form\_a\_matrix} method has been called. \\
+    \end{xtabular}
+\end{center}
+The methods of \class{NewAMatrix} objects are listed in Table \ref{tbl:objects-amatrix-methods}.
+\begin{center}
+    \tablecaption{Methods of \class{NewAMatrix} objects.}
+    \tablefirsthead{\hline Method & Description \\ \hline}
+    \tablehead{\hline Method & Description \\ \hline}
+    \tabletail{\hline \multicolumn{2}{l}{\small\sl continued on next page} \\ \hline}
+    \tablelasttail{\hline}
+    \label{tbl:objects-amatrix-methods}
+    \begin{xtabular}{l|p{4in}}
+        \_\_init\_\_ & Initializes and returns a \class{NewAMatrix} object. \\
+        form\_a\_matrix & Calls \function{pyp\_nrm.fast\_a\_matrix()} or \function{pyp\_nrm.fast\_a\_matrix\_r()} to form a NRM from a pedigree. \\
+        info & Uses the NRM's \method{info()} method to dump some information about the NRM. This is useful for debugging. \\
+        load & Uses the NumPy function \function{fromfile{}} to load an array from a binary file.  If the load is successful, self.nrm contains the matrix. \\
+        save & Uses the NRM's \method{tofile()} method to save an array to either a text or binary file. \\
+        printme & Prints the NRM to the screen. \\
+    \end{xtabular}
+\end{center}

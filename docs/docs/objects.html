@@ -56,7 +56,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -108,6 +128,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -248,25 +311,187 @@ Table&nbsp;6.1: Attributes of <code>NewAnimal</code> objects..
 <div aria-describedby="tbl-objects-animal-objects-new-animal-attributes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 24%">
-<col style="width: 24%">
-<col style="width: 40%">
+<col style="width: 12%">
+<col style="width: 19%">
+<col style="width: 19%">
+<col style="width: 47%">
 </colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;">Attribute</th>
-<th style="text-align: left;">Defaults for integer IDs (<code>asd</code>)</th>
-<th style="text-align: left;">Defaults for string IDs (<code>ASD</code>)</th>
+<th style="text-align: center;">Defaults for integer IDs (<code>asd</code>)</th>
+<th style="text-align: center;">Defaults for string IDs (<code>ASD</code>)</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">age</td>
-<td style="text-align: left;">-999</td>
-<td style="text-align: left;">-999</td>
+<td style="text-align: center;">-999</td>
+<td style="text-align: center;">-999</td>
 <td style="text-align: left;">The animal’s age based on the global <code>BASE_DEMOGRAPHIC_YEAR</code> defined in <code>pyp_demog</code>. If the <code>by</code> is unknown, the inferred generation is used. If the inferred generation is unknown, the age is set to -999.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">alive</td>
+<td style="text-align: center;"><code>0</code></td>
+<td style="text-align: center;"><code>0</code></td>
+<td style="text-align: left;">Flag indicating if an animal is alive: <code>0</code> = dead, <code>1</code> = alive.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">alleles</td>
+<td style="text-align: center;"><code>['', '']</code></td>
+<td style="text-align: center;"><code>['', '']</code></td>
+<td style="text-align: left;">Alleles used for gene dropping.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ancestor</td>
+<td style="text-align: center;"><code>0</code></td>
+<td style="text-align: center;"><code>0</code></td>
+<td style="text-align: left;">Flag indicating if an animal has offspring: <code>0</code> = has no offspring, <code>1</code> = has offspring. The flags are set by calling <code>pyp_utils.set_ancestor_flag()</code>.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">animalID</td>
+<td style="text-align: center;">animal ID</td>
+<td style="text-align: center;">animal ID <span class="math inline">\mapsto</span> <code>integer</code></td>
+<td style="text-align: left;">Animal’s ID. Animal IDs change when a pedigree is renumbered. IDs must be provided for all animals in a pedigree file. When strings are used for animal IDs with the <code>ASD</code> pedigree format code they’re converted to numeric IDs with the <code>string_to_int()</code> method.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bd</td>
+<td style="text-align: center;"><code>missing_bdate</code></td>
+<td style="text-align: center;"><code>missing_bdate</code></td>
+<td style="text-align: left;">The animal’s birthdate in <code>MMDDYY</code> format.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">breed</td>
+<td style="text-align: center;"><code>missing_breed</code></td>
+<td style="text-align: center;"><code>missing_breed</code></td>
+<td style="text-align: left;">The animal’s breed as a string.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">by</td>
+<td style="text-align: center;"><code>missing_byear</code></td>
+<td style="text-align: center;"><code>missing_byear</code></td>
+<td style="text-align: left;">The animal’s birthyear in <code>YYYY</code> format.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">damID</td>
+<td style="text-align: center;">dam ID</td>
+<td style="text-align: center;">dam ID <span class="math inline">\mapsto</span> <code>integer</code></td>
+<td style="text-align: left;">Dam’s ID. When strings are provided for IDs with the <code>ASD</code> pedigree format code they’re converted to numeric IDs with the <code>string_to_int()</code> method.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">damName</td>
+<td style="text-align: center;">dam ID</td>
+<td style="text-align: center;">dam ID</td>
+<td style="text-align: left;">The name of the animal’s dam.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">daus</td>
+<td style="text-align: center;"><code>{}</code></td>
+<td style="text-align: center;"><code>{}</code></td>
+<td style="text-align: left;">Dictionary containing all daughters of an animal. The keys and values are the animal IDs for each offspring. When the pedigree is renumbered, keys are updated to match the renumbered IDs for each offspring.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fa</td>
+<td style="text-align: center;"><code>0.0</code></td>
+<td style="text-align: center;"><code>0.0</code></td>
+<td style="text-align: left;">The animal’s coefficient of inbreeding.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">founder</td>
+<td style="text-align: center;"><code>n</code></td>
+<td style="text-align: center;"><code>y</code></td>
+<td style="text-align: left;">Character indicating whether or not the animal is a founder (had unknown parents): <code>n</code> = not a founder (one or both parents known), <code>y</code> = founder (both parents unknown).</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gen</td>
+<td style="text-align: center;"><code>-999</code></td>
+<td style="text-align: center;"><code>-999</code></td>
+<td style="text-align: left;">Generation to which the animal belongs.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gencoeff</td>
+<td style="text-align: center;"><code>-999.0</code></td>
+<td style="text-align: center;"><code>-999.0</code></td>
+<td style="text-align: left;">Pattie’s <span class="citation" data-cites="Pattie1965">(<a href="references.html#ref-Pattie1965" role="doc-biblioref">1965</a>)</span> generation coefficient.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">herd</td>
+<td style="text-align: center;"><code>missing_herd</code> <span class="math inline">\mapsto</span> <code>integer</code></td>
+<td style="text-align: center;"><code>missing_herd</code> <span class="math inline">\mapsto</span> </td>
+<td style="text-align: left;">The ID of the herd to which the animal belongs.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">igen</td>
+<td style="text-align: center;"><code>-999</code></td>
+<td style="text-align: center;"><code>-999</code></td>
+<td style="text-align: left;">Generation inferred by <code>pyp_utils.set_generation()</code>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">name</td>
+<td style="text-align: center;">animal ID</td>
+<td style="text-align: center;">animal ID</td>
+<td style="text-align: left;">The animal’s name.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">originalHerd</td>
+<td style="text-align: center;">herd</td>
+<td style="text-align: center;">herd</td>
+<td style="text-align: left;">The original herd ID to which an animal belonged before the herd was converted from a string to an integer; most useful with the <code>H</code> pedigree format code.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">originalID</td>
+<td style="text-align: center;">animalID</td>
+<td style="text-align: center;">animal ID <span class="math inline">\mapsto</span> <code>integer</code></td>
+<td style="text-align: left;">Original ID assigned to an animal. It will not change when the pedigree is renumbered.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">paddedID</td>
+<td style="text-align: center;"><code>animalID</code> <span class="math inline">\mapsto</span> <code>integer</code></td>
+<td style="text-align: center;"><code>animalID</code> <span class="math inline">\mapsto</span> <code>integer</code></td>
+<td style="text-align: left;">The animal ID padded to fifteen digits, with the birthyear (or 1950 if the birth year is unknown) prepended. The order of elements is: birthyear, animalID, count of zeros, zeros. Used to create the alleles for gene dropping.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pedcomp</td>
+<td style="text-align: center;"><code>-999.9</code></td>
+<td style="text-align: center;"><code>-999.9</code></td>
+<td style="text-align: left;">Pedigree completeness as described in <span class="quarto-unresolved-ref">?sec-methodology-pedigre-completeness</span>}.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">renumberedID</td>
+<td style="text-align: center;"><code>-999</code></td>
+<td style="text-align: center;"><code>-999</code></td>
+<td style="text-align: left;">ID assigned to an animal when the pedigree is renumbered. The default value indicates the pedigree hasn’t been renumbered using PyPedal.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sex</td>
+<td style="text-align: center;"><code>u</code></td>
+<td style="text-align: center;"><code>u</code></td>
+<td style="text-align: left;">The sex of the animal: <code>m</code> = male, <code>f</code> = female, <code>u</code> = unknown/not provided.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sireID</td>
+<td style="text-align: center;">sire ID</td>
+<td style="text-align: center;">sire ID <span class="math inline">\mapsto</span> <code>integer</code></td>
+<td style="text-align: left;">Sire’s ID. When strings are provided for animal IDs using the <code>ASD</code> pedigree format code they’re converted to numeric IDs with the <code>string_to_int()</code> method.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sireName</td>
+<td style="text-align: center;">sireID</td>
+<td style="text-align: center;">sireID</td>
+<td style="text-align: left;">The name of the animal’s sire.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sons</td>
+<td style="text-align: center;"><code>{}</code></td>
+<td style="text-align: center;">{}</td>
+<td style="text-align: left;">Dictionary containing all known sons of an animal. The keys and values are the animal IDs for each offspring. When the pedigree is renumbered, keys are updated to correspond to the renumbered IDs for each animal.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">unks</td>
+<td style="text-align: center;"><code>{}</code></td>
+<td style="text-align: center;">{}</td>
+<td style="text-align: left;">Dictionary containing all offspring of an animal with unknown sex. The keys and values are the animal IDs for each offspring. When the pedigree is renumbered, keys are updated to correspond to the renumbered IDs for each animal.</td>
 </tr>
 </tbody>
 </table>
@@ -278,6 +503,11 @@ Table&nbsp;6.1: Attributes of <code>NewAnimal</code> objects..
 
 <!-- -->
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-Pattie1965" class="csl-entry" role="listitem">
+Pattie, W. 1965. <span>“Selection for Weaning Weight in <span>M</span>erino Sheep.”</span> <em>J. Agric. Exp. Animl. Husb.</em> 5: 353–60.
+</div>
+</div>
 </section>
 </section>
 
@@ -775,16 +1005,115 @@ Table&nbsp;6.1: Attributes of <code>NewAnimal</code> objects..
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="fu">### The NewAnimal Class {#sec-objects-animal-objects-new-animal}</span></span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>::: {#tbl-objects-animal-objects-new-animal-attributes}</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Attribute    <span class="pp">|</span> Defaults for integer IDs (<span class="in">`asd`</span>) <span class="pp">|</span> Defaults for string IDs (<span class="in">`ASD`</span>) <span class="pp">|</span> Description                                            <span class="pp">|</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="pp">|:-------------|:---------------------------------|:--------------------------------|:-------------------------------------------------------|</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> age          <span class="pp">|</span> -999                             <span class="pp">|</span> -999                            <span class="pp">|</span> The animal's age based on the global <span class="in">`BASE_DEMOGRAPHIC_YEAR`</span> defined in <span class="in">`pyp_demog`</span>. If the <span class="in">`by`</span> is unknown, the inferred generation is used. If the inferred generation is unknown, the age is set to -999. <span class="pp">|</span></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>Attributes of <span class="in">`NewAnimal`</span> objects..</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="in">`NewAnimal`</span> objects have the seven methods listed in @tbl-objects-animal-objects-new-animal-methods. The methods focus</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>on returning information about an instance of an object; calculations are left to functions in, e.g., the <span class="in">`pyp_metrics`</span></span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="in">`pyp_nrm`</span> modules.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span> Defaults for integer  <span class="pp">|</span> Defaults for string  <span class="pp">|</span>                                                        <span class="pp">|</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Attribute    <span class="pp">|</span> IDs (<span class="in">`asd`</span>)           <span class="pp">|</span> IDs (<span class="in">`ASD`</span>)          <span class="pp">|</span> Description                                            <span class="pp">|</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>+:===========<span class="al">==+:=====================:+:====================:+:==</span>=====================================================+</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> age          <span class="pp">|</span> -999                  <span class="pp">|</span> -999                 <span class="pp">|</span> The animal's age based on the global                   <span class="pp">|</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> <span class="in">`BASE_DEMOGRAPHIC_YEAR`</span> defined in <span class="in">`pyp_demog`</span>. If the <span class="pp">|</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> <span class="in">`by`</span> is unknown, the inferred generation is used. If   <span class="pp">|</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> the inferred generation is unknown, the age is set to  <span class="pp">|</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> -999.                                                  <span class="pp">|</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> alive        <span class="pp">|</span> <span class="in">`0`</span>                   <span class="pp">|</span> <span class="in">`0`</span>                  <span class="pp">|</span> Flag indicating if an animal is alive: <span class="in">`0`</span> = dead,     <span class="pp">|</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> <span class="in">`1`</span> = alive.                                           <span class="pp">|</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> alleles      <span class="pp">|</span> <span class="in">`['', '']`</span>            <span class="pp">|</span> <span class="in">`['', '']`</span>           <span class="pp">|</span> Alleles used for gene dropping.                        <span class="pp">|</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> ancestor     <span class="pp">|</span> <span class="in">`0`</span>                   <span class="pp">|</span> <span class="in">`0`</span>                  <span class="pp">|</span> Flag indicating if an animal has offspring: <span class="in">`0`</span> = has  <span class="pp">|</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> no offspring, <span class="in">`1`</span> = has offspring. The flags are set   <span class="pp">|</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> by calling <span class="in">`pyp_utils.set_ancestor_flag()`</span>.            <span class="pp">|</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> animalID     <span class="pp">|</span> animal ID             <span class="pp">|</span> animal ID $\mapsto$  <span class="pp">|</span> Animal's ID. Animal IDs change when a pedigree is      <span class="pp">|</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span> <span class="in">`integer`</span>            <span class="pp">|</span> renumbered. IDs must be provided for all animals in a  <span class="pp">|</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> pedigree file. When strings are used for animal IDs    <span class="pp">|</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> with the <span class="in">`ASD`</span> pedigree format code they're converted  <span class="pp">|</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> to numeric IDs with the <span class="in">`string_to_int()`</span> method.      <span class="pp">|</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> bd           <span class="pp">|</span> <span class="in">`missing_bdate`</span>       <span class="pp">|</span> <span class="in">`missing_bdate`</span>      <span class="pp">|</span> The animal's birthdate in <span class="in">`MMDDYY`</span> format.             <span class="pp">|</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> breed        <span class="pp">|</span> <span class="in">`missing_breed`</span>       <span class="pp">|</span> <span class="in">`missing_breed`</span>      <span class="pp">|</span> The animal's breed as a string.                        <span class="pp">|</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> by           <span class="pp">|</span> <span class="in">`missing_byear`</span>       <span class="pp">|</span> <span class="in">`missing_byear`</span>      <span class="pp">|</span> The animal's birthyear in <span class="in">`YYYY`</span> format.               <span class="pp">|</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> damID        <span class="pp">|</span> dam ID                <span class="pp">|</span> dam ID $\mapsto$     <span class="pp">|</span> Dam's ID. When strings are provided for IDs with the   <span class="pp">|</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span> <span class="in">`integer`</span>            <span class="pp">|</span> <span class="in">`ASD`</span> pedigree format code they're converted to        <span class="pp">|</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> numeric IDs with the <span class="in">`string_to_int()`</span> method.         <span class="pp">|</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> damName      <span class="pp">|</span> dam ID                <span class="pp">|</span> dam ID               <span class="pp">|</span> The name of the animal's dam.                          <span class="pp">|</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> daus         <span class="pp">|</span> <span class="in">`{}`</span>                  <span class="pp">|</span> <span class="in">`{}`</span>                 <span class="pp">|</span> Dictionary containing all daughters of an animal. The  <span class="pp">|</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> keys and values are the animal IDs for each offspring. <span class="pp">|</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> When the pedigree is renumbered, keys are updated to   <span class="pp">|</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> match the renumbered IDs for each offspring.           <span class="pp">|</span></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> fa           <span class="pp">|</span> <span class="in">`0.0`</span>                 <span class="pp">|</span> <span class="in">`0.0`</span>                <span class="pp">|</span> The animal's coefficient of inbreeding.                <span class="pp">|</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> founder      <span class="pp">|</span> <span class="in">`n`</span>                   <span class="pp">|</span> <span class="in">`y`</span>                  <span class="pp">|</span> Character indicating whether or not the animal is a    <span class="pp">|</span></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> founder (had unknown parents): <span class="in">`n`</span> = not a founder     <span class="pp">|</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> (one or both parents known), <span class="in">`y`</span> = founder (both       <span class="pp">|</span></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> parents unknown).                                      <span class="pp">|</span></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> gen          <span class="pp">|</span> <span class="in">`-999`</span>                <span class="pp">|</span> <span class="in">`-999`</span>               <span class="pp">|</span> Generation to which the animal belongs.                <span class="pp">|</span></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> gencoeff     <span class="pp">|</span> <span class="in">`-999.0`</span>              <span class="pp">|</span> <span class="in">`-999.0`</span>             <span class="pp">|</span> Pattie's <span class="co">[</span><span class="ot">-@Pattie1965</span><span class="co">]</span> generation coefficient.        <span class="pp">|</span></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> herd         <span class="pp">|</span> <span class="in">`missing_herd`</span>        <span class="pp">|</span> <span class="in">`missing_herd`</span>       <span class="pp">|</span> The ID of the herd to which the animal belongs.        <span class="pp">|</span></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span> $\mapsto$ <span class="in">`integer`</span>   <span class="pp">|</span> $\mapsto$            <span class="pp">|</span>                                                        <span class="pp">|</span></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span> \emph{integer}       <span class="pp">|</span>                                                        <span class="pp">|</span></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> igen         <span class="pp">|</span> <span class="in">`-999`</span>                <span class="pp">|</span> <span class="in">`-999`</span>               <span class="pp">|</span> Generation inferred by <span class="in">`pyp_utils.set_generation()`</span>.   <span class="pp">|</span></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> name         <span class="pp">|</span> animal ID             <span class="pp">|</span> animal ID            <span class="pp">|</span> The animal's name.                                     <span class="pp">|</span></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> originalHerd <span class="pp">|</span> herd                  <span class="pp">|</span> herd                 <span class="pp">|</span> The original herd ID to which an animal belonged before<span class="pp">|</span></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> the herd was converted from a string to an integer;    <span class="pp">|</span></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> most useful with the <span class="in">`H`</span> pedigree format code.         <span class="pp">|</span></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> originalID   <span class="pp">|</span> animalID              <span class="pp">|</span> animal ID $\mapsto$  <span class="pp">|</span> Original ID assigned to an animal. It will not change  <span class="pp">|</span></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span> <span class="in">`integer`</span>            <span class="pp">|</span> when the pedigree is renumbered.                       <span class="pp">|</span></span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> paddedID     <span class="pp">|</span> <span class="in">`animalID`</span> $\mapsto$  <span class="pp">|</span> <span class="in">`animalID`</span> $\mapsto$ <span class="pp">|</span> The animal ID padded to fifteen digits, with the       <span class="pp">|</span></span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span> <span class="in">`integer`</span>             <span class="pp">|</span> <span class="in">`integer`</span>            <span class="pp">|</span> birthyear (or 1950 if the birth year is unknown)       <span class="pp">|</span></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> prepended. The order of elements is: birthyear,        <span class="pp">|</span></span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> animalID, count of zeros, zeros. Used to create the    <span class="pp">|</span></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> alleles for gene dropping.                             <span class="pp">|</span></span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> pedcomp      <span class="pp">|</span> <span class="in">`-999.9`</span>              <span class="pp">|</span> <span class="in">`-999.9`</span>             <span class="pp">|</span> Pedigree completeness as described in                  <span class="pp">|</span></span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> @sec-methodology-pedigre-completeness}.                <span class="pp">|</span></span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> renumberedID <span class="pp">|</span> <span class="in">`-999`</span>                <span class="pp">|</span> <span class="in">`-999`</span>               <span class="pp">|</span> ID assigned to an animal when the pedigree is          <span class="pp">|</span></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> renumbered. The default value indicates the pedigree   <span class="pp">|</span></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> hasn't been renumbered using PyPedal.                  <span class="pp">|</span></span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> sex          <span class="pp">|</span> <span class="in">`u`</span>                   <span class="pp">|</span> <span class="in">`u`</span>                  <span class="pp">|</span> The sex of the animal: <span class="in">`m`</span> = male, <span class="in">`f`</span> = female, <span class="in">`u`</span>   <span class="pp">|</span></span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> = unknown/not provided.                                <span class="pp">|</span></span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> sireID       <span class="pp">|</span> sire ID               <span class="pp">|</span> sire ID $\mapsto$    <span class="pp">|</span> Sire's ID. When strings are provided for animal IDs    <span class="pp">|</span></span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span> <span class="in">`integer`</span>            <span class="pp">|</span> using the <span class="in">`ASD`</span> pedigree format code they're converted <span class="pp">|</span></span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> to numeric IDs with the <span class="in">`string_to_int()`</span> method.      <span class="pp">|</span></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> sireName     <span class="pp">|</span> sireID                <span class="pp">|</span> sireID               <span class="pp">|</span> The name of the animal's sire.                         <span class="pp">|</span></span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> sons         <span class="pp">|</span> <span class="in">`{}`</span>                  <span class="pp">|</span> {}                   <span class="pp">|</span> Dictionary containing all known sons of an animal.     <span class="pp">|</span></span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> The keys and values are the animal IDs for each        <span class="pp">|</span></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> offspring. When the pedigree is renumbered, keys are   <span class="pp">|</span></span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> updated to correspond to the renumbered IDs for each   <span class="pp">|</span></span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> animal.                                                <span class="pp">|</span></span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> unks         <span class="pp">|</span> <span class="in">`{}`</span>                  <span class="pp">|</span> {}                   <span class="pp">|</span> Dictionary containing all offspring of an animal with  <span class="pp">|</span></span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> unknown sex. The keys and values are the animal IDs    <span class="pp">|</span></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> for each offspring. When the pedigree is renumbered,   <span class="pp">|</span></span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> keys are updated to correspond to the renumbered IDs   <span class="pp">|</span></span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>              <span class="pp">|</span>                       <span class="pp">|</span>                      <span class="pp">|</span> for each animal.                                       <span class="pp">|</span></span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a>+--------------+-----------------------+----------------------+--------------------------------------------------------+</span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>Attributes of <span class="in">`NewAnimal`</span> objects..</span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a><span class="in">`NewAnimal`</span> objects have the seven methods listed in @tbl-objects-animal-objects-new-animal-methods. The methods focus</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>on returning information about an instance of an object; calculations are left to functions in, e.g., the <span class="in">`pyp_metrics`</span></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a><span class="in">`pyp_nrm`</span> modules.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">
